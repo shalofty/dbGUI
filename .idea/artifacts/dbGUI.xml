@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="javafx" name="dbGUI">
+    <output-path>$PROJECT_DIR$/out/artifacts/dbGUI</output-path>
+    <root id="root">
+      <element id="archive" name="dbGUI.jar">
+        <element id="module-output" name="dbGUI" />
+      </element>
+    </root>
+  </artifact>
+</component>
