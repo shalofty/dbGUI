@@ -2,7 +2,13 @@ package helper;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
+/**
+ * JDBC class establishes a connection to the database
+ * per the instructions in the class video
+ * */
 public abstract class JDBC {
     private static final String protocol = "jdbc";
     private static final String vendor = ":mysql:";
@@ -13,20 +19,38 @@ public abstract class JDBC {
     private static final String userName = "sqlUser"; // Username
     private static String password = "passw0rd!"; // Password
     public static Connection connection;  // Connection Interface
+    private static PreparedStatement preparedStatement;
 
-    public static void openConnection()
+    /**
+     * openConnection method opens a connection to the database
+     * make sure mysql server is running
+     * Win key + R, services.msc and start it
+     * */
+    public static Connection openConnection()
     {
         try {
             Class.forName(driver); // Locate Driver
-            connection = DriverManager.getConnection(jdbcUrl, userName, password); // Reference Connection object
+            connection = (Connection) DriverManager.getConnection(jdbcUrl, userName, password); // Reference Connection object
             System.out.println("Connection successful!");
         }
         catch(Exception e)
         {
             System.out.println("Error:" + e.getMessage());
+            System.out.println("Cause:" + e.getCause());
         }
+        return connection;
     }
 
+    /**
+     * @return Connection
+     * */
+    public static Connection getConnection() {
+        return connection;
+    }
+
+    /**
+     * closeConnection method closes the connection to the database
+     * */
     public static void closeConnection() {
         try {
             connection.close();
@@ -38,4 +62,11 @@ public abstract class JDBC {
         }
     }
 
+    public static void setPreparedStatement(Connection connection, String sqlStatement) throws Exception {
+        connection.prepareStatement(sqlStatement);
+    }
+
+    public static PreparedStatement getPreparedStatement() {
+        return preparedStatement;
+    }
 }

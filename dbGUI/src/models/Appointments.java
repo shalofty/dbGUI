@@ -6,19 +6,19 @@ public final class Appointments {
     private final String appointmentTitle, appointmentDescription, appointmentLocation, appointmentType;
     private final int appointmentID;
     public final int customerID, userID, contactID;
-    private final LocalDateTime starTime, endTime;
+    private final LocalDateTime startTime, endTime;
 
     /**
      * Appointments constructor
      * */
     public Appointments(int appointmentID, String appointmentTitle, String appointmentDescription, String appointmentLocation,
-                        String appointmentType, LocalDateTime starTime, LocalDateTime endTime, int customerID, int contactID, int userID) {
+                        String appointmentType, LocalDateTime startTime, LocalDateTime endTime, int customerID, int contactID, int userID) {
         this.appointmentID = appointmentID;
         this.appointmentTitle = appointmentTitle;
         this.appointmentDescription = appointmentDescription;
         this.appointmentLocation = appointmentLocation;
         this.appointmentType = appointmentType;
-        this.starTime = starTime;
+        this.startTime = startTime;
         this.endTime = endTime;
         this.customerID = customerID;
         this.contactID = contactID;
@@ -69,9 +69,7 @@ public final class Appointments {
      * getStarTime method to
      * @return starTime
      * */
-    public LocalDateTime getStarTime() {
-        return starTime;
-    }
+    public LocalDateTime getStartTime() {return startTime;}
 
     /**
      * getEndTime method to
@@ -103,5 +101,26 @@ public final class Appointments {
      * */
     public int getUserID() {
         return userID;
+    }
+
+    /**
+     * toString method to
+     * @return appointmentID, appointmentTitle, appointmentDescription, appointmentLocation, appointmentType, starTime, endTime, customerID, contactID, userID
+     * used for debugging easy debugging, because the method is automatically called when the object is printed
+     *  */
+    @Override
+    public String toString() {
+        return "Appointment{" +
+                "appointmentID=" + appointmentID +
+                ", appointmentTitle='" + appointmentTitle + '\'' +
+                ", appointmentDescription='" + appointmentDescription + '\'' +
+                ", appointmentLocation='" + appointmentLocation + '\'' +
+                ", appointmentType='" + appointmentType + '\'' +
+                ", starTime=" + startTime +
+                ", endTime=" + endTime +
+                ", customerID=" + customerID +
+                ", contactID=" + contactID +
+                ", userID=" + userID +
+                '}';
     }
 }

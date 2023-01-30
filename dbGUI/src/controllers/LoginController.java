@@ -45,7 +45,7 @@ public class LoginController implements Initializable {
 
             if (username.equals("test") && password.equals("test")) {
                 FXMLLoader loader = new FXMLLoader();
-                loader.setLocation(LoginController.class.getResource("/views/mainMenu.fxml"));
+                loader.setLocation(LoginController.class.getResource("/views/aioTabbedMenu.fxml"));
                 Parent root = loader.load();
                 stage = (Stage) loginButton.getScene().getWindow();
                 Scene scene = new Scene(root);
