@@ -12,14 +12,14 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import models.Appointments;
+import models.CompanyTime;
 import models.Customers;
 
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Optional;
@@ -33,6 +33,9 @@ public class aioController implements Initializable {
     // Appointments Variables
     @FXML public TextField appIDField, contactIDField, userIDField, locationField, customerIDField, typeField, titleField;
     @FXML public DatePicker startDatePicker, endDatePicker;
+    @FXML public ComboBox<String> startTimeBox = new ComboBox<>();
+    @FXML public ComboBox<String> endTimeBox = new ComboBox<>();
+    @FXML public ObservableList<String> times = FXCollections.observableArrayList("08:00", "09:00", "10:00", "11:00", "12:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00");
     @FXML public TextArea descriptionTextArea;
     @FXML public TableView<Appointments> viewAppointments;
     @FXML public RadioButton viewByWeek, viewByMonth;
@@ -70,10 +73,36 @@ public class aioController implements Initializable {
         }
         return String.format("%02d:%02d:00", hour, minute);
     }
-    // EST to UCT
-    @FXML public LocalDateTime convertESTtoUTC(LocalDateTime estTime) {
-        return estTime.minusHours(5).plusMinutes(45);
+
+    // converting users localdatetime to UTC
+    @FXML public LocalDateTime convertToUTC(LocalDateTime localDateTime) {
+        ZoneId localZone = ZoneId.systemDefault();
+        ZonedDateTime localZonedDateTime = localDateTime.atZone(localZone);
+        Instant instant = localZonedDateTime.toInstant();
+        return instant.atZone(ZoneOffset.UTC).toLocalDateTime();
     }
+
+    /**
+     * isWithinBusinessHours checks if the appointment is within business hours
+     * @param localStartDate
+     * @param localStartTime
+     * @param localEndDate
+     * @param localEndTime
+     * */
+    @FXML public boolean isWithinBusinessHours(LocalDate localStartDate, LocalTime localStartTime, LocalDate localEndDate, LocalTime localEndTime) {
+        ZoneId easternZoneId = ZoneId.of("America/New_York");
+        LocalDateTime startDateTime = LocalDateTime.of(localStartDate, localStartTime);
+        LocalDateTime endDateTime = LocalDateTime.of(localEndDate, localEndTime);
+        ZonedDateTime easternStartDateTime = startDateTime.atZone(easternZoneId);
+        ZonedDateTime easternEndDateTime = endDateTime.atZone(easternZoneId);
+
+        LocalTime startTime = easternStartDateTime.toLocalTime();
+        LocalTime endTime = easternEndDateTime.toLocalTime();
+        LocalTime openTime = LocalTime.of(7, 59);
+        LocalTime closeTime = LocalTime.of(22, 1);
+        return startTime.isAfter(openTime) && endTime.isBefore(closeTime);
+    }
+
 
     /**
      * selectAppointment selects an appointment from the tableview and populates the text fields
@@ -92,6 +121,8 @@ public class aioController implements Initializable {
                 descriptionTextArea.setText(String.valueOf(selectedAppointment.getAppointmentDescription()));
                 startDatePicker.setValue(selectedAppointment.getStartTime().toLocalDate());
                 endDatePicker.setValue(selectedAppointment.getEndTime().toLocalDate());
+                startTimeBox.setValue(selectedAppointment.getStartTime().toLocalTime().toString());
+                endTimeBox.setValue(selectedAppointment.getEndTime().toLocalTime().toString());
                 addAppointmentButton.setDisable(true);
                 modifyAppointmentButton.setDisable(false);
                 deleteAppointmentButton.setDisable(false);
@@ -124,6 +155,8 @@ public class aioController implements Initializable {
         descriptionTextArea.clear();
         startDatePicker.setValue(null);
         endDatePicker.setValue(null);
+        startTimeBox.setValue(null);
+        endTimeBox.setValue(null);
         addAppointmentButton.setDisable(false);
         modifyAppointmentButton.setDisable(true);
         deleteAppointmentButton.setDisable(true);
@@ -159,21 +192,47 @@ public class aioController implements Initializable {
             String newDescriptionText = descriptionTextArea.getText();
             String newLocation = locationField.getText();
             String newType = typeField.getText();
-            LocalDate newStartDate = startDatePicker.getValue();
-            LocalDate newEndDate = endDatePicker.getValue();
+
+            // getting the values from the date pickers
+            LocalDate localStartDate = startDatePicker.getValue();
+            LocalDate localEndDate = endDatePicker.getValue();
+
+            // getting the values from the combo boxes
+            // formatting the date and time values
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+            LocalTime localStartTime = LocalTime.parse(startTimeBox.getValue(), formatter);
+            LocalTime localEndTime = LocalTime.parse(endTimeBox.getValue(), formatter);
+
+            // checking if the appointment is within business hours
+            if (!isWithinBusinessHours(localStartDate, localStartTime, localEndDate, localEndTime)) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Error");
+                alert.setContentText("Error: Appointment is not within business hours.");
+                alert.showAndWait();
+                return;
+            }
+
+            // combining the date and time values
+            LocalDateTime localStartDateTime = LocalDateTime.of(localStartDate, localStartTime);
+            LocalDateTime localEndDateTime = LocalDateTime.of(localEndDate, localEndTime);
+
+            // convert to UTC for storage
+            LocalDateTime utcStartDT = convertToUTC(localStartDateTime);
+            LocalDateTime utcEndDT = convertToUTC(localEndDateTime);
+
+            // formatting to String
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:");
+            String startDT = dtf.format(utcStartDT);
+            String endDT = dtf.format(utcEndDT);
 
             int newCustomerID = Integer.parseInt(customerIDField.getText());
             int newUserID = Integer.parseInt(userIDField.getText());
             int newContactID = Integer.parseInt(contactIDField.getText());
 
-
-            // creating a new appointment object
-//            Appointments newAppointment = new Appointments(newAppointmentID, newTitle, newDescriptionText, newLocation, newType,
-//                    newStartDate, newEndDate, newCustomerID, newUserID, newContactID);
-
             // adding the new appointment to the database
             SQLQueries.insertInto(newAppointmentID, newTitle, newDescriptionText, newLocation, newType,
-                    newStartDate, newEndDate, newCustomerID, newUserID, newContactID);
+                    startDT, endDT, newCustomerID, newUserID, newContactID);
 
             updateAppointments();
 
@@ -335,7 +394,11 @@ public class aioController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         // TODO
+        // establishing connection to db
         JDBC.openConnection();
+        // set up the times for the start and end time combo boxes
+        startTimeBox.setItems(times);
+        endTimeBox.setItems(times);
         // set up the Appointment columns in the table, must match the names of the variables in the model
         appIDColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentID"));
         titleColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentTitle"));

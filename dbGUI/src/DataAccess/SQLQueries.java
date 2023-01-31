@@ -57,7 +57,7 @@ public class SQLQueries {
     /**
      * insertInto inserts a new appointment into the database
      * */
-    public static void insertInto (int ID, String title, String description, String location, String type, LocalDateTime start, LocalDateTime end, int customerID, int userID, int contactID) throws Exception {
+    public static void insertInto (int ID, String title, String description, String location, String type, String start, String end, int customerID, int userID, int contactID) throws Exception {
         try (Connection connection = JDBC.openConnection()) {
             JDBC.setPreparedStatement(connection, SQLQueries.INSERT_APPOINTMENTS);
             PreparedStatement statement = JDBC.getPreparedStatement();
@@ -71,8 +71,8 @@ public class SQLQueries {
             statement.setString(4, location); // location
             statement.setString(5, type); // type
 
-            statement.setTime(6, CompanyTime.setAppointmentTime(start)); // start
-            statement.setTime(7, CompanyTime.setAppointmentTime(end)); // end
+            statement.setString(6, start); // start
+            statement.setString(7, end); // end
 
             statement.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now())); // create date
             statement.setString(9, JDBC.getUsername()); // created by

@@ -5,14 +5,14 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.sql.Time;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 
 public class CompanyTime {
     public static LocalDateTime appointmentTimeUTC;
 
-    public static Time setAppointmentTime(LocalDateTime appointmentTime) {
+
+    public static LocalDateTime setAppointmentTime(LocalDateTime appointmentTime) {
         ZoneId localZone = ZoneId.systemDefault();
         ZoneId estZone = ZoneId.of("America/New_York");
         LocalDateTime appointmentTimeEST = appointmentTime.atZone(localZone).withZoneSameInstant(estZone).toLocalDateTime();
@@ -24,7 +24,7 @@ public class CompanyTime {
         }
 
         appointmentTimeUTC = appointmentTime.atZone(localZone).withZoneSameInstant(ZoneId.of("UTC")).toLocalDateTime();
-        return null;
+        return appointmentTimeUTC;
     }
 
     public LocalDateTime getAppointmentTime() {
