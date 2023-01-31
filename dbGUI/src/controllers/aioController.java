@@ -90,7 +90,10 @@ public class aioController implements Initializable {
      * @param localEndDate - the end date of the appointment
      * @param localEndTime - the end time of the appointment
      * */
-    @FXML public boolean isWithinBusinessHours(LocalDate localStartDate, LocalTime localStartTime, LocalDate localEndDate, LocalTime localEndTime) {
+    @FXML public boolean isWithinBusinessHours(LocalDate localStartDate,
+                                               LocalTime localStartTime,
+                                               LocalDate localEndDate,
+                                               LocalTime localEndTime) {
         ZoneId easternZoneId = ZoneId.of("America/New_York");
         LocalDateTime startDateTime = LocalDateTime.of(localStartDate, localStartTime);
         LocalDateTime endDateTime = LocalDateTime.of(localEndDate, localEndTime);
@@ -236,7 +239,7 @@ public class aioController implements Initializable {
             int newContactID = Integer.parseInt(contactIDField.getText()); // get contact ID
 
             // adding the new appointment to the database
-            SQLQueries.insertIntoAppointments(connection,
+            SQLQueries.INSERT_INTO_APPOINTMENTS_METHOD(connection,
                                                 newAppointmentID,
                                                 newTitle,
                                                 newDescriptionText,
@@ -248,10 +251,8 @@ public class aioController implements Initializable {
                                                 newUserID,
                                                 newContactID);
 
-            // updating the appointments table
-            updateAppointments();
-            // clearing the text fields
-            clearSelectedAppointment();
+            updateAppointments(); // update the appointments table
+            clearSelectedAppointment(); // clear the selected appointment
             JDBC.closeConnection(); // close connection
 
         }
@@ -293,17 +294,19 @@ public class aioController implements Initializable {
                 LocalTime startTime = LocalTime.parse(startTimeBox.getValue()); // getting the start time
                 LocalTime endTime = LocalTime.parse(endTimeBox.getValue()); // getting the end time
                 // combining the date and time values
-                SQLQueries.updateAppointment(connection,
-                                            appointmentID,
-                                            title,
-                                            descriptionText,
-                                            location,
-                                            type,
-                                            startDate,
-                                            endDate,
-                                            customerID,
-                                            userID,
-                                            contactID);
+                SQLQueries.UPDATE_APPOINTMENT_METHOD(connection,
+                                                    appointmentID,
+                                                    title,
+                                                    descriptionText,
+                                                    location,
+                                                    type,
+                                                    startDate,
+                                                    endDate,
+                                                    customerID,
+                                                    userID,
+                                                    contactID);
+                updateAppointments(); // update the appointments table
+                clearSelectedAppointment(); // clear the text fields
                 JDBC.closeConnection(); // close connection
             }
         }
@@ -312,9 +315,10 @@ public class aioController implements Initializable {
             alert.setTitle("Error");
             alert.setHeaderText("Error");
             alert.setContentText("Error: " + e.getMessage() + "Cause: " + e.getCause());
-            alert.showAndWait();
             System.out.println("Error: " + e.getMessage());
             System.out.println("Cause: " + e.getCause());
+            e.printStackTrace();
+            alert.showAndWait();
         }
     }
 
@@ -323,8 +327,8 @@ public class aioController implements Initializable {
      * */
     @FXML public void deleteAppointment() {
         try {
-            Connection connection = JDBC.getConnection();
-            int appointmentID = selectedAppointment.getAppointmentID();
+            Connection connection = JDBC.getConnection(); // open a connection
+            int appointmentID = selectedAppointment.getAppointmentID(); // get the appointment ID
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Delete Appointment");
             alert.setHeaderText("Delete Appointment");
@@ -332,7 +336,10 @@ public class aioController implements Initializable {
             Optional<ButtonType> result;
             result = alert.showAndWait();
             if (result.isPresent() && result.get() == ButtonType.OK) {
-                AppointmentAccess.deleteAppointment(connection, appointmentID);
+                SQLQueries.DELETE_APPOINTMENT_METHOD(connection, appointmentID);
+                updateAppointments(); // update the appointments table
+                clearSelectedAppointment(); // clear the selected appointment
+                JDBC.closeConnection(); // close connection
             } else {
                 alert.close();
             }
@@ -421,25 +428,33 @@ public class aioController implements Initializable {
     }
 
     // addCustomer
-    @FXML public void addCustomer(ActionEvent event) {
+    @FXML public void addCustomer() {
         try{
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Add Customer");
-            alert.setHeaderText("Add Customer");
+            alert.setHeaderText("Adding Customer to Database");
             alert.setContentText("Are you sure you want to add this customer?");
             Optional<ButtonType> result;
             result = alert.showAndWait();
             if (result.isPresent() && result.get() == ButtonType.OK) {
-                Connection connection = JDBC.getConnection();
-                int customerID = generateAppointmentID();
-                String customerName = customerNameField.getText();
-                String address = addressField.getText();
-                String postalCode = postalField.getText();
-                String phone = phoneField.getText();
-                String country = countryMenu.getValue();
-                String division = divisionMenu.getValue();
-                JDBC.setPreparedStatement(connection, SQLQueries.INSERT_CUSTOMER);
-                clearSelectedCustomer();
+                Connection connection = JDBC.getConnection(); // establish connection
+                int customerID = Integer.parseInt(customerIDField.getText()); // get customer id
+                String customerName = customerNameField.getText(); // get customer name
+                String address = addressField.getText(); // get customer address
+                String postalCode = postalField.getText(); // get customer postal code
+                String phone = phoneField.getText(); // get customer phone
+                String country = countryMenu.getValue(); // get customer country
+                String division = divisionMenu.getValue(); // get customer division
+                JDBC.setPreparedStatement(connection, SQLQueries.INSERT_CUSTOMER_STATEMENT); // set prepared statement
+                SQLQueries.INSERT_INTO_CUSTOMERS_METHOD(connection,
+                                                        customerID,
+                                                        customerName,
+                                                        address,
+                                                        postalCode,
+                                                        phone,
+                                                        division); // insert into customers
+                clearSelectedCustomer(); // clear selected customer
+                JDBC.closeConnection(); // close connection
             } else {
                 alert.close();
             }
