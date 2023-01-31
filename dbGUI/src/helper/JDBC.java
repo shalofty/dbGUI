@@ -29,6 +29,7 @@ public abstract class JDBC {
      * openConnection method opens a connection to the database
      * make sure mysql server is running
      * Win key + R, services.msc and start it
+     * every established connection needs to be closed!!!
      * */
     public static Connection openConnection()
     {

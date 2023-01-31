@@ -10,17 +10,14 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import models.Appointments;
-import models.CompanyTime;
 import models.Customers;
+import models.Country;
+import models.Division;
 
 import java.net.URL;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.Optional;
 import java.util.Random;
 import java.util.ResourceBundle;
@@ -45,19 +42,20 @@ public class aioController implements Initializable {
 
     // Customer Variables ///////////////////////////////////////////////////////////////////////////////////////////////
     @FXML public TextField customerRecordsIDField, customerNameField, addressField, postalField, phoneField;
-    @FXML public SplitMenuButton countryMenu, divisionMenu;
+    @FXML public ComboBox<String> countryMenu;
+    @FXML public ComboBox<String> divisionMenu;
+    @FXML public ObservableList<String> countryObservableList = FXCollections.observableArrayList();
+    @FXML public ObservableList<String> divisionObservableList = FXCollections.observableArrayList();
     @FXML public TableView<Customers> viewCustomers;
     @FXML public TableColumn<?, ?> customerIDRecordsColumn, nameColumn, phoneColumn, addressColumn, postalColumn, divisionColumn;
     @FXML public Button addCustomerButton, modifyCustomerButton, deleteCustomerButton, clearSelectedCustomerButton;
     @FXML public ObservableList<Customers> customersList = FXCollections.observableArrayList(CustomerAccess.getCustomers());
-    @FXML public ObservableList<CountryAccess> countriesList = FXCollections.observableArrayList(CountryAccess.getCountries());
-    @FXML public ObservableList<DivisionAccess> divisionsList = FXCollections.observableArrayList(DivisionAccess.getDivisions());
+//    @FXML public ObservableList<CountryAccess> countriesList = FXCollections.observableArrayList(CountryAccess.getCountries());
+//    @FXML public ObservableList<DivisionAccess> divisionsList = FXCollections.observableArrayList(DivisionAccess.getDivisions());
+    @FXML public ObservableList<DivisionAccess> divisionsList = FXCollections.observableArrayList();
     @FXML public ObservableList<String> countryNames = FXCollections.observableArrayList();
     @FXML public ObservableList<String> divisionNames = FXCollections.observableArrayList();
     @FXML public Customers selectedCustomer;
-
-    public aioController() throws SQLException {
-    }
 
 
     // Appointments Tab Methods ////////////////////////////////////////////////////////////////////////////////////////
@@ -90,10 +88,10 @@ public class aioController implements Initializable {
 
     /**
      * isWithinBusinessHours checks if the appointment is within business hours
-     * @param localStartDate
-     * @param localStartTime
-     * @param localEndDate
-     * @param localEndTime
+     * @param localStartDate - the start date of the appointment
+     * @param localStartTime - the start time of the appointment
+     * @param localEndDate - the end date of the appointment
+     * @param localEndTime - the end time of the appointment
      * */
     @FXML public boolean isWithinBusinessHours(LocalDate localStartDate, LocalTime localStartTime, LocalDate localEndDate, LocalTime localEndTime) {
         ZoneId easternZoneId = ZoneId.of("America/New_York");
@@ -147,9 +145,8 @@ public class aioController implements Initializable {
 
     /**
      * clearSelection clears the selected appointment and resets the buttons to their default state
-     * @param event the event that triggers the method
      * */
-    @FXML public void clearSelectedAppointment(ActionEvent event) {
+    @FXML public void clearSelectedAppointment() {
         selectedAppointment = null;
         appIDField.clear();
         titleField.clear();
@@ -185,10 +182,8 @@ public class aioController implements Initializable {
 
     /**
      * addAppointment adds a new appointment to the database
-     * @param event the event that triggers the method
-     * @throws Exception
      * */
-    @FXML public void addAppointment(ActionEvent event) throws Exception {
+    @FXML public void addAppointment() {
         try {
             // generating new appointment ID and getting the values from the text fields
             int newAppointmentID = generateAppointmentID();
@@ -242,10 +237,8 @@ public class aioController implements Initializable {
 
             updateAppointments();
 
-//            // adding the new appointment to the tableview
-//            appointmentsList.add(newAppointment);
             // clearing the text fields
-            clearSelectedAppointment(event);
+            clearSelectedAppointment();
         }
         catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -261,9 +254,8 @@ public class aioController implements Initializable {
 
     /**
      * modifyAppointment modifies an appointment in the database
-     * @param event modifyAppointmentButton
      * */
-    @FXML public void modifyAppointment(ActionEvent event) {
+    @FXML public void modifyAppointment() {
         try {
             Connection connection = JDBC.getConnection();
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -298,9 +290,8 @@ public class aioController implements Initializable {
 
     /**
      * deleteAppointment deletes an appointment from the database
-     * @param event deleteAppointmentButton
      * */
-    @FXML public void deleteAppointment(ActionEvent event) {
+    @FXML public void deleteAppointment() {
         try {
             Connection connection = JDBC.getConnection();
             int appointmentID = selectedAppointment.getAppointmentID();
@@ -335,6 +326,7 @@ public class aioController implements Initializable {
      * */
     public void selectCustomer(){
         try {
+            JDBC.openConnection(); // establish connection
             selectedCustomer = viewCustomers.getSelectionModel().getSelectedItem();
             if (selectedCustomer != null) {
                 customerIDField.setText(String.valueOf(selectedCustomer.getCustomerID()));
@@ -342,13 +334,30 @@ public class aioController implements Initializable {
                 addressField.setText(selectedCustomer.getCustomerAddress());
                 postalField.setText(selectedCustomer.getPostalCode());
                 phoneField.setText(selectedCustomer.getCustomerPhone());
-//                countryMenu.setText(selectedCustomer.getCountry());
-                divisionMenu.setText(selectedCustomer.getCountryDivision());
-//                divisionID = selectedCustomer.getDivisionID();
+                divisionMenu.valueProperty().set(selectedCustomer.getCountryDivision());
+
+                ObservableList<CountryAccess> countryList = CountryAccess.getCountries();
+                ObservableList<DivisionAccess> divisionList = DivisionAccess.getDivisions();
+
+                // setting the country menu to the country of the selected customer
+                for (Division division : divisionList) {
+                    // if the division id of the selected customer matches the division id of the division in the list
+                    if (division.getDivisionID() == selectedCustomer.getDivisionID()) {
+                        for (Country country : countryList) {
+                            // if the country id of the selected customer matches the country id of the country in the list
+                            if (country.getCountryID() == division.getCountryID() && selectedCustomer.getDivisionID() == division.getDivisionID()) {
+                                // set the country menu to the country of the selected customer
+                                countryMenu.valueProperty().set(String.valueOf(country.getCountryName()));
+                            }
+                        }
+                    }
+                }
+                // disable add button, enable modify and delete buttons to prevent pointer exceptions
                 addCustomerButton.setDisable(true);
                 modifyCustomerButton.setDisable(false);
                 deleteCustomerButton.setDisable(false);
             }
+            JDBC.closeConnection(); // close connection
         }
         catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -359,7 +368,7 @@ public class aioController implements Initializable {
             System.out.println("Error: " + e.getMessage());
             System.out.println("Cause: " + e.getCause());
         }
-    };
+    }
 
     /**
      * clearSelectedCustomer clears the selected customer
@@ -372,8 +381,8 @@ public class aioController implements Initializable {
         addressField.clear();
         postalField.clear();
         phoneField.clear();
-        countryMenu.setText("Country");
-        divisionMenu.setText("Division");
+        countryMenu.valueProperty().set(null);
+        divisionMenu.valueProperty().set(null);
         addCustomerButton.setDisable(false);
         modifyCustomerButton.setDisable(true);
         deleteCustomerButton.setDisable(true);
@@ -405,45 +414,66 @@ public class aioController implements Initializable {
     public void updateCustomers() {
         viewCustomers.setItems(customersList);
     }
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // TODO
-        // establishing connection to db
-        JDBC.openConnection();
-        // set up the times for the start and end time combo boxes
-        startTimeBox.setItems(times);
-        endTimeBox.setItems(times);
-        // set up the Appointment columns in the table, must match the names of the variables in the model
-        appIDColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentID"));
-        titleColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentTitle"));
-        descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentDescription"));
-        locationColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentLocation"));
-        typeColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentType"));
-        customerIDAppointmentsColumn.setCellValueFactory(new PropertyValueFactory<>("customerID"));
-        userIDColumn.setCellValueFactory(new PropertyValueFactory<>("userID"));
-        contactIDColumn.setCellValueFactory(new PropertyValueFactory<>("contactID"));
-        startColumn.setCellValueFactory(new PropertyValueFactory<>("startTime"));
-        endColumn.setCellValueFactory(new PropertyValueFactory<>("endTime"));
+        try {
+            // TODO
+            // establishing connection to db
+            JDBC.openConnection();
 
-        // set up the Customer columns in the table, must match the names of the variables in the model
-        customerIDRecordsColumn.setCellValueFactory(new PropertyValueFactory<>("customerID"));
-        nameColumn.setCellValueFactory(new PropertyValueFactory<>("customerName"));
-        addressColumn.setCellValueFactory(new PropertyValueFactory<>("customerAddress"));
-        postalColumn.setCellValueFactory(new PropertyValueFactory<>("postalCode"));
-        phoneColumn.setCellValueFactory(new PropertyValueFactory<>("customerPhone"));
-        divisionColumn.setCellValueFactory(new PropertyValueFactory<>("divisionID"));
+            // set up the times for the start and end time combo boxes
+            startTimeBox.setItems(times);
+            endTimeBox.setItems(times);
 
+            // set up the Appointment columns in the table, must match the names of the variables in the model
+            appIDColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentID"));
+            titleColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentTitle"));
+            descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentDescription"));
+            locationColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentLocation"));
+            typeColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentType"));
+            customerIDAppointmentsColumn.setCellValueFactory(new PropertyValueFactory<>("customerID"));
+            userIDColumn.setCellValueFactory(new PropertyValueFactory<>("userID"));
+            contactIDColumn.setCellValueFactory(new PropertyValueFactory<>("contactID"));
+            startColumn.setCellValueFactory(new PropertyValueFactory<>("startTime"));
+            endColumn.setCellValueFactory(new PropertyValueFactory<>("endTime"));
 
-        viewAppointments.setItems(appointmentsList);
-//        System.out.println(viewAppointments.getItems()); // testing output to console
+            // set up the Customer columns in the table, must match the names of the variables in the model
+            customerIDRecordsColumn.setCellValueFactory(new PropertyValueFactory<>("customerID"));
+            nameColumn.setCellValueFactory(new PropertyValueFactory<>("customerName"));
+            addressColumn.setCellValueFactory(new PropertyValueFactory<>("customerAddress"));
+            postalColumn.setCellValueFactory(new PropertyValueFactory<>("postalCode"));
+            phoneColumn.setCellValueFactory(new PropertyValueFactory<>("customerPhone"));
+            divisionColumn.setCellValueFactory(new PropertyValueFactory<>("divisionID"));
 
-        viewCustomers.setItems(customersList);
-//        System.out.println(viewCustomers.getItems()); // testing output to console
+            // call getCountries method to populate an ObservableList to populate the country menu
+            ObservableList<CountryAccess> countriesList = CountryAccess.getCountries();
+            countriesList.stream().map(Country::getCountryName).forEach(countryObservableList::add);
+            countryMenu.setItems(countryObservableList);
 
-        // update tables
-        updateAppointments();
-        updateCustomers();
+            // call getDivisions method to populate an ObservableList to populate the division menu
+            ObservableList<DivisionAccess> divisionsList = DivisionAccess.getDivisions();
+            divisionsList.stream().map(Division::getDivisionName).forEach(divisionObservableList::add);
+            divisionMenu.setItems(divisionObservableList);
 
-        JDBC.closeConnection(); // close connection to db
+            // setItems for the tableviews
+            viewAppointments.setItems(appointmentsList);
+            viewCustomers.setItems(customersList);
+
+            // update tables
+            updateAppointments();
+            updateCustomers();
+
+            JDBC.closeConnection(); // close connection to db
+        }
+        catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Error: aioController.java initialize");
+            alert.setContentText("Error: " + e.getMessage() + "Cause: " + e.getCause());
+            System.out.println("Error: " + e.getMessage());
+            System.out.println("Cause: " + e.getCause());
+            alert.showAndWait();
+        }
     }
 }
