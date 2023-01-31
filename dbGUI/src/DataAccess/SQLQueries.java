@@ -85,7 +85,8 @@ public class SQLQueries {
     /**
      * insertInto inserts a new appointment into the database
      * */
-    public static void insertIntoAppointments(int ID,
+    public static void insertIntoAppointments(Connection connection,
+                                              int ID,
                                               String title,
                                               String description,
                                               String location,
@@ -95,7 +96,7 @@ public class SQLQueries {
                                               int customerID,
                                               int userID,
                                               int contactID) throws Exception {
-        try (Connection connection = JDBC.openConnection()) {
+        try {
             JDBC.setPreparedStatement(connection, SQLQueries.INSERT_APPOINTMENT);
             PreparedStatement statement = JDBC.getPreparedStatement();
 
@@ -116,7 +117,6 @@ public class SQLQueries {
             statement.setInt(13, userID); // user ID
             statement.setInt(14, contactID); // contact ID
             statement.execute();
-            JDBC.closeConnection();
         }
         catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -132,7 +132,8 @@ public class SQLQueries {
     /**
      * updateAppointment updates an existing appointment in the database
      * */
-    public static void updateAppointment(int ID,
+    public static void updateAppointment(Connection connection,
+                                         int ID,
                                          String title,
                                          String description,
                                          String location,
@@ -142,7 +143,7 @@ public class SQLQueries {
                                          int customerID,
                                          int userID,
                                          int contactID) throws Exception {
-        try (Connection connection = JDBC.openConnection()) {
+        try {
             JDBC.setPreparedStatement(connection, SQLQueries.UPDATE_APPOINTMENT);
             // set the parameters for the prepared statement
             // the order of the parameters must match the order of the columns in the database
@@ -162,7 +163,6 @@ public class SQLQueries {
             statement.setInt(13, userID); // user ID
             statement.setInt(14, contactID); // contact ID
             statement.execute();
-            JDBC.closeConnection();
         }
         catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -173,5 +173,9 @@ public class SQLQueries {
             System.out.println(e.getMessage());
             System.out.println(e.getCause());
         }
+    }
+
+    public static void insertIntoCustomers() {
+
     }
 }

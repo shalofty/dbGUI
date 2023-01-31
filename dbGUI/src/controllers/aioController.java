@@ -197,25 +197,21 @@ public class aioController implements Initializable {
      * */
     @FXML public void addAppointment() {
         try {
+            Connection connection = JDBC.getConnection(); // establish connection, passing into insertIntoAppointment()
             // generating new appointment ID and getting the values from the text fields
-            int newAppointmentID = generateAppointmentID();
-//            System.out.println("New appointment ID: " + newAppointmentID); // for testing
-
-            String newTitle = titleField.getText();
-            String newDescriptionText = descriptionTextArea.getText();
-            String newLocation = locationField.getText();
-            String newType = typeField.getText();
-
+            int newAppointmentID = generateAppointmentID(); // generate new appointment ID
+            String newTitle = titleField.getText();  // get title
+            String newDescriptionText = descriptionTextArea.getText(); // get description
+            String newLocation = locationField.getText(); // get location
+            String newType = typeField.getText(); // get type
             // getting the values from the date pickers
-            LocalDate localStartDate = startDatePicker.getValue();
-            LocalDate localEndDate = endDatePicker.getValue();
-
+            LocalDate localStartDate = startDatePicker.getValue(); // get start date
+            LocalDate localEndDate = endDatePicker.getValue(); // get end date
             // getting the values from the combo boxes
             // formatting the date and time values
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
-            LocalTime localStartTime = LocalTime.parse(startTimeBox.getValue(), formatter);
-            LocalTime localEndTime = LocalTime.parse(endTimeBox.getValue(), formatter);
-
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm"); // format time
+            LocalTime localStartTime = LocalTime.parse(startTimeBox.getValue(), formatter); // get start time
+            LocalTime localEndTime = LocalTime.parse(endTimeBox.getValue(), formatter); // get end time
             // checking if the appointment is within business hours
             if (!isWithinBusinessHours(localStartDate, localStartTime, localEndDate, localEndTime)) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -225,32 +221,39 @@ public class aioController implements Initializable {
                 alert.showAndWait();
                 return;
             }
-
             // combining the date and time values
             LocalDateTime localStartDateTime = LocalDateTime.of(localStartDate, localStartTime);
             LocalDateTime localEndDateTime = LocalDateTime.of(localEndDate, localEndTime);
-
             // convert to UTC for storage
             LocalDateTime utcStartDT = convertToUTC(localStartDateTime);
             LocalDateTime utcEndDT = convertToUTC(localEndDateTime);
-
             // formatting to String
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:");
             String startDT = dtf.format(utcStartDT);
             String endDT = dtf.format(utcEndDT);
-
-            int newCustomerID = Integer.parseInt(customerIDField.getText());
-            int newUserID = Integer.parseInt(userIDField.getText());
-            int newContactID = Integer.parseInt(contactIDField.getText());
+            int newCustomerID = Integer.parseInt(customerIDField.getText()); // get customer ID
+            int newUserID = Integer.parseInt(userIDField.getText()); // get user ID
+            int newContactID = Integer.parseInt(contactIDField.getText()); // get contact ID
 
             // adding the new appointment to the database
-            SQLQueries.insertIntoAppointments(newAppointmentID, newTitle, newDescriptionText, newLocation, newType,
-                    startDT, endDT, newCustomerID, newUserID, newContactID);
+            SQLQueries.insertIntoAppointments(connection,
+                                                newAppointmentID,
+                                                newTitle,
+                                                newDescriptionText,
+                                                newLocation,
+                                                newType,
+                                                startDT,
+                                                endDT,
+                                                newCustomerID,
+                                                newUserID,
+                                                newContactID);
 
+            // updating the appointments table
             updateAppointments();
-
             // clearing the text fields
             clearSelectedAppointment();
+            JDBC.closeConnection(); // close connection
+
         }
         catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -269,6 +272,7 @@ public class aioController implements Initializable {
      * */
     @FXML public void modifyAppointment() {
         try {
+            // open a connection, pass to updateAppoint() method below
             Connection connection = JDBC.getConnection();
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Confirmation");
@@ -288,7 +292,19 @@ public class aioController implements Initializable {
                 LocalDateTime endDate = LocalDateTime.from(endDatePicker.getValue()); // getting the end date
                 LocalTime startTime = LocalTime.parse(startTimeBox.getValue()); // getting the start time
                 LocalTime endTime = LocalTime.parse(endTimeBox.getValue()); // getting the end time
-                SQLQueries.updateAppointment(appointmentID, title, descriptionText, location, type, startDate, endDate, customerID, userID, contactID);
+                // combining the date and time values
+                SQLQueries.updateAppointment(connection,
+                                            appointmentID,
+                                            title,
+                                            descriptionText,
+                                            location,
+                                            type,
+                                            startDate,
+                                            endDate,
+                                            customerID,
+                                            userID,
+                                            contactID);
+                JDBC.closeConnection(); // close connection
             }
         }
         catch (Exception e) {
