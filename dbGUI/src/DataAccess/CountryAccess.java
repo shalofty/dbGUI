@@ -27,7 +27,7 @@ public class CountryAccess extends Country {
      */
     public static ObservableList<CountryAccess> getAllCountries() throws SQLException {
         ObservableList<CountryAccess> countriesObservableList = FXCollections.observableArrayList();
-        PreparedStatement ps = JDBC.getConnection().prepareStatement(SQL_GET_COUNTRIES);
+        PreparedStatement ps = JDBC.openConnection().prepareStatement(SQL_GET_COUNTRIES);
         ResultSet rs = ps.executeQuery();
         while (rs.next()) {
             int countryID = rs.getInt("Country_ID");

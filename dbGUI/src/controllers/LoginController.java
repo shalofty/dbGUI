@@ -1,5 +1,6 @@
 package controllers;
 
+import helper.JDBC;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -20,10 +21,11 @@ import java.util.ResourceBundle;
 
 public class LoginController implements Initializable {
     @FXML public Label schedulizerLabel, zoneLabel;
-    @FXML private TextField usernameField;
-    @FXML private PasswordField passwordField;
+    @FXML public TextField usernameField;
+    @FXML public PasswordField passwordField;
     @FXML private ImageView backgroundView;
     @FXML private Button loginButton;
+    @FXML public String userName, passWord;
     Stage stage;
 
     /**
@@ -32,6 +34,8 @@ public class LoginController implements Initializable {
      * */
     @FXML public void initialize(URL url, ResourceBundle bundle) {
         zoneLabel.setText(ZoneId.systemDefault().toString());
+        usernameField.setText(JDBC.getUsername());
+        passwordField.setText(JDBC.getPassword());
     }
 
     /**
@@ -40,10 +44,8 @@ public class LoginController implements Initializable {
      * */
     @FXML public void loginHandler(ActionEvent event) throws Exception {
         try {
-            String username = usernameField.getText();
-            String password = passwordField.getText();
-
-            if (username.equals("test") && password.equals("test")) {
+            // retrieve username and password from text fields
+            if (!usernameField.getText().isEmpty() && !passwordField.getText().isEmpty()) {
                 FXMLLoader loader = new FXMLLoader();
                 loader.setLocation(LoginController.class.getResource("/views/aioTabbedMenu.fxml"));
                 Parent root = loader.load();
@@ -60,6 +62,13 @@ public class LoginController implements Initializable {
             }
         }
         catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Start Failed");
+            alert.setHeaderText("Start Failed");
+            alert.setContentText("The username or password you entered is incorrect.");
+            alert.showAndWait();
+            System.out.println("Error: " + e.getMessage());
+            System.out.println("Error: " + e.getCause());
             e.printStackTrace();
         }
     }

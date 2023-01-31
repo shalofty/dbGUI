@@ -21,9 +21,9 @@ public class Start extends Application {
 
     public static void main(String[] args) throws Exception {
         try {
-            JDBC.openConnection();
+//            JDBC.openConnection();
             launch(args);
-            JDBC.closeConnection();
+//            JDBC.closeConnection();
         }
         catch (Exception e) {
             System.out.println("Error: " + e.getMessage());

@@ -21,9 +21,10 @@ public class ContactAccess {
      */
     public static ObservableList<Contacts> getAllContacts() throws SQLException {
         ObservableList<Contacts> contactsObservableList = FXCollections.observableArrayList();
-        try (Connection connection = JDBC.getConnection();
+        try (Connection connection = JDBC.openConnection();
              PreparedStatement ps = connection.prepareStatement(SELECT_ALL_CONTACTS_SQL);
              ResultSet rs = ps.executeQuery()) {
+            JDBC.closeConnection();
             while (rs.next()) {
                 contactsObservableList.add(createContact(rs));
             }
@@ -38,7 +39,7 @@ public class ContactAccess {
      * @return contactID
      */
     public static String findContactID(String contactName) throws SQLException {
-        try (Connection connection = JDBC.getConnection();
+        try (Connection connection = JDBC.openConnection();
              PreparedStatement ps = connection.prepareStatement(SELECT_CONTACT_ID_SQL)) {
             ps.setString(1, contactName);
             try (ResultSet rs = ps.executeQuery()) {

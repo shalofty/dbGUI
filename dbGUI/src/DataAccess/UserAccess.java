@@ -18,7 +18,7 @@ public class UserAccess extends Users {
      * */
     public static int checkUser(String userName, String password) {
         try {
-            PreparedStatement statement = JDBC.getConnection().prepareStatement(SQLQueries.CHECK_USER);
+            PreparedStatement statement = JDBC.openConnection().prepareStatement(SQLQueries.CHECK_USER);
             statement.setString(1, userName);
             statement.setString(2, password);
             ResultSet set = statement.executeQuery();

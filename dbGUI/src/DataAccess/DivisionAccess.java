@@ -15,7 +15,7 @@ public class DivisionAccess {
      * Observablelist that takes all customer data from the database.
      * */
     public static ObservableList<Division> getDivisions(Connection connection) throws SQLException {
-        PreparedStatement statement = JDBC.getConnection().prepareStatement(SQLQueries.DIVISION_ACCESS);
+        PreparedStatement statement = JDBC.openConnection().prepareStatement(SQLQueries.DIVISION_ACCESS);
         ResultSet set = statement.executeQuery();
         ObservableList<Division> divisionsObservableList = FXCollections.observableArrayList();
         while (set.next()) {

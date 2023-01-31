@@ -17,13 +17,14 @@ public class AppointmentAccess {
      * */
     public static ObservableList<Appointments> getAllAppointments() {
         ObservableList<Appointments> appointmentsObservableList = FXCollections.observableArrayList();
-        try (Connection connection = JDBC.getConnection();
+        try (Connection connection = JDBC.openConnection();
             PreparedStatement statement = connection.prepareStatement(SQLQueries.GET_ALL_APPOINTMENTS)) {
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 Appointments appointment = AppointmentMapper.map(resultSet);
                 appointmentsObservableList.add(appointment);
             }
+            JDBC.closeConnection();
         } catch (SQLException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error");

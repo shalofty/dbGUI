@@ -1,6 +1,7 @@
 package controllers;
 
 import DataAccess.AppointmentAccess;
+import DataAccess.CustomerAccess;
 import DataAccess.SQLQueries;
 import helper.JDBC;
 import javafx.collections.FXCollections;
@@ -11,6 +12,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import models.Appointments;
+import models.Customers;
 
 import java.net.URL;
 import java.sql.Connection;
@@ -18,8 +20,10 @@ import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Optional;
+import java.util.Random;
 import java.util.ResourceBundle;
 
 public class aioController implements Initializable {
@@ -32,7 +36,7 @@ public class aioController implements Initializable {
     @FXML public TextArea descriptionTextArea;
     @FXML public TableView<Appointments> viewAppointments;
     @FXML public RadioButton viewByWeek, viewByMonth;
-    @FXML public TableColumn appIDColumn, titleColumn, descriptionColumn, locationColumn, typeColumn, customerIDAppointmentsColumn, userIDColumn, contactIDColumn, startColumn, endColumn;
+    @FXML public TableColumn<?, ?> appIDColumn, titleColumn, descriptionColumn, locationColumn, typeColumn, customerIDAppointmentsColumn, userIDColumn, contactIDColumn, startColumn, endColumn;
     @FXML public Button addAppointmentButton, modifyAppointmentButton, deleteAppointmentButton, clearSelectionButton;
     @FXML public ObservableList<Appointments> appointmentsList = FXCollections.observableArrayList(AppointmentAccess.getAllAppointments());
     @FXML public Appointments selectedAppointment;
@@ -40,14 +44,36 @@ public class aioController implements Initializable {
     // Customer Variables
     @FXML public TextField customerRecordsIDField, customerNameField, addressField, postalField, phoneField;
     @FXML public SplitMenuButton countryMenu, divisionMenu;
-    @FXML public TableView viewCustomers;
-    @FXML public TableColumn customerIDRecordsColumn, nameColumn, phoneColumn, addressColumn, postalColumn, divisionColumn;
-    @FXML public Button addCustomerButton, modifyCustomerButton, deleteCustomerButton;
+    @FXML public TableView<Customers> viewCustomers;
+    @FXML public TableColumn<?, ?> customerIDRecordsColumn, nameColumn, phoneColumn, addressColumn, postalColumn, divisionColumn;
+    @FXML public Button addCustomerButton, modifyCustomerButton, deleteCustomerButton, clearSelectedCustomerButton;
+    @FXML public ObservableList<Customers> customersList = FXCollections.observableArrayList(CustomerAccess.getCustomers());
+    @FXML public Customers selectedCustomer;
 
 
     // Appointments Tab Methods
     // viewByWeek
     // viewByMonth
+
+    // timeConversion methods
+    // militaryTime
+    @FXML public String militaryTime(String time) {
+        String[] timeArray = time.split(":");
+        int hour = Integer.parseInt(timeArray[0]);
+        int minute = Integer.parseInt(timeArray[1]);
+        String ampm = timeArray[2].substring(2);
+
+        if (ampm.equals("PM") && hour != 12) {
+            hour += 12;
+        } else if (ampm.equals("AM") && hour == 12) {
+            hour = 0;
+        }
+        return String.format("%02d:%02d:00", hour, minute);
+    }
+    // EST to UCT
+    @FXML public LocalDateTime convertESTtoUTC(LocalDateTime estTime) {
+        return estTime.minusHours(5).plusMinutes(45);
+    }
 
     /**
      * selectAppointment selects an appointment from the tableview and populates the text fields
@@ -86,7 +112,7 @@ public class aioController implements Initializable {
      * clearSelection clears the selected appointment and resets the buttons to their default state
      * @param event the event that triggers the method
      * */
-    @FXML public void clearSelection(ActionEvent event) {
+    @FXML public void clearSelectedAppointment(ActionEvent event) {
         selectedAppointment = null;
         appIDField.clear();
         titleField.clear();
@@ -108,12 +134,14 @@ public class aioController implements Initializable {
      * @return newAppointmentID
      * */
     @FXML public int generateAppointmentID() {
-        int newAppointmentID = 0;
+        Random randy = new Random();
+        int maxID = 9999;
+        int newID = randy.nextInt(maxID);
         for (Appointments appointment : appointmentsList) {
-            if (appointment.getAppointmentID() <= newAppointmentID) {
-                newAppointmentID++;
+            if (appointment.getAppointmentID() == newID) {
+                return generateAppointmentID();
             }
-        } return newAppointmentID;
+        } return newID;
     }
 
     /**
@@ -122,23 +150,48 @@ public class aioController implements Initializable {
      * @throws Exception
      * */
     @FXML public void addAppointment(ActionEvent event) throws Exception {
-        // generating new appointment ID and getting the values from the text fields
-        int newAppointmentID = generateAppointmentID();
-        String newTitle = titleField.getText();
-        String newLocation = locationField.getText();
-        int newCustomerID = Integer.parseInt(customerIDField.getText());
-        int newContactID = Integer.parseInt(contactIDField.getText());
-        int newUserID = Integer.parseInt(userIDField.getText());
-        String newType = typeField.getText();
-        String newDescriptionText = descriptionTextArea.getText();
-        LocalDateTime newStartDate = LocalDateTime.from(startDatePicker.getValue());
-        LocalDateTime newEndDate = LocalDateTime.from(endDatePicker.getValue());
-        // creating a new appointment object
-        Appointments newAppointment = new Appointments(newAppointmentID, newTitle, newDescriptionText, newLocation, newType,
-                newStartDate, newEndDate, newCustomerID, newUserID, newContactID);
-        // adding the new appointment to the database
-        SQLQueries.insertInto(newAppointmentID, newTitle, newDescriptionText, newLocation, newType,
-                newStartDate, newEndDate, newCustomerID, newUserID, newContactID);
+        try {
+            // generating new appointment ID and getting the values from the text fields
+            int newAppointmentID = generateAppointmentID();
+//            System.out.println("New appointment ID: " + newAppointmentID); // for testing
+
+            String newTitle = titleField.getText();
+            String newDescriptionText = descriptionTextArea.getText();
+            String newLocation = locationField.getText();
+            String newType = typeField.getText();
+            LocalDate newStartDate = startDatePicker.getValue();
+            LocalDate newEndDate = endDatePicker.getValue();
+
+            int newCustomerID = Integer.parseInt(customerIDField.getText());
+            int newUserID = Integer.parseInt(userIDField.getText());
+            int newContactID = Integer.parseInt(contactIDField.getText());
+
+
+            // creating a new appointment object
+//            Appointments newAppointment = new Appointments(newAppointmentID, newTitle, newDescriptionText, newLocation, newType,
+//                    newStartDate, newEndDate, newCustomerID, newUserID, newContactID);
+
+            // adding the new appointment to the database
+            SQLQueries.insertInto(newAppointmentID, newTitle, newDescriptionText, newLocation, newType,
+                    newStartDate, newEndDate, newCustomerID, newUserID, newContactID);
+
+            updateAppointments();
+
+//            // adding the new appointment to the tableview
+//            appointmentsList.add(newAppointment);
+            // clearing the text fields
+            clearSelectedAppointment(event);
+        }
+        catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Error");
+            alert.setContentText("Error: " + e.getMessage() + "Cause: " + e.getCause());
+            System.out.println("Error: " + e.getMessage());
+            System.out.println("Cause: " + e.getCause());
+            e.printStackTrace();
+            alert.showAndWait();
+        }
     }
 
     /**
@@ -147,7 +200,13 @@ public class aioController implements Initializable {
      * */
     @FXML public void modifyAppointment(ActionEvent event) {
         try {
-            if (selectedAppointment != null) {
+            Connection connection = JDBC.getConnection();
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Confirmation");
+            alert.setHeaderText("Confirmation");
+            alert.setContentText("Are you sure you want to modify this appointment?");
+            Optional<ButtonType> result = alert.showAndWait();
+            if (selectedAppointment != null && result.isPresent() && result.get() == ButtonType.OK) {
                 int appointmentID = selectedAppointment.getAppointmentID();
                 String title = titleField.getText();
                 String location = locationField.getText();
@@ -178,7 +237,7 @@ public class aioController implements Initializable {
      * */
     @FXML public void deleteAppointment(ActionEvent event) {
         try {
-            Connection connection = JDBC.openConnection();
+            Connection connection = JDBC.getConnection();
             int appointmentID = selectedAppointment.getAppointmentID();
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Delete Appointment");
@@ -205,6 +264,50 @@ public class aioController implements Initializable {
 
     // Customers Tab Methods
 
+    // selecteCustomer
+    public void selectCustomer(){
+        try {
+            selectedCustomer = viewCustomers.getSelectionModel().getSelectedItem();
+            if (selectedCustomer != null) {
+                customerIDField.setText(String.valueOf(selectedCustomer.getCustomerID()));
+                customerNameField.setText(selectedCustomer.getCustomerName());
+                addressField.setText(selectedCustomer.getCustomerAddress());
+                postalField.setText(selectedCustomer.getPostalCode());
+                phoneField.setText(selectedCustomer.getCustomerPhone());
+//                countryMenu.setText(selectedCustomer.getCountry());
+                divisionMenu.setText(selectedCustomer.getCountryDivision());
+//                divisionID = selectedCustomer.getDivisionID();
+                addCustomerButton.setDisable(true);
+                modifyCustomerButton.setDisable(false);
+                deleteCustomerButton.setDisable(false);
+            }
+        }
+        catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Error");
+            alert.setContentText("Error: " + e.getMessage() + "Cause: " + e.getCause());
+            alert.showAndWait();
+            System.out.println("Error: " + e.getMessage());
+            System.out.println("Cause: " + e.getCause());
+        }
+    };
+
+    // clearSelectedCustomer
+    public void clearSelectedCustomer() {
+        selectedCustomer = null;
+        customerIDField.clear();
+        customerNameField.clear();
+        addressField.clear();
+        postalField.clear();
+        phoneField.clear();
+        countryMenu.setText("Country");
+        divisionMenu.setText("Division");
+        addCustomerButton.setDisable(false);
+        modifyCustomerButton.setDisable(true);
+        deleteCustomerButton.setDisable(true);
+    }
+
     // addCustomer
     @FXML public void addCustomer(ActionEvent event) {
         System.out.println("Add Customer");
@@ -227,12 +330,13 @@ public class aioController implements Initializable {
 
     // updateCustomers
     public void updateCustomers() {
-//        viewCustomers.setItems(customersList);
+        viewCustomers.setItems(customersList);
     }
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         // TODO
-        // set up the columns in the table, must match the names of the variables in the model
+        JDBC.openConnection();
+        // set up the Appointment columns in the table, must match the names of the variables in the model
         appIDColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentID"));
         titleColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentTitle"));
         descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentDescription"));
@@ -244,11 +348,24 @@ public class aioController implements Initializable {
         startColumn.setCellValueFactory(new PropertyValueFactory<>("startTime"));
         endColumn.setCellValueFactory(new PropertyValueFactory<>("endTime"));
 
+        // set up the Customer columns in the table, must match the names of the variables in the model
+        customerIDRecordsColumn.setCellValueFactory(new PropertyValueFactory<>("customerID"));
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("customerName"));
+        addressColumn.setCellValueFactory(new PropertyValueFactory<>("customerAddress"));
+        postalColumn.setCellValueFactory(new PropertyValueFactory<>("postalCode"));
+        phoneColumn.setCellValueFactory(new PropertyValueFactory<>("customerPhone"));
+        divisionColumn.setCellValueFactory(new PropertyValueFactory<>("divisionID"));
+
+
         viewAppointments.setItems(appointmentsList);
         System.out.println(viewAppointments.getItems()); // testing output to console
+
+        viewCustomers.setItems(customersList);
+        System.out.println(viewCustomers.getItems()); // testing output to console
 
         // update tables
         updateAppointments();
         updateCustomers();
+        JDBC.closeConnection();
     }
 }

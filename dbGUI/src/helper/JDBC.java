@@ -1,5 +1,8 @@
 package helper;
 
+import controllers.LoginController;
+import javafx.scene.control.Alert;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -17,7 +20,7 @@ public abstract class JDBC {
     private static final String jdbcUrl = protocol + vendor + location + databaseName + "?connectionTimeZone = SERVER"; // LOCAL
     private static final String driver = "com.mysql.cj.jdbc.Driver"; // Driver reference
     private static final String userName = "sqlUser"; // Username
-    private static String password = "passw0rd!"; // Password
+    private static final String passWord = "passw0rd!"; // Password
     public static Connection connection;  // Connection Interface
     private static PreparedStatement preparedStatement;
 
@@ -30,10 +33,10 @@ public abstract class JDBC {
     {
         try {
             Class.forName(driver); // Locate Driver
-            connection = (Connection) DriverManager.getConnection(jdbcUrl, userName, password); // Reference Connection object
-            System.out.println("Connection successful!");
+            connection = DriverManager.getConnection(jdbcUrl, userName, passWord); // Reference Connection object
+            System.out.println("Connected to database as: " + userName);
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             System.out.println("Error:" + e.getMessage());
             System.out.println("Cause:" + e.getCause());
@@ -63,10 +66,19 @@ public abstract class JDBC {
     }
 
     public static void setPreparedStatement(Connection connection, String sqlStatement) throws Exception {
-        connection.prepareStatement(sqlStatement);
+        preparedStatement = connection.prepareStatement(sqlStatement);
     }
 
     public static PreparedStatement getPreparedStatement() {
         return preparedStatement;
     }
+
+    public static String getUsername() {
+        return userName;
+    }
+
+    public static String getPassword() {
+        return passWord;
+    }
+
 }
