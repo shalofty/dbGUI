@@ -5,28 +5,39 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import models.Division;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class DivisionAccess {
+public class DivisionAccess extends Division {
     /**
-     * Observablelist that takes all customer data from the database.
+     * @param divisionID
+     * @param divisionName
+     * @param countryID
+     * a constructor that takes the divisionID, divisionName, and countryID
      * */
-    public static ObservableList<Division> getDivisions(Connection connection) throws SQLException {
-        PreparedStatement statement = JDBC.openConnection().prepareStatement(SQLQueries.DIVISION_ACCESS);
+    public DivisionAccess(int divisionID, String divisionName, int countryID) {
+        super(divisionID, divisionName, countryID);
+    }
+
+    /**
+     * @return ObservableList<DivisionAccess>
+     * @throws SQLException
+     * */
+    public static ObservableList<DivisionAccess> getDivisions() throws SQLException {
+        PreparedStatement statement = JDBC.openConnection().prepareStatement(SQLQueries.SELECT_DIVISIONS);
         ResultSet set = statement.executeQuery();
-        ObservableList<Division> divisionsObservableList = FXCollections.observableArrayList();
+        ObservableList<DivisionAccess> divisionsObservableList = FXCollections.observableArrayList();
         while (set.next()) {
             int divisionID = set.getInt("Division_ID");
             String divisionName = set.getString("Division");
             int countryID = set.getInt("Country_ID");
             // param ordering must match the constructor in the Customers model
-            Division division = new Division(divisionID, divisionName, countryID);
+            DivisionAccess division = new DivisionAccess(divisionID, divisionName, countryID);
             // add each customer to the observable list of
             divisionsObservableList.add(division);
         }
+        JDBC.closeConnection(); // close the connection
         return divisionsObservableList;
     }
 }

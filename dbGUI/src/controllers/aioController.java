@@ -1,8 +1,6 @@
 package controllers;
 
-import DataAccess.AppointmentAccess;
-import DataAccess.CustomerAccess;
-import DataAccess.SQLQueries;
+import DataAccess.*;
 import helper.JDBC;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -18,6 +16,7 @@ import models.Customers;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -30,7 +29,7 @@ public class aioController implements Initializable {
 
     @FXML public Tab appointmentsTab, customersTab, reportsTab, logTab;
 
-    // Appointments Variables
+    // Appointments Variables ///////////////////////////////////////////////////////////////////////////////////////////
     @FXML public TextField appIDField, contactIDField, userIDField, locationField, customerIDField, typeField, titleField;
     @FXML public DatePicker startDatePicker, endDatePicker;
     @FXML public ComboBox<String> startTimeBox = new ComboBox<>();
@@ -44,17 +43,24 @@ public class aioController implements Initializable {
     @FXML public ObservableList<Appointments> appointmentsList = FXCollections.observableArrayList(AppointmentAccess.getAllAppointments());
     @FXML public Appointments selectedAppointment;
 
-    // Customer Variables
+    // Customer Variables ///////////////////////////////////////////////////////////////////////////////////////////////
     @FXML public TextField customerRecordsIDField, customerNameField, addressField, postalField, phoneField;
     @FXML public SplitMenuButton countryMenu, divisionMenu;
     @FXML public TableView<Customers> viewCustomers;
     @FXML public TableColumn<?, ?> customerIDRecordsColumn, nameColumn, phoneColumn, addressColumn, postalColumn, divisionColumn;
     @FXML public Button addCustomerButton, modifyCustomerButton, deleteCustomerButton, clearSelectedCustomerButton;
     @FXML public ObservableList<Customers> customersList = FXCollections.observableArrayList(CustomerAccess.getCustomers());
+    @FXML public ObservableList<CountryAccess> countriesList = FXCollections.observableArrayList(CountryAccess.getCountries());
+    @FXML public ObservableList<DivisionAccess> divisionsList = FXCollections.observableArrayList(DivisionAccess.getDivisions());
+    @FXML public ObservableList<String> countryNames = FXCollections.observableArrayList();
+    @FXML public ObservableList<String> divisionNames = FXCollections.observableArrayList();
     @FXML public Customers selectedCustomer;
 
+    public aioController() throws SQLException {
+    }
 
-    // Appointments Tab Methods
+
+    // Appointments Tab Methods ////////////////////////////////////////////////////////////////////////////////////////
     // viewByWeek
     // viewByMonth
 
@@ -321,9 +327,12 @@ public class aioController implements Initializable {
         }
     }
 
-    // Customers Tab Methods
+    // Customers Tab Methods ///////////////////////////////////////////////////////////////////////////////////////////
 
-    // selecteCustomer
+    /**
+     * selectCustomer selects a customer from the tableview
+     * disables add button, enables modify and delete buttons to prevent pointer exceptions
+     * */
     public void selectCustomer(){
         try {
             selectedCustomer = viewCustomers.getSelectionModel().getSelectedItem();
@@ -352,7 +361,10 @@ public class aioController implements Initializable {
         }
     };
 
-    // clearSelectedCustomer
+    /**
+     * clearSelectedCustomer clears the selected customer
+     * enables add button, disables modify and delete buttons to prevent pointer exceptions
+     * */
     public void clearSelectedCustomer() {
         selectedCustomer = null;
         customerIDField.clear();
@@ -381,6 +393,8 @@ public class aioController implements Initializable {
     @FXML public void deleteCustomer(ActionEvent event) {
         System.out.println("Delete Customer");
     }
+
+    // Initialize and Support  /////////////////////////////////////////////////////////////////////////////////////////
 
     // updateAppointments
     public void updateAppointments() {
@@ -421,14 +435,15 @@ public class aioController implements Initializable {
 
 
         viewAppointments.setItems(appointmentsList);
-        System.out.println(viewAppointments.getItems()); // testing output to console
+//        System.out.println(viewAppointments.getItems()); // testing output to console
 
         viewCustomers.setItems(customersList);
-        System.out.println(viewCustomers.getItems()); // testing output to console
+//        System.out.println(viewCustomers.getItems()); // testing output to console
 
         // update tables
         updateAppointments();
         updateCustomers();
-        JDBC.closeConnection();
+
+        JDBC.closeConnection(); // close connection to db
     }
 }

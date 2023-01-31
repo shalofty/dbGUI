@@ -11,11 +11,10 @@ import java.sql.SQLException;
 
 public class CountryAccess extends Country {
 
-    private static final String SQL_GET_COUNTRIES = "SELECT Country_ID, Country FROM countries";
-
     /**
      * @param countryID
      * @param countryName
+     * a constructor that takes the countryID and countryName
      */
     public CountryAccess(int countryID, String countryName) {
         super(countryID, countryName);
@@ -25,16 +24,17 @@ public class CountryAccess extends Country {
      * @return ObservableList<CountryAccess>
      * @throws SQLException
      */
-    public static ObservableList<CountryAccess> getAllCountries() throws SQLException {
+    public static ObservableList<CountryAccess> getCountries() throws SQLException {
         ObservableList<CountryAccess> countriesObservableList = FXCollections.observableArrayList();
-        PreparedStatement ps = JDBC.openConnection().prepareStatement(SQL_GET_COUNTRIES);
-        ResultSet rs = ps.executeQuery();
-        while (rs.next()) {
-            int countryID = rs.getInt("Country_ID");
-            String countryName = rs.getString("Country");
+        PreparedStatement statement = JDBC.openConnection().prepareStatement(SQLQueries.SELECT_COUNTRIES);
+        ResultSet set = statement.executeQuery();
+        while (set.next()) {
+            int countryID = set.getInt("Country_ID");
+            String countryName = set.getString("Country");
             CountryAccess country = new CountryAccess(countryID, countryName);
             countriesObservableList.add(country);
         }
+        JDBC.closeConnection(); // close connection
         return countriesObservableList;
     }
 }

@@ -1,8 +1,9 @@
 package models;
 
-public final class Division {
+public class Division {
     private final String divisionName;
-    private final int divisionID, countryID;
+    private final int divisionID;
+    public int countryID;
 
     /**
      * constructor for Division
@@ -12,23 +13,6 @@ public final class Division {
         this.divisionID = divisionID;
         this.divisionName = divisionName;
         this.countryID = countryID;
-    }
-
-    /**
-     * @param divisionID, divisionName, countryID
-     * @return Division object
-     * */
-    public static Division create(int divisionID, String divisionName, int countryID) {
-        if (divisionID <= 0) {
-            throw new IllegalArgumentException("Invalid division ID");
-        }
-        if (divisionName == null || divisionName.isEmpty()) {
-            throw new IllegalArgumentException("Invalid division name");
-        }
-        if (countryID <= 0) {
-            throw new IllegalArgumentException("Invalid country ID");
-        }
-        return new Division(divisionID, divisionName, countryID);
     }
 
     /**

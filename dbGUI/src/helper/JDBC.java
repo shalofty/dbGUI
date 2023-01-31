@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.time.Instant;
 
 /**
  * JDBC class establishes a connection to the database
@@ -34,7 +35,7 @@ public abstract class JDBC {
         try {
             Class.forName(driver); // Locate Driver
             connection = DriverManager.getConnection(jdbcUrl, userName, passWord); // Reference Connection object
-            System.out.println("Connected to database as: " + userName);
+            System.out.println(Instant.now() + ": " + userName + " connected to " + databaseName + ". session id: " + connection); // connection information to console
         }
         catch (Exception e)
         {
@@ -57,7 +58,7 @@ public abstract class JDBC {
     public static void closeConnection() {
         try {
             connection.close();
-            System.out.println("Connection closed!");
+            System.out.println(Instant.now() + ": " + userName + " disconnected from " + databaseName + ". session id: " + connection);
         }
         catch(Exception e)
         {

@@ -20,6 +20,7 @@ public class ContactAccess {
      * @return contactsObservableList
      */
     public static ObservableList<Contacts> getAllContacts() throws SQLException {
+        System.out.println("ContactAccess.getAllContacts()" + "\nTrying: JDBC.openConnection();");
         ObservableList<Contacts> contactsObservableList = FXCollections.observableArrayList();
         try (Connection connection = JDBC.openConnection();
              PreparedStatement ps = connection.prepareStatement(SELECT_ALL_CONTACTS_SQL);
@@ -29,6 +30,7 @@ public class ContactAccess {
                 contactsObservableList.add(createContact(rs));
             }
         }
+        JDBC.closeConnection();
         return contactsObservableList;
     }
 
@@ -54,13 +56,13 @@ public class ContactAccess {
     /**
      * Create contact object from result set.
      * @throws SQLException
-     * @param rs
+     * @param set
      * @return contact
      */
-    private static Contacts createContact(ResultSet rs) throws SQLException {
-        int contactID = rs.getInt("Contact_ID");
-        String contactName = rs.getString("Contact_Name");
-        String contactEmail = rs.getString("Email");
+    private static Contacts createContact(ResultSet set) throws SQLException {
+        int contactID = set.getInt("Contact_ID");
+        String contactName = set.getString("Contact_Name");
+        String contactEmail = set.getString("Email");
         return new Contacts(contactID, contactName, contactEmail);
     }
 }

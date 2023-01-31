@@ -21,7 +21,7 @@ public class CustomerAccess {
     public static ObservableList<Customers> getCustomers() {
         ObservableList<Customers> customersObservableList = FXCollections.observableArrayList();
         try (Connection connection = JDBC.openConnection()) {
-            PreparedStatement statement = connection.prepareStatement(SQLQueries.CUSTOMER_ACCESS);
+            PreparedStatement statement = connection.prepareStatement(SQLQueries.SELECT_CUSTOMERS);
             ResultSet set = statement.executeQuery();
             while (set.next()) {
                 int customerID = set.getInt("Customer_ID");

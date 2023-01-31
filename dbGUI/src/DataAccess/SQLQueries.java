@@ -1,7 +1,6 @@
 package DataAccess;
 
 import helper.JDBC;
-import models.CompanyTime;
 import javafx.scene.control.Alert;
 
 import java.sql.Connection;
@@ -17,7 +16,7 @@ public class SQLQueries {
     // Appointment Statements
     public static final String GET_ALL_APPOINTMENTS = "SELECT * from appointments";
     public static final String DELETE_APPOINTMENT = "DELETE FROM appointments WHERE Appointment_ID=?";
-    public static final String INSERT_APPOINTMENTS =
+    public static final String INSERT_APPOINTMENT =
             "INSERT INTO appointments " +
             "(Appointment_ID, " +
             "Title, " +
@@ -42,8 +41,9 @@ public class SQLQueries {
             "End = ?, " +
             "Last_Update = ?, " +
             "Last_Updated_By = ? WHERE Appointment_ID = ?";
+
     // Customer Statements
-    public static final String CUSTOMER_ACCESS =
+    public static final String SELECT_CUSTOMERS =
             "SELECT customers.Customer_ID, " +
             "customers.Customer_Name, " +
             "customers.Address, " +
@@ -51,7 +51,8 @@ public class SQLQueries {
             "customers.Phone, " +
             "customers.Division_ID, " +
             "first_level_divisions.Division from customers INNER JOIN  first_level_divisions ON customers.Division_ID = first_level_divisions.Division_ID";
-    public static final String DIVISION_ACCESS = "SELECT * from first_level_divisions";
+    public static final String SELECT_DIVISIONS = "SELECT * from first_level_divisions";
+    public static final String SELECT_COUNTRIES = "SELECT Country_ID, Country FROM countries";
     public static final String CHECK_USER = "SELECT * FROM users WHERE User_Name = ? AND Password = ?";
 
     /**
@@ -59,7 +60,7 @@ public class SQLQueries {
      * */
     public static void insertInto (int ID, String title, String description, String location, String type, String start, String end, int customerID, int userID, int contactID) throws Exception {
         try (Connection connection = JDBC.openConnection()) {
-            JDBC.setPreparedStatement(connection, SQLQueries.INSERT_APPOINTMENTS);
+            JDBC.setPreparedStatement(connection, SQLQueries.INSERT_APPOINTMENT);
             PreparedStatement statement = JDBC.getPreparedStatement();
 
             // set the parameters for the prepared statement
