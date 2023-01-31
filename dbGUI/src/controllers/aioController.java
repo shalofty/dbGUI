@@ -9,10 +9,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import models.Appointments;
-import models.Customers;
-import models.Country;
-import models.Division;
+import models.*;
 
 import java.net.URL;
 import java.sql.Connection;
@@ -167,7 +164,7 @@ public class aioController implements Initializable {
 
     /**
      * generateAppointmentID generates a new appointment ID
-     * @return newAppointmentID
+     * @return newID
      * */
     @FXML public int generateAppointmentID() {
         Random randy = new Random();
@@ -176,6 +173,21 @@ public class aioController implements Initializable {
         for (Appointments appointment : appointmentsList) {
             if (appointment.getAppointmentID() == newID) {
                 return generateAppointmentID();
+            }
+        } return newID;
+    }
+
+    /**
+     * generateCustomerID generates a new customer ID
+     * @return newID
+     * */
+    @FXML public int generateCustomerID() {
+        Random randy = new Random();
+        int maxID = 9999;
+        int newID = randy.nextInt(maxID);
+        for (Customers customer : customersList) {
+            if (customer.getCustomerID() == newID) {
+                return generateCustomerID();
             }
         } return newID;
     }
@@ -232,7 +244,7 @@ public class aioController implements Initializable {
             int newContactID = Integer.parseInt(contactIDField.getText());
 
             // adding the new appointment to the database
-            SQLQueries.insertInto(newAppointmentID, newTitle, newDescriptionText, newLocation, newType,
+            SQLQueries.insertIntoAppointments(newAppointmentID, newTitle, newDescriptionText, newLocation, newType,
                     startDT, endDT, newCustomerID, newUserID, newContactID);
 
             updateAppointments();
@@ -264,17 +276,19 @@ public class aioController implements Initializable {
             alert.setContentText("Are you sure you want to modify this appointment?");
             Optional<ButtonType> result = alert.showAndWait();
             if (selectedAppointment != null && result.isPresent() && result.get() == ButtonType.OK) {
-                int appointmentID = selectedAppointment.getAppointmentID();
-                String title = titleField.getText();
-                String location = locationField.getText();
-                int customerID = Integer.parseInt(customerIDField.getText());
-                int contactID = Integer.parseInt(contactIDField.getText());
-                int userID = Integer.parseInt(userIDField.getText());
-                String type = typeField.getText();
-                String descriptionText = descriptionTextArea.getText();
-                LocalDateTime startDate = LocalDateTime.from(startDatePicker.getValue());
-                LocalDateTime endDate = LocalDateTime.from(endDatePicker.getValue());
-                SQLQueries.updateTable(appointmentID, title, descriptionText, location, type, startDate, endDate, customerID, userID, contactID);
+                int appointmentID = selectedAppointment.getAppointmentID(); // getting the appointment ID
+                String title = titleField.getText(); // getting the title
+                String location = locationField.getText(); // getting the location
+                String type = typeField.getText(); // getting the type
+                String descriptionText = descriptionTextArea.getText(); // getting the description
+                int customerID = Integer.parseInt(customerIDField.getText()); // getting the customer ID
+                int contactID = Integer.parseInt(contactIDField.getText()); // getting the contact ID
+                int userID = Integer.parseInt(userIDField.getText()); // getting the user ID
+                LocalDateTime startDate = LocalDateTime.from(startDatePicker.getValue()); // getting the start date
+                LocalDateTime endDate = LocalDateTime.from(endDatePicker.getValue()); // getting the end date
+                LocalTime startTime = LocalTime.parse(startTimeBox.getValue()); // getting the start time
+                LocalTime endTime = LocalTime.parse(endTimeBox.getValue()); // getting the end time
+                SQLQueries.updateAppointment(appointmentID, title, descriptionText, location, type, startDate, endDate, customerID, userID, contactID);
             }
         }
         catch (Exception e) {
@@ -340,9 +354,11 @@ public class aioController implements Initializable {
                 ObservableList<DivisionAccess> divisionList = DivisionAccess.getDivisions();
 
                 // setting the country menu to the country of the selected customer
+                // loop through the division list
                 for (Division division : divisionList) {
                     // if the division id of the selected customer matches the division id of the division in the list
                     if (division.getDivisionID() == selectedCustomer.getDivisionID()) {
+                        // loop through the country list
                         for (Country country : countryList) {
                             // if the country id of the selected customer matches the country id of the country in the list
                             if (country.getCountryID() == division.getCountryID() && selectedCustomer.getDivisionID() == division.getDivisionID()) {
@@ -390,7 +406,37 @@ public class aioController implements Initializable {
 
     // addCustomer
     @FXML public void addCustomer(ActionEvent event) {
-        System.out.println("Add Customer");
+        try{
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Add Customer");
+            alert.setHeaderText("Add Customer");
+            alert.setContentText("Are you sure you want to add this customer?");
+            Optional<ButtonType> result;
+            result = alert.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                Connection connection = JDBC.getConnection();
+                int customerID = generateAppointmentID();
+                String customerName = customerNameField.getText();
+                String address = addressField.getText();
+                String postalCode = postalField.getText();
+                String phone = phoneField.getText();
+                String country = countryMenu.getValue();
+                String division = divisionMenu.getValue();
+                JDBC.setPreparedStatement(connection, SQLQueries.INSERT_CUSTOMER);
+                clearSelectedCustomer();
+            } else {
+                alert.close();
+            }
+        }
+        catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Error");
+            alert.setContentText("Error: " + e.getMessage() + "Cause: " + e.getCause());
+            alert.showAndWait();
+            System.out.println("Error: " + e.getMessage());
+            System.out.println("Cause: " + e.getCause());
+        }
     }
 
     // modifyCustomer
@@ -401,6 +447,37 @@ public class aioController implements Initializable {
     // deleteCustomer
     @FXML public void deleteCustomer(ActionEvent event) {
         System.out.println("Delete Customer");
+    }
+
+    // Data Validation Tools ///////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * checks if a field is empty and returns true if it is
+     * */
+    public boolean emptyAppointmentField() {
+        return appIDField.getText().isEmpty()
+                || contactIDField.getText().isEmpty()
+                || userIDField.getText().isEmpty()
+                || locationField.getText().isEmpty()
+                || customerIDField.getText().isEmpty()
+                || typeField.getText().isEmpty()
+                || titleField.getText().isEmpty()
+                || startTimeBox.getValue() == null
+                || endTimeBox.getValue() == null
+                || startDatePicker.getValue() == null
+                || endDatePicker.getValue() == null;
+    }
+
+    /**
+     * checks if a field is empty and returns true if it is
+     * */
+    public boolean emptyCustomerField() {
+        return customerNameField.getText().isEmpty()
+                || addressField.getText().isEmpty()
+                || postalField.getText().isEmpty()
+                || phoneField.getText().isEmpty()
+                || countryMenu.getValue() == null
+                || divisionMenu.getValue() == null;
     }
 
     // Initialize and Support  /////////////////////////////////////////////////////////////////////////////////////////

@@ -15,7 +15,7 @@ public class SQLQueries {
      * */
     // Appointment Statements
     public static final String GET_ALL_APPOINTMENTS = "SELECT * from appointments";
-    public static final String DELETE_APPOINTMENT = "DELETE FROM appointments WHERE Appointment_ID=?";
+    public static final String DELETE_FROM_APPOINTMENTS = "DELETE FROM appointments WHERE Appointment_ID=?";
     public static final String INSERT_APPOINTMENT =
             "INSERT INTO appointments " +
             "(Appointment_ID, " +
@@ -50,7 +50,34 @@ public class SQLQueries {
             "customers.Postal_Code, " +
             "customers.Phone, " +
             "customers.Division_ID, " +
-            "first_level_divisions.Division from customers INNER JOIN  first_level_divisions ON customers.Division_ID = first_level_divisions.Division_ID";
+            "first_level_divisions.Division from customers " +
+            "INNER JOIN first_level_divisions " +
+            "ON customers.Division_ID = first_level_divisions.Division_ID";
+
+    public static final String INSERT_CUSTOMER =
+            "INSERT INTO customers " +
+            "(Customer_ID, " +
+            "Customer_Name, " +
+            "Address, " +
+            "Postal_Code, " +
+            "Phone, " +
+            "Create_Date, " +
+            "Created_By, " +
+            "Last_Update, " +
+            "Last_Updated_By, " +
+            "Division_ID) VALUES (?,?,?,?,?,?,?,?,?,?)";
+
+    public static final String UPDATE_CUSTOMER =
+            "UPDATE customers SET Customer_Name = ?, " +
+            "Address = ?, " +
+            "Postal_Code = ?, " +
+            "Phone = ?, " +
+            "Last_Update = ?, " +
+            "Last_Updated_By = ?, " +
+            "Division_ID = ? " +
+            "WHERE Customer_ID = ?";
+
+    public static final String DELETE_FROM_CUSTOMERS = "DELETE FROM customers WHERE Customer_ID=?";
     public static final String SELECT_DIVISIONS = "SELECT * from first_level_divisions";
     public static final String SELECT_COUNTRIES = "SELECT Country_ID, Country FROM countries";
     public static final String CHECK_USER = "SELECT * FROM users WHERE User_Name = ? AND Password = ?";
@@ -58,29 +85,33 @@ public class SQLQueries {
     /**
      * insertInto inserts a new appointment into the database
      * */
-    public static void insertInto (int ID, String title, String description, String location, String type, String start, String end, int customerID, int userID, int contactID) throws Exception {
+    public static void insertIntoAppointments(int ID,
+                                              String title,
+                                              String description,
+                                              String location,
+                                              String type,
+                                              String start,
+                                              String end,
+                                              int customerID,
+                                              int userID,
+                                              int contactID) throws Exception {
         try (Connection connection = JDBC.openConnection()) {
             JDBC.setPreparedStatement(connection, SQLQueries.INSERT_APPOINTMENT);
             PreparedStatement statement = JDBC.getPreparedStatement();
 
             // set the parameters for the prepared statement
             // the order of the parameters must match the order of the columns in the database
-
             statement.setInt(1, ID); // appointment ID
             statement.setString(2, title); // title
             statement.setString(3, description); // description
             statement.setString(4, location); // location
             statement.setString(5, type); // type
-
             statement.setString(6, start); // start
             statement.setString(7, end); // end
-
             statement.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now())); // create date
             statement.setString(9, JDBC.getUsername()); // created by
-
             statement.setTimestamp(10, Timestamp.valueOf(LocalDateTime.now())); // last update
             statement.setString(11, JDBC.getUsername()); // last updated by
-
             statement.setInt(12, customerID); // customer ID
             statement.setInt(13, userID); // user ID
             statement.setInt(14, contactID); // contact ID
@@ -98,21 +129,38 @@ public class SQLQueries {
         }
     }
 
-    public static void updateTable(int ID, String title, String description, String location, String type, LocalDateTime start, LocalDateTime end, int customerID, int userID, int contactID) throws Exception {
+    /**
+     * updateAppointment updates an existing appointment in the database
+     * */
+    public static void updateAppointment(int ID,
+                                         String title,
+                                         String description,
+                                         String location,
+                                         String type,
+                                         LocalDateTime start,
+                                         LocalDateTime end,
+                                         int customerID,
+                                         int userID,
+                                         int contactID) throws Exception {
         try (Connection connection = JDBC.openConnection()) {
             JDBC.setPreparedStatement(connection, SQLQueries.UPDATE_APPOINTMENT);
+            // set the parameters for the prepared statement
+            // the order of the parameters must match the order of the columns in the database
             PreparedStatement statement = JDBC.getPreparedStatement();
-            statement.setInt(1, ID);
-            statement.setString(2, title);
-            statement.setString(3, description);
-            statement.setString(4, location);
-            statement.setString(5, type);
-
-            statement.setTimestamp(6, Timestamp.valueOf(start));
-            statement.setTimestamp(7, Timestamp.valueOf(end));
-            statement.setInt(8, customerID);
-            statement.setInt(9, userID);
-            statement.setInt(10, contactID);
+            statement.setInt(1, ID); // appointment ID
+            statement.setString(2, title); // title
+            statement.setString(3, description); // description
+            statement.setString(4, location); // location
+            statement.setString(5, type); // type
+            statement.setTimestamp(6, Timestamp.valueOf(start)); // start
+            statement.setTimestamp(7, Timestamp.valueOf(end)); // end
+            statement.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now())); // create date
+            statement.setString(9, JDBC.getUsername()); // created by
+            statement.setTimestamp(10, Timestamp.valueOf(LocalDateTime.now())); // last update
+            statement.setString(11, JDBC.getUsername()); // last updated by
+            statement.setInt(12, customerID); // customer ID
+            statement.setInt(13, userID); // user ID
+            statement.setInt(14, contactID); // contact ID
             statement.execute();
             JDBC.closeConnection();
         }

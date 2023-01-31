@@ -39,7 +39,7 @@ public class AppointmentAccess {
      * delete appointment from database
      * */
     public static void deleteAppointment(Connection connection, int customer) throws SQLException {
-        try (PreparedStatement statement = connection.prepareStatement(SQLQueries.DELETE_APPOINTMENT)) {
+        try (PreparedStatement statement = connection.prepareStatement(SQLQueries.DELETE_FROM_APPOINTMENTS)) {
             statement.setInt(1, customer);
             statement.executeUpdate();
         }
