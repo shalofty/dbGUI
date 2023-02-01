@@ -62,7 +62,7 @@
                               <TextField fx:id="contactIDField" promptText="Contact ID" GridPane.rowIndex="2" />
                               <TextField fx:id="userIDField" promptText="User ID" GridPane.rowIndex="3" />
                               <TextField fx:id="locationField" promptText="Location" GridPane.rowIndex="4" />
-                              <TextField fx:id="customerIDField" promptText="Customer ID" GridPane.rowIndex="9" />
+                              <TextField fx:id="customerIDField" editable="false" promptText="Auto-Generated ID" GridPane.rowIndex="9" />
                               <TextField fx:id="typeField" promptText="Type" GridPane.rowIndex="10" />
                               <DatePicker fx:id="startDatePicker" prefHeight="25.0" prefWidth="187.0" promptText="Start Date" GridPane.rowIndex="5" />
                               <DatePicker fx:id="endDatePicker" prefHeight="25.0" prefWidth="161.0" promptText="End Date" GridPane.rowIndex="6" />
@@ -107,8 +107,8 @@
                         <TextField fx:id="phoneField" layoutX="683.0" layoutY="131.0" prefHeight="25.0" prefWidth="150.0" promptText="Phone Number" />
                         <TextField fx:id="postalField" layoutX="682.0" layoutY="168.0" prefHeight="25.0" prefWidth="150.0" promptText="Postal Code" />
                         <Button fx:id="clearSelectedCustomerButton" layoutX="681.0" layoutY="18.0" mnemonicParsing="false" onAction="#clearSelectedCustomer" prefHeight="25.0" prefWidth="152.0" text="Clear Selection" />
-                        <ComboBox fx:id="countryMenu" layoutX="683.0" layoutY="246.0" prefWidth="150.0" promptText="Country" />
-                        <ComboBox fx:id="divisionMenu" layoutX="683.0" layoutY="284.0" prefWidth="150.0" promptText="Division" />
+                        <ComboBox fx:id="countryMenu" layoutX="683.0" layoutY="246.0" onAction="#enableDivisions" prefWidth="150.0" promptText="Country" />
+                        <ComboBox fx:id="divisionMenu" disable="true" layoutX="683.0" layoutY="284.0" prefWidth="150.0" promptText="Division" />
                      </children>
                   </AnchorPane>
             </content>

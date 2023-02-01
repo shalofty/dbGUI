@@ -1,3 +1,13 @@
+//1.  Create a log-in form with the following capabilities:
+//
+//        •  accepts username and password and provides an appropriate error message ✓
+//
+//        •  determines the user’s location (i.e., ZoneId) and displays it in a label on the log-in form ✓
+//
+//        •  displays the log-in form in English or French based on the user’s computer language setting to translate all the text, labels, buttons, and errors on the form
+//
+//        •  automatically translates error control messages into English or French based on the user’s computer language setting
+
 package controllers;
 
 import DataAccess.SQLQueries;
@@ -41,9 +51,9 @@ public class LoginController implements Initializable {
      * sets the zone label to the current zone the user is in
      * */
     @FXML public void initialize(URL url, ResourceBundle bundle) {
-        zoneLabel.setText(ZoneId.systemDefault().toString());
-        usernameField.setText(JDBC.getUsername());
-        passwordField.setText(JDBC.getPassword());
+        zoneLabel.setText(ZoneId.systemDefault().toString()); // sets the zone label to the current zone the user is in
+        usernameField.setText(JDBC.getUsername()); // sets the username field to the username in the JDBC class
+        passwordField.setText(JDBC.getPassword()); // sets the password field to the password in the JDBC class
     }
 
     /**

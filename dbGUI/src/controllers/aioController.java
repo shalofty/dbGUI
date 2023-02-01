@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
@@ -421,26 +423,54 @@ public class aioController implements Initializable {
                 addressField.setText(selectedCustomer.getCustomerAddress()); // set the address field
                 postalField.setText(selectedCustomer.getPostalCode()); // set the postal code field
                 phoneField.setText(selectedCustomer.getCustomerPhone()); // set the phone field
-                divisionMenu.valueProperty().set(selectedCustomer.getCountryDivision()); // set the division menu
 
-                ObservableList<CountryAccess> countryList = CountryAccess.getCountries(); // get the country list
-                ObservableList<DivisionAccess> divisionList = DivisionAccess.getDivisions(); // get the division list
+                // set the division menu
+                countryMenu.valueProperty().addListener((observable, oldValue, newValue) -> {
+                    int selectedCountryID = 0;  // create a variable to hold the country ID
+                    try {
+                        // get the country ID
+                        for (Country country : CountryAccess.getCountries()) {
+                            // if the country name equals the new value, set the country ID
+                            if (country.getCountryName().equals(newValue)) {
+                                selectedCountryID = country.getCountryID(); // set the country ID
+                                break;
+                            }
+                        }
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
 
-                // setting the country menu to the country of the selected customer
-                // loop through the division list
-                for (Division division : divisionList) {
-                    // if the division id of the selected customer matches the division id of the division in the list
+                    ObservableList<String> relatedDivisionsList = FXCollections.observableArrayList(); // create a new observable list
+                    try {
+                        // loop through the divisions
+                        for (DivisionAccess division : DivisionAccess.getDivisions()) {
+                            // if the country ID matches the selected country ID, add the division name to the list
+                            if (division.getCountryID() == selectedCountryID) {
+                                relatedDivisionsList.add(String.valueOf(division.getDivisionName())); // add the division name to the list
+                            }
+                        }
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    divisionMenu.setItems(relatedDivisionsList); // set the division menu
+                });
+
+                // set the country menu
+                for (Division division : DivisionAccess.getDivisions()) {
+                    // if the division ID matches the selected customer's division ID, set the division name
                     if (division.getDivisionID() == selectedCustomer.getDivisionID()) {
-                        // loop through the country list
-                        for (Country country : countryList) {
-                            // if the country id of the selected customer matches the country id of the country in the list
-                            if (country.getCountryID() == division.getCountryID() && selectedCustomer.getDivisionID() == division.getDivisionID()) {
-                                // set the country menu to the country of the selected customer
-                                countryMenu.valueProperty().set(String.valueOf(country.getCountryName()));
+                        divisionMenu.setValue(division.getDivisionName()); // set the division name
+                        // loop through the countries
+                        for (Country country : CountryAccess.getCountries()) {
+                            // if the country ID matches the division's country ID, set the country name
+                            if (country.getCountryID() == division.getCountryID()) {
+                                countryMenu.setValue(country.getCountryName()); // set the country name
                             }
                         }
                     }
                 }
+
                 // disable add button, enable modify and delete buttons to prevent pointer exceptions
                 addCustomerButton.setDisable(true);
                 modifyCustomerButton.setDisable(false);
@@ -538,6 +568,49 @@ public class aioController implements Initializable {
     }
 
     // Data Validation Tools ///////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * findDivisions finds the divisions for the selected country
+     * */
+    public void findDivisions() {
+        try {
+            String country = countryMenu.getValue(); // get the country
+            // if the country is not null
+            if (country != null) {
+                connection = JDBC.openConnection(); // establish connection
+                JDBC.setPreparedStatement(connection, SQLQueries.GET_DIVISION_FOR_COUNTRY); // set the prepared statement
+                PreparedStatement statement = JDBC.getPreparedStatement(); // get the prepared statement
+                statement.setString(1, country); // set the country
+                ResultSet resultSet = statement.executeQuery(); // execute the query
+                // loop through the result set
+                while (resultSet.next()) {
+                    divisionObservableList.add(resultSet.getString("Division")); // add the division to the observable list
+                    divisionMenu.setItems(divisionObservableList); // set the division menu to the observable list
+                }
+
+            }
+        }
+        catch (Exception e) {
+            ExceptionHandler.eAlert(e); // eAlert method
+        }
+        finally {
+            if (connection != null) {
+                connection = JDBC.closeConnection(); // close the connection
+            }
+            trackActivity(); // track activity
+        }
+    }
+
+    /**
+     * enables the division menu if a country is selected
+     * prevents incorrect data from being entered
+     * */
+    public void enableDivisions() {
+        if (countryMenu.getValue() != null) {
+            findDivisions(); // find divisions for the selected country
+            divisionMenu.setDisable(false); // enable division menu
+        }
+    }
 
     /**
      * checks if a field is empty and returns true if it is

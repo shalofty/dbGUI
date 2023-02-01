@@ -95,6 +95,23 @@ public class SQLQueries {
     public static final String SELECT_ID_BY_DIVISION = "SELECT Division_ID FROM first_level_divisions WHERE Division = ?";
     public static final String SELECT_COUNTRIES = "SELECT Country_ID, Country FROM countries";
 
+    public static final String SELECT_COUNTRY_FROM_DIVISION =
+            "SELECT countries.Country\n" +
+            "FROM countries\n" +
+            "JOIN first_level_divisions ON countries.Country_ID = first_level_divisions.Country_ID\n" +
+            "JOIN customers ON first_level_divisions.Division_ID = customers.Division_ID\n" +
+            "WHERE customers.Division_ID = ?";
+
+
+//            "SELECT customers.Customer_ID, " + "customers.Customer_Name, countries.Country " +
+//            "FROM customers " +
+//            "INNER JOIN countries ON customers.Division_ID = countries.Country_ID";
+
+    public static final String GET_DIVISION_FOR_COUNTRY =
+            "SELECT first_level_divisions.Division_ID, first_level_divisions.Division\n" +
+            "FROM countries\n" +
+            "JOIN first_level_divisions ON countries.Country_ID = first_level_divisions.Country_ID\n" +
+            "WHERE countries.Country = ?";
 
     /// Appointment Methods //////////////////////////////////////////////////////////////////////////
     /**
