@@ -165,20 +165,19 @@ public class SQLQueries {
             // the order of the parameters must match the order of the columns in the database
             JDBC.setPreparedStatement(connection, SQLQueries.UPDATE_APPOINTMENT_STATEMENT);
             PreparedStatement statement = JDBC.getPreparedStatement();
-            statement.setInt(1, ID); // appointment ID
-            statement.setString(2, title); // title
-            statement.setString(3, description); // description
-            statement.setString(4, location); // location
-            statement.setString(5, type); // type
-            statement.setTimestamp(6, Timestamp.valueOf(start)); // start
-            statement.setTimestamp(7, Timestamp.valueOf(end)); // end
-            statement.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now())); // create date
-            statement.setString(9, JDBC.getUsername()); // created by
-            statement.setTimestamp(10, Timestamp.valueOf(LocalDateTime.now())); // last update
-            statement.setString(11, JDBC.getUsername()); // last updated by
-            statement.setInt(12, customerID); // customer ID
-            statement.setInt(13, userID); // user ID
-            statement.setInt(14, contactID); // contact ID
+            statement.setString(1, title); // title
+            statement.setString(2, description); // description
+            statement.setString(3, location); // location
+            statement.setString(4, type); // type
+            statement.setTimestamp(5, Timestamp.valueOf(start)); // start
+            statement.setTimestamp(6, Timestamp.valueOf(end)); // end
+            statement.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now())); // last update
+            statement.setString(8, JDBC.getUsername()); // last updated by
+            statement.setInt(9, ID); // appointment ID
+
+//            statement.setInt(12, customerID); // customer ID
+//            statement.setInt(13, userID); // user ID
+//            statement.setInt(14, contactID); // contact ID
             statement.execute();
         }
         catch (Exception e) {
