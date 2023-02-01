@@ -84,6 +84,7 @@ public class SQLQueries {
 
     public static final String DELETE_FROM_CUSTOMERS_STATEMENT = "DELETE FROM customers WHERE Customer_ID=?";
     public static final String SELECT_DIVISIONS = "SELECT * from first_level_divisions";
+    public static final String SELECT_ID_BY_DIVISION = "SELECT Division_ID FROM first_level_divisions WHERE Division = ?";
     public static final String SELECT_COUNTRIES = "SELECT Country_ID, Country FROM countries";
     public static final String CHECK_USER = "SELECT * FROM users WHERE User_Name = ? AND Password = ?";
 
@@ -192,7 +193,7 @@ public class SQLQueries {
                                                     String address,
                                                     String postalCode,
                                                     String phone,
-                                                    String division) throws Exception {
+                                                    int division) throws Exception {
         try{
             JDBC.setPreparedStatement(connection, SQLQueries.INSERT_CUSTOMER_STATEMENT); // set the prepared statement
             PreparedStatement statement = JDBC.getPreparedStatement(); // get the prepared statement
@@ -205,7 +206,7 @@ public class SQLQueries {
             statement.setString(7, JDBC.getUsername()); // set the created by
             statement.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now())); // set the last update
             statement.setString(9, JDBC.getUsername()); // set the last updated by
-            statement.setString(10, division); // set the division ID
+            statement.setInt(10, division); // set the division ID
             statement.execute();
         }
         catch (Exception e) {

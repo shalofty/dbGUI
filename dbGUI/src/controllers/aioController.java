@@ -14,8 +14,11 @@ import models.*;
 
 import java.net.URL;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.Timestamp;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.ResourceBundle;
@@ -24,6 +27,7 @@ public class aioController implements Initializable {
 
     @FXML public Tab appointmentsTab, customersTab, reportsTab, logTab;
     @FXML public Connection connection = null;
+    @FXML public PreparedStatement preparedStatement = null;
 
     // Appointments Variables ///////////////////////////////////////////////////////////////////////////////////////////
     @FXML public TextField appIDField, contactIDField, userIDField, locationField, customerIDField, typeField, titleField;
@@ -445,7 +449,7 @@ public class aioController implements Initializable {
     }
 
     // addCustomer
-    @FXML public void addCustomer() throws RuntimeException {
+    @FXML public void addCustomer() {
         try{
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Add Customer");
@@ -454,22 +458,22 @@ public class aioController implements Initializable {
             Optional<ButtonType> result;
             result = alert.showAndWait();
             if (result.isPresent() && result.get() == ButtonType.OK) {
-                connection = JDBC.getConnection(); // establish connection
-                int customerID = Integer.parseInt(customerIDField.getText()); // get customer id
+                connection = JDBC.openConnection(); // establish connection
+                int customerID = generateCustomerID(); // get customer id
                 String customerName = customerNameField.getText(); // get customer name
                 String address = addressField.getText(); // get customer address
                 String postalCode = postalField.getText(); // get customer postal code
                 String phone = phoneField.getText(); // get customer phone
                 String country = countryMenu.getValue(); // get customer country
                 String division = divisionMenu.getValue(); // get customer division
-                JDBC.setPreparedStatement(connection, SQLQueries.INSERT_CUSTOMER_STATEMENT); // set prepared statement
+                int divisionID = DivisionAccess.getDivisionID(division); // get division ID
                 SQLQueries.INSERT_INTO_CUSTOMERS_METHOD(connection,
-                                                        customerID,
-                                                        customerName,
-                                                        address,
-                                                        postalCode,
-                                                        phone,
-                                                        division); // insert into customers
+                        customerID,
+                        customerName,
+                        address,
+                        postalCode,
+                        phone,
+                        divisionID); // insert into customers
                 clearSelectedCustomer(); // clear selected customer
             } else {
                 alert.close();
@@ -482,6 +486,7 @@ public class aioController implements Initializable {
             if (connection != null) {
                 connection = JDBC.closeConnection(); // close the connection
             }
+            updateCustomers(); // update customers tableview
         }
     }
 
@@ -535,7 +540,20 @@ public class aioController implements Initializable {
 
     // updateCustomers
     public void updateCustomers() {
-        viewCustomers.setItems(customersList); // set the items in the table to the customers list
+        try {
+            viewCustomers.getItems().clear(); // clear the items in the table
+            ObservableList<Customers> newCustomers = FXCollections.observableArrayList(CustomerAccess.getCustomers()); // create a new observable list
+            connection = JDBC.openConnection(); // establish connection
+            viewCustomers.setItems(newCustomers); // set the items in the table to the customers list
+        }
+        catch (Exception e) {
+            ExceptionHandler.eAlert(e); // eAlert method
+        }
+        finally {
+            if (connection != null) {
+                connection = JDBC.closeConnection(); // close the connection
+            }
+        }
     }
 
     @Override
@@ -581,8 +599,6 @@ public class aioController implements Initializable {
             viewAppointments.setItems(appointmentsList); // set the items in the table to the appointments list
             viewCustomers.setItems(customersList); // set the items in the table to the customers list
 
-            updateAppointments(); // update the appointments table
-            updateCustomers(); // update the customers table
             connection = JDBC.closeConnection(); // close the connection
         }
         catch (Exception e) {

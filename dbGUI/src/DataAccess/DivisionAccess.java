@@ -55,4 +55,31 @@ public class DivisionAccess extends Division {
             if (connection != null) connection.close(); // close connection
         }
     }
+
+    /**
+     * getDivisionID method gets the division ID
+     * @param divisionName
+     * @return divisionID as an int
+     * */
+    public static int getDivisionID(String divisionName) throws SQLException {
+        try {
+            connection = JDBC.openConnection(); // open the connection
+            statement = connection.prepareStatement(SQLQueries.SELECT_ID_BY_DIVISION); // prepare the statement
+            statement.setString(1, divisionName);
+            set = statement.executeQuery(); // execute the statement
+            int divisionID = 0;
+            // loop through the result set
+            while (set.next()) {
+                divisionID = set.getInt("Division_ID"); // get the division ID
+            }
+            return divisionID;
+        } catch (SQLException e) {
+            ExceptionHandler.eAlert(e);
+            throw e;
+        } finally {
+            if (set != null) set.close(); // close set
+            if (statement != null) statement.close(); // close statement
+            if (connection != null) connection.close(); // close connection
+        }
+    }
 }

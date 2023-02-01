@@ -70,8 +70,7 @@ public abstract class JDBC {
         try {
             StackTraceElement trace = Thread.currentThread().getStackTrace()[2];
             System.out.println(Instant.now() +
-                                ": " +
-                                trace.getFileName() +
+                                ": " + trace.getFileName() +
                                 " ln" + trace.getLineNumber() +
                                 ". " + " DISCONNECTED("  + userName +
                                 ", " + databaseName +
@@ -86,8 +85,8 @@ public abstract class JDBC {
         return connection;
     }
 
-    public static void setPreparedStatement(Connection connection, String sqlStatement) throws Exception {
-        preparedStatement = connection.prepareStatement(sqlStatement);
+    public static void setPreparedStatement(Connection connection, String statement) throws Exception {
+        preparedStatement = connection.prepareStatement(statement);
     }
 
     public static PreparedStatement getPreparedStatement() {
