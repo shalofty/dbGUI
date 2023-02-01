@@ -81,7 +81,8 @@ public class SQLQueries {
             "Division_ID) VALUES (?,?,?,?,?,?,?,?,?,?)";
 
     public static final String UPDATE_CUSTOMER_STATEMENT =
-            "UPDATE customers SET Customer_Name = ?, " +
+            "UPDATE customers " +
+            "SET Customer_Name = ?, " +
             "Address = ?, " +
             "Postal_Code = ?, " +
             "Phone = ?, " +
@@ -127,7 +128,8 @@ public class SQLQueries {
                                                        String end,
                                                        int customerID,
                                                        int userID,
-                                                       int contactID) throws Exception {
+                                                       int contactID)
+        throws Exception {
         try {
             // set the parameters for the prepared statement
             // the order of the parameters must match the order of the columns in the database
@@ -168,7 +170,8 @@ public class SQLQueries {
                                                  LocalDateTime end,
                                                  int customerID,
                                                  int userID,
-                                                 int contactID) throws Exception {
+                                                 int contactID)
+        throws Exception {
         try {
             // set the parameters for the prepared statement
             // the order of the parameters must match the order of the columns in the database
@@ -199,7 +202,8 @@ public class SQLQueries {
     /**
      * deleteFromAppointments deletes an appointment from the database
      * */
-    public static void DELETE_APPOINTMENT_METHOD(Connection connection, int customerID) {
+    public static void DELETE_APPOINTMENT_METHOD(Connection connection, int customerID)
+    {
         try {
             JDBC.setPreparedStatement(connection, SQLQueries.DELETE_FROM_APPOINTMENTS_STATEMENT); // set the prepared statement
             PreparedStatement statement = JDBC.getPreparedStatement(); // get the prepared statement
@@ -212,13 +216,19 @@ public class SQLQueries {
     }
 
     /// Customer Methods //////////////////////////////////////////////////////////////////////////
+
+    /**
+     * addCustomer adds a new customer to the database
+     * */
     public static void INSERT_INTO_CUSTOMERS_METHOD(Connection connection,
                                                     int customerID,
                                                     String customerName,
                                                     String address,
                                                     String postalCode,
                                                     String phone,
-                                                    int division) throws Exception {
+                                                    int division)
+    throws Exception
+    {
         try{
             JDBC.setPreparedStatement(connection, SQLQueries.INSERT_CUSTOMER_STATEMENT); // set the prepared statement
             PreparedStatement statement = JDBC.getPreparedStatement(); // get the prepared statement
@@ -240,42 +250,35 @@ public class SQLQueries {
         }
     }
 
-//    public static int RETURN_USER_ID(String userName) throws Exception {
-//        // get the connection
-//        try (Connection connection = JDBC.openConnection()) {
-//            JDBC.setPreparedStatement(connection, SQLQueries.SELECT_USER_ID_STATEMENT); // set the prepared statement
-//            PreparedStatement statement = JDBC.getPreparedStatement(); // get the prepared statement
-//            statement.setString(1, userName); // set the user name
-//            ResultSet resultSet = statement.executeQuery(); // execute the query
-//            return resultSet.getInt("User_ID"); // return the user ID
-//        } catch (Exception e) {
-//            ExceptionHandler.eAlert(e); // eAlert method
-//            throw e;
-//        }
-//    }
-
     /**
-     * CREATE_USER creates a new user in the database
-     * user ID is set to 3 because the user ID is auto-incremented
-     * username and password are set to the username and password entered in the login screen
+     * updateCustomer updates an existing customer in the database
      * */
-//    public static void CREATE_USER(String userName, String password) throws Exception {
-//        try (Connection connection = JDBC.openConnection()) {
-//            JDBC.setPreparedStatement(connection, SQLQueries.INSERT_ON_LOGIN_STATEMENT); // set the prepared statement
-//            PreparedStatement statement = JDBC.getPreparedStatement(); // get the prepared statement
-//            statement.setInt(1, 3); // set the user ID
-//            statement.setString(2, userName); // set the username
-//            statement.setString(3, password); // set the password
-//            statement.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now())); // set the create date
-//            statement.setString(5, userName); // set the created by
-//            statement.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now())); // set the last update
-//            statement.setString(7, password); // set the last updated by
-//            statement.execute();
-//            connection.close(); // close the connection
-//        }
-//        catch (Exception e) {
-//            ExceptionHandler.eAlert(e); // eAlert method
-//            throw e;
-//        }
-//    }
+    public static void UPDATE_CUSTOMER_METHOD
+    (Connection connection,
+      int customerID,
+      String customerName,
+      String address,
+      String postalCode,
+      String phone,
+      int division)
+        throws Exception
+    {
+        try{
+            JDBC.setPreparedStatement(connection, SQLQueries.UPDATE_CUSTOMER_STATEMENT); // set the prepared statement
+            PreparedStatement statement = JDBC.getPreparedStatement(); // get the prepared statement
+            statement.setString(1, customerName); // set the customer name
+            statement.setString(2, address); // set the address
+            statement.setString(3, postalCode); // set the postal code
+            statement.setString(4, phone); // set the phone number
+            statement.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now())); // set the last update
+            statement.setString(6, JDBC.getUsername()); // set the last updated by
+            statement.setInt(7, division); // set the division ID
+            statement.setInt(8, customerID); // set the customer ID
+            statement.execute();
+        }
+        catch (Exception e) {
+            ExceptionHandler.eAlert(e); // eAlert method
+            throw e;
+        }
+    }
 }

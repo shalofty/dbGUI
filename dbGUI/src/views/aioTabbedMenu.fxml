@@ -99,7 +99,7 @@
                            </columns>
                         </TableView>
                         <Button fx:id="addCustomerButton" layoutX="682.0" layoutY="331.0" mnemonicParsing="false" onAction="#addCustomer" prefHeight="25.0" prefWidth="150.0" text="Add" />
-                        <Button fx:id="modifyCustomerButton" disable="true" layoutX="683.0" layoutY="375.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="150.0" text="Modify" />
+                        <Button fx:id="modifyCustomerButton" disable="true" layoutX="683.0" layoutY="375.0" mnemonicParsing="false" onAction="#modifyCustomer" prefHeight="25.0" prefWidth="150.0" text="Modify" />
                         <Button fx:id="deleteCustomerButton" disable="true" layoutX="681.0" layoutY="419.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="150.0" text="Delete" />
                         <TextField fx:id="customerRecordsIDField" layoutX="683.0" layoutY="58.0" prefHeight="25.0" prefWidth="150.0" promptText="Customer ID" />
                         <TextField fx:id="addressField" layoutX="682.0" layoutY="206.0" prefHeight="25.0" prefWidth="150.0" promptText="Address" />

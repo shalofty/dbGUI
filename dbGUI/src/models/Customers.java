@@ -9,13 +9,13 @@ public final class Customers {
      * */
     public Customers(String customerName, String customerAddress, String postalCode,
                      String customerPhone, String countryDivision, int customerID, int divisionID) {
-        this.customerName = customerName;
-        this.customerAddress = customerAddress;
-        this.postalCode = postalCode;
-        this.customerPhone = customerPhone;
-        this.countryDivision = countryDivision;
-        this.customerID = customerID;
-        this.divisionID = divisionID;
+        this.customerName = customerName; // set the customer name
+        this.customerAddress = customerAddress; // set the customer address
+        this.postalCode = postalCode; // set the postal code
+        this.customerPhone = customerPhone; // set the customer phone
+        this.countryDivision = countryDivision; // set the country division
+        this.customerID = customerID; // set the customer ID
+        this.divisionID = divisionID; // set the division ID
     }
 
     /**

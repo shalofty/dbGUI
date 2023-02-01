@@ -559,11 +559,48 @@ public class aioController implements Initializable {
 
     // modifyCustomer
     @FXML public void modifyCustomer(ActionEvent event) {
-        System.out.println("Modify Customer");
+        try {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Modify Customer");
+            alert.setHeaderText("Modifying Customer in Database");
+            alert.setContentText("Are you sure you want to modify this customer?");
+            Optional<ButtonType> result;
+            result = alert.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                connection = JDBC.openConnection(); // establish connection
+                int customerID = selectedCustomer.getCustomerID(); // get customer id
+                String customerName = customerNameField.getText(); // get customer name
+                String address = addressField.getText(); // get customer address
+                String postalCode = postalField.getText(); // get customer postal code
+                String phone = phoneField.getText(); // get customer phone
+                String country = countryMenu.getValue(); // get customer country
+                String division = divisionMenu.getValue(); // get customer division
+                int divisionID = DivisionAccess.getDivisionID(division); // get division ID
+                SQLQueries.UPDATE_CUSTOMER_METHOD(connection,
+                                                   customerID,
+                                                   customerName,
+                                                   address,
+                                                   postalCode,
+                                                   phone,
+                                                   divisionID); // update customers
+                clearSelectedCustomer(); // clear selected customer
+            } else {
+                alert.close();
+            }
+        }
+        catch (Exception e) {
+            ExceptionHandler.eAlert(e); // eAlert method
+        }
+        finally {
+            updateCustomers(); // update customers tableview
+            trackActivity(); // track activity
+        }
+
     }
 
     // deleteCustomer
     @FXML public void deleteCustomer(ActionEvent event) {
+
         System.out.println("Delete Customer");
     }
 

@@ -64,19 +64,20 @@ public class LoginController implements Initializable {
         try {
             // retrieve username and password from text fields
             if (usernameField.getText().equals(JDBC.getUsername()) && passwordField.getText().equals(JDBC.getPassword())) {
-                FXMLLoader loader = new FXMLLoader();
-                loader.setLocation(LoginController.class.getResource("/views/aioTabbedMenu.fxml"));
-                Parent root = loader.load();
-                stage = (Stage) loginButton.getScene().getWindow();
-                Scene scene = new Scene(root);
-                stage.setScene(scene);
-                loginSpy();
-                stage.show();
+                FXMLLoader loader = new FXMLLoader(); // creates a new FXMLLoader object
+                loader.setLocation(LoginController.class.getResource("/views/aioTabbedMenu.fxml")); // sets the location of the loader to the aioTabbedMenu.fxml file
+                Parent root = loader.load(); // loads the root
+                stage = (Stage) loginButton.getScene().getWindow(); // gets the stage from the login button
+                Scene scene = new Scene(root); // creates a new scene
+                stage.setScene(scene); // sets the stage to the scene
+                loginSpy(); // calls the loginSpy method
+                stage.show(); // shows the stage
             } else {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Start Failed");
                 alert.setHeaderText("Start Failed");
                 alert.setContentText("The username or password you entered is incorrect.");
+                loginSpy();
                 alert.showAndWait();
             }
         }
@@ -89,22 +90,23 @@ public class LoginController implements Initializable {
      * loginSpy logs the user's login attempt to a text file
      * */
     @FXML public void loginSpy() {
-        String success;
+        String success; // creates a string variable called success
+        // checks to see if the username and password match the username and password in the JDBC class
         if (usernameField.getText().equals(JDBC.getUsername()) && passwordField.getText().equals(JDBC.getPassword())) {
             success = "SUCCESS";
         }
         else {
             success = "FAILED";
         }
-        String time = LocalDateTime.now().toString().replace(":", "-");
-        String userName = usernameField.getText();
-        String userLog = time + ": User: " + userName + ", " + success + "\n";
-        String fileName = "loginActivity.txt";
-        String filePath = "ActivityLog/";
+        String time = LocalDateTime.now().toString().replace(":", "-"); // gets the current time and replaces the : with -
+        String userName = usernameField.getText(); // gets the username from the username field
+        String userLog = time + ": User: " + userName + ", " + success + "\n"; // creates a string variable called userLog
+        String fileName = "loginActivity.txt"; // creates a string variable called fileName
+        String filePath = "ActivityLog/"; // creates a string variable called filePath
         try {
-            FileWriter fileWriter = new FileWriter(filePath + fileName, true);
-            fileWriter.write(userLog);
-            fileWriter.close();
+            FileWriter fileWriter = new FileWriter(filePath + fileName, true); // creates a new FileWriter object
+            fileWriter.write(userLog); // writes the userLog string to the file
+            fileWriter.close(); // closes the file
         } catch (IOException e) {
             e.printStackTrace();
         }

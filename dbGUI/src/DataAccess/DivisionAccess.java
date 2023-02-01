@@ -22,7 +22,7 @@ public class DivisionAccess extends Division {
      * a constructor that takes the divisionID, divisionName, and countryID
      * */
     public DivisionAccess(int divisionID, String divisionName, int countryID) {
-        super(divisionID, divisionName, countryID);
+        super(divisionID, divisionName, countryID); // call the super constructor
     }
 
     /**
