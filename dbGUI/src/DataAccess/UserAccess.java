@@ -21,19 +21,18 @@ public class UserAccess extends Users {
      * @param userName, password
      * This method validates the user for the login form.
      * */
-    public static int checkUser(String userName, String password) {
+    public static boolean checkUser(String userName, String password) throws SQLException {
         try {
             connection = JDBC.openConnection(); // Open connection
-            statement = JDBC.openConnection().prepareStatement(SQLQueries.CHECK_USER); // Prepare statement
+            statement = connection.prepareStatement(SQLQueries.CHECK_USER); // Prepare statement
             statement.setString(1, userName); // Set parameters
             statement.setString(2, password); // Set parameters
             set = statement.executeQuery(); // Execute query
             // If the user exists, return the user ID
-            if (set.next() && set.getString("User_Name").equals(userName) && set.getString("Password").equals(password)) {
-                return set.getInt("User_ID");
-            }
+            return set.next() && set.getString("User_Name").equals(userName) && set.getString("Password").equals(password);
         } catch (SQLException e) {
             e.printStackTrace();
+            throw e;
         } finally {
             if (set != null) {
                 set = null; // Close result set
@@ -45,6 +44,5 @@ public class UserAccess extends Users {
                 connection = JDBC.closeConnection(); // Close connection
             }
         }
-        return -1; // If the user does not exist, return -1
     }
 }

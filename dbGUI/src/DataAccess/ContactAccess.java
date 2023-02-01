@@ -53,20 +53,20 @@ public class ContactAccess {
     /**
      * Find contact ID given contact name.
      * @throws SQLException
-     * @param contactName
      * @return contactID
      */
-    public static String findContactID(String contactName) throws SQLException {
+    public static int findContactID(int contactID) throws SQLException {
         try {
             connection = JDBC.openConnection(); // open connection
             statement = connection.prepareStatement(SQLQueries.SELECT_CONTACTS_BY_NAME_STATEMENT); // prepare statement
-            statement.setString(1, contactName); // set contact name
+            statement.setInt(1, contactID); // set contact name
             set = statement.executeQuery(); // execute query
-            if (set.next()) {
-                return set.getString("Contact_ID");
-            } else {
-                throw new SQLException("Contact not found.");
+            while (set.next()) {
+                if (contactID == set.getInt("Contact_ID")) {
+                    contactID = set.getInt("Contact_ID"); // get contact ID
+                }
             }
+            return contactID; // return contact ID
         }
         catch (SQLException e) {
             ExceptionHandler.eAlert(e); // handle exception

@@ -5,6 +5,7 @@ import javafx.scene.control.Alert;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import Exceptions.ExceptionHandler;
@@ -14,6 +15,13 @@ public class SQLQueries {
      * I thought it would be easier to have all of my SQL queries in one place.
      * To make the code look a bit cleaner
      * */
+    /// User Statement
+    public static final String INSERT_ON_LOGIN_STATEMENT = "INSERT INTO client_schedule.users " +
+            "(USER_ID, User_Name, Password, Create_Date, Created_By, Last_Update, Last_Updated_By)\n" + "VALUES " +
+            "(?, ?, ?, ?, ?, ?, ?);\n";
+    public static final String CHECK_USER = "SELECT * FROM users WHERE User_Name = ? AND Password = ?";
+    public static final String SELECT_USER_ID_STATEMENT = "SELECT User_ID FROM users WHERE User_Name = ?";
+
     /// Appointment Statements
     public static final String GET_ALL_APPOINTMENTS_STATEMENT = "SELECT * from appointments";
     public static final String DELETE_FROM_APPOINTMENTS_STATEMENT = "DELETE FROM appointments WHERE Appointment_ID=?";
@@ -86,7 +94,7 @@ public class SQLQueries {
     public static final String SELECT_DIVISIONS = "SELECT * from first_level_divisions";
     public static final String SELECT_ID_BY_DIVISION = "SELECT Division_ID FROM first_level_divisions WHERE Division = ?";
     public static final String SELECT_COUNTRIES = "SELECT Country_ID, Country FROM countries";
-    public static final String CHECK_USER = "SELECT * FROM users WHERE User_Name = ? AND Password = ?";
+
 
     /// Appointment Methods //////////////////////////////////////////////////////////////////////////
     /**
@@ -120,8 +128,8 @@ public class SQLQueries {
             statement.setTimestamp(10, Timestamp.valueOf(LocalDateTime.now())); // last update
             statement.setString(11, JDBC.getUsername()); // last updated by
             statement.setInt(12, customerID); // customer ID
-            statement.setInt(13, userID); // user ID
-            statement.setInt(14, contactID); // contact ID
+            statement.setInt(13, ContactAccess.findContactID(userID)); // user ID
+            statement.setInt(14, ContactAccess.findContactID(contactID)); // contact ID
             statement.execute();
         }
         catch (Exception e) {
@@ -214,4 +222,43 @@ public class SQLQueries {
             throw e;
         }
     }
+
+//    public static int RETURN_USER_ID(String userName) throws Exception {
+//        // get the connection
+//        try (Connection connection = JDBC.openConnection()) {
+//            JDBC.setPreparedStatement(connection, SQLQueries.SELECT_USER_ID_STATEMENT); // set the prepared statement
+//            PreparedStatement statement = JDBC.getPreparedStatement(); // get the prepared statement
+//            statement.setString(1, userName); // set the user name
+//            ResultSet resultSet = statement.executeQuery(); // execute the query
+//            return resultSet.getInt("User_ID"); // return the user ID
+//        } catch (Exception e) {
+//            ExceptionHandler.eAlert(e); // eAlert method
+//            throw e;
+//        }
+//    }
+
+    /**
+     * CREATE_USER creates a new user in the database
+     * user ID is set to 3 because the user ID is auto-incremented
+     * username and password are set to the username and password entered in the login screen
+     * */
+//    public static void CREATE_USER(String userName, String password) throws Exception {
+//        try (Connection connection = JDBC.openConnection()) {
+//            JDBC.setPreparedStatement(connection, SQLQueries.INSERT_ON_LOGIN_STATEMENT); // set the prepared statement
+//            PreparedStatement statement = JDBC.getPreparedStatement(); // get the prepared statement
+//            statement.setInt(1, 3); // set the user ID
+//            statement.setString(2, userName); // set the username
+//            statement.setString(3, password); // set the password
+//            statement.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now())); // set the create date
+//            statement.setString(5, userName); // set the created by
+//            statement.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now())); // set the last update
+//            statement.setString(7, password); // set the last updated by
+//            statement.execute();
+//            connection.close(); // close the connection
+//        }
+//        catch (Exception e) {
+//            ExceptionHandler.eAlert(e); // eAlert method
+//            throw e;
+//        }
+//    }
 }

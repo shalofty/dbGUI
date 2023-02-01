@@ -10,8 +10,14 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.DirectoryChooser;
 import models.*;
 
+import java.io.File;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -26,8 +32,11 @@ public class aioController implements Initializable {
     @FXML public Tab appointmentsTab, customersTab, reportsTab, logTab;
     @FXML public Connection connection = null;
     @FXML public PreparedStatement preparedStatement = null;
+    @FXML public TextArea logTextArea, dbActivityTextArea;
+    @FXML public static Button exportButton, exportDBButton;
 
     // Appointments Variables ///////////////////////////////////////////////////////////////////////////////////////////
+    @FXML public Label userCreds;
     @FXML public TextField appIDField, contactIDField, userIDField, locationField, customerIDField, typeField, titleField;
     @FXML public DatePicker startDatePicker, endDatePicker;
     @FXML public ComboBox<String> startTimeBox = new ComboBox<>();
@@ -49,7 +58,10 @@ public class aioController implements Initializable {
     @FXML public ObservableList<String> divisionObservableList = FXCollections.observableArrayList();
     @FXML public TableView<Customers> viewCustomers;
     @FXML public TableColumn<?, ?> customerIDRecordsColumn, nameColumn, phoneColumn, addressColumn, postalColumn, divisionColumn;
-    @FXML public Button addCustomerButton, modifyCustomerButton, deleteCustomerButton, clearSelectedCustomerButton;
+    @FXML public Button addCustomerButton;
+    @FXML public Button modifyCustomerButton;
+    @FXML public Button deleteCustomerButton;
+    @FXML public Button clearSelectedCustomerButton;
     @FXML public ObservableList<Customers> customersList = FXCollections.observableArrayList(CustomerAccess.getCustomers());
     @FXML public ObservableList<DivisionAccess> divisionsList = FXCollections.observableArrayList();
     @FXML public ObservableList<String> countryNames = FXCollections.observableArrayList();
@@ -89,6 +101,9 @@ public class aioController implements Initializable {
             ExceptionHandler.eAlert(e); // eAlert method
             throw e;
         }
+        finally {
+            trackActivity(); // trackActivity method
+        }
     }
 
     /**
@@ -118,6 +133,9 @@ public class aioController implements Initializable {
         } catch (Exception e) {
             ExceptionHandler.eAlert(e); // eAlert method
             throw e;
+        }
+        finally {
+            trackActivity(); // trackActivity method
         }
     }
 
@@ -149,6 +167,9 @@ public class aioController implements Initializable {
             ExceptionHandler.eAlert(e); // eAlert method
             throw e;
         }
+        finally {
+            trackActivity(); // trackActivity method
+        }
     }
 
     /**
@@ -177,6 +198,9 @@ public class aioController implements Initializable {
             ExceptionHandler.eAlert(e); // eAlert method
             throw e;
         }
+        finally {
+            trackActivity(); // trackActivity method
+        }
     }
 
     /**
@@ -200,6 +224,9 @@ public class aioController implements Initializable {
         catch (Exception e) {
             ExceptionHandler.eAlert(e); // eAlert method
             throw e;
+        }
+        finally {
+            trackActivity(); // trackActivity method
         }
     }
 
@@ -225,6 +252,9 @@ public class aioController implements Initializable {
             ExceptionHandler.eAlert(e); // eAlert method
             throw e;
         }
+        finally {
+            trackActivity(); // trackActivity method
+        }
     }
 
     /**
@@ -232,7 +262,7 @@ public class aioController implements Initializable {
      * */
     @FXML public void addAppointment() throws RuntimeException {
         try {
-            connection = JDBC.getConnection(); // establish connection, passing into insertIntoAppointment()
+            connection = JDBC.openConnection(); // establish connection, passing into insertIntoAppointment()
             // generating new appointment ID and getting the values from the text fields
             int newAppointmentID = generateAppointmentID(); // generate new appointment ID
             String newTitle = titleField.getText();  // get title
@@ -244,15 +274,15 @@ public class aioController implements Initializable {
             LocalDate localEndDate = endDatePicker.getValue(); // get end date
             // getting the values from the combo boxes
             // formatting the date and time values
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm"); // format time
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm"); // formatter to HH:mm
             LocalTime localStartTime = LocalTime.parse(startTimeBox.getValue(), formatter); // get start time
             LocalTime localEndTime = LocalTime.parse(endTimeBox.getValue(), formatter); // get end time
             // checking if the appointment is within business hours
             if (!isWithinBusinessHours(localStartDate, localStartTime, localEndDate, localEndTime)) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Error");
-                alert.setHeaderText("Error");
-                alert.setContentText("Error: Appointment is not within business hours.");
+                alert.setHeaderText("Scheduling Error");
+                alert.setContentText("Error: Appointment is not within business hours." + "\nPlease choose a time between 8:00 AM and 10:00 PM.");
                 alert.showAndWait();
             }
             // combining the date and time values
@@ -282,13 +312,14 @@ public class aioController implements Initializable {
                                                 newUserID,
                                                 newContactID);
 
-            updateAppointments(); // update the appointments table
             clearSelectedAppointment(); // clear the selected appointment
         }
         catch (Exception e) {
             ExceptionHandler.eAlert(e); // eAlert method
         } finally {
             connection = JDBC.closeConnection(); // close the connection
+            updateAppointments(); // update the appointments table
+            trackActivity(); // trackActivity method
         }
     }
 
@@ -339,6 +370,8 @@ public class aioController implements Initializable {
         }
         finally {
             connection = JDBC.closeConnection(); // close the connection
+            updateAppointments(); // update the appointments table
+            trackActivity(); // track activity
         }
     }
 
@@ -368,6 +401,7 @@ public class aioController implements Initializable {
         }
         finally {
             connection = JDBC.closeConnection(); // close the connection
+            trackActivity(); // track activity
         }
     }
 
@@ -420,6 +454,7 @@ public class aioController implements Initializable {
             if (connection != null) {
                 connection = JDBC.closeConnection(); // close the connection
             }
+            trackActivity(); // track activity
         }
     }
 
@@ -443,6 +478,9 @@ public class aioController implements Initializable {
         }
         catch (Exception e) {
             ExceptionHandler.eAlert(e); // eAlert method
+        }
+        finally {
+            trackActivity(); // track activity
         }
     }
 
@@ -485,6 +523,7 @@ public class aioController implements Initializable {
                 connection = JDBC.closeConnection(); // close the connection
             }
             updateCustomers(); // update customers tableview
+            trackActivity(); // track activity
         }
     }
 
@@ -532,6 +571,59 @@ public class aioController implements Initializable {
     // Initialize and Support  /////////////////////////////////////////////////////////////////////////////////////////
 
     /**
+     * trackActivity tracks the activity of the user and logs it to the activity log
+     * viewable in the activity log tab
+     * */
+    @FXML public void trackActivity() {
+        try {
+            StackTraceElement trace = Thread.currentThread().getStackTrace()[2]; // get the stack trace
+            String codeLog = trace.getFileName() + " . Line" + trace.getLineNumber() + ". " + trace.getMethodName() + "()"; // get the file name, line number, and method name
+            String userLog = Instant.now() + " User: " + JDBC.getUsername() + ". Session ID: " + JDBC.getConnection() + ". "; // get the username, connection, and time
+            logTextArea.appendText(userLog + codeLog + "\n"); // append the log to the text area
+        }
+        catch (Exception e) {
+            ExceptionHandler.eAlert(e);
+            throw e;
+        }
+    }
+
+    /**
+     * exportActivity exports the activity log to a text file in the ActivityLog folder
+     * when the export button is clicked
+     * */
+    @FXML public void exportActivity() {
+        try {
+            String time = String.valueOf(LocalDateTime.now()).replace(":", "-"); // replace : with -
+            String userName = JDBC.getUsername(); // get username
+            String fileName = time + "_" + userName + ".txt"; // create file name
+            String filePath = "ActivityLog/"; // create file path
+            FileWriter fileWriter = new FileWriter(filePath + fileName); // create file writer
+            fileWriter.write(logTextArea.getText()); // write to file
+            fileWriter.close(); // close file writer
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+        finally {
+            trackActivity(); // track activity
+        }
+    }
+
+    /**
+     * trackLogins tracks the logins and displays them in the dbActivityTextArea
+     * */
+    @FXML public void trackLogins() {
+        try (BufferedReader eyeSpy = new BufferedReader(new FileReader("ActivityLog/loginActivity.txt"));) {
+            StringBuilder agentZero = new StringBuilder(); // create a string builder
+            String spyLine = eyeSpy.readLine(); // read the first line
+            agentZero.append(spyLine).append("\n"); // append the first line
+            dbActivityTextArea.appendText(agentZero.toString()); // append the string builder to the text area
+        }
+        catch (Exception e) {
+            ExceptionHandler.eAlert(e);
+        }
+    }
+
+    /**
      * updateAppointments updates the appointments tableview
      * clears the tableview, creates a new observable list, establishes connection, sets the items in the tableview to the new observable list
      * */
@@ -577,6 +669,7 @@ public class aioController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         try {
             // TODO
+            trackLogins(); // track logins
             // establishing connection to db
             connection = JDBC.openConnection();
 
@@ -625,6 +718,8 @@ public class aioController implements Initializable {
             if (connection != null) {
                 connection = JDBC.closeConnection(); // close the connection
             }
+            trackActivity(); // track activity
+            exportActivity(); // export activity after every session
         }
     }
 }
