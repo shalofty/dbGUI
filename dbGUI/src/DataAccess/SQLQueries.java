@@ -7,13 +7,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import Exceptions.ExceptionHandler;
 
 public class SQLQueries {
     /**
      * I thought it would be easier to have all of my SQL queries in one place.
      * To make the code look a bit cleaner
      * */
-    // Appointment Statements
+    /// Appointment Statements
     public static final String GET_ALL_APPOINTMENTS_STATEMENT = "SELECT * from appointments";
     public static final String DELETE_FROM_APPOINTMENTS_STATEMENT = "DELETE FROM appointments WHERE Appointment_ID=?";
     public static final String APPOINTMENT_INSERT_STATEMENT =
@@ -42,7 +43,11 @@ public class SQLQueries {
             "Last_Update = ?, " +
             "Last_Updated_By = ? WHERE Appointment_ID = ?";
 
-    // Customer Statements
+    /// Contacts Statements
+    public static final String SELECT_ALL_CONTACTS_STATEMENT = "SELECT * from contacts";
+    public static final String SELECT_CONTACTS_BY_NAME_STATEMENT = "SELECT Contact_ID FROM contacts WHERE Contact_Name = ?";
+
+    /// Customer Statements
     public static final String SELECT_CUSTOMERS_STATEMENT =
             "SELECT customers.Customer_ID, " +
             "customers.Customer_Name, " +
@@ -119,13 +124,7 @@ public class SQLQueries {
             statement.execute();
         }
         catch (Exception e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("There was an error inserting the appointment into the database.");
-            alert.setContentText("Error: " + e.getMessage() + "Cause: " + e.getCause());
-            alert.showAndWait();
-            System.out.println(e.getMessage());
-            e.printStackTrace();
+            ExceptionHandler.eAlert(e); // eAlert method
         }
     }
 
@@ -165,13 +164,7 @@ public class SQLQueries {
             statement.execute();
         }
         catch (Exception e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("There was an error updating the appointment in the database.");
-            alert.setContentText("Error: " + e.getMessage() + "Cause: " + e.getCause());
-            alert.showAndWait();
-            System.out.println(e.getMessage());
-            System.out.println(e.getCause());
+            ExceptionHandler.eAlert(e); // eAlert method
         }
     }
 
@@ -186,14 +179,7 @@ public class SQLQueries {
             statement.execute();
         }
         catch (Exception e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("There was an error deleting the appointment from the database.");
-            alert.setContentText("Error: " + e.getMessage() + "Cause: " + e.getCause());
-            System.out.println(e.getMessage());
-            System.out.println(e.getCause());
-            e.printStackTrace();
-            alert.showAndWait();
+            ExceptionHandler.eAlert(e); // eAlert method
         }
     }
 
@@ -221,14 +207,7 @@ public class SQLQueries {
             statement.execute();
         }
         catch (Exception e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("There was an error inserting the customer into the database.");
-            alert.setContentText("Error: " + e.getMessage() + "Cause: " + e.getCause());
-            System.out.println(e.getMessage());
-            System.out.println(e.getCause());
-            e.printStackTrace();
-            alert.showAndWait();
+            ExceptionHandler.eAlert(e); // eAlert method
         }
     }
 }

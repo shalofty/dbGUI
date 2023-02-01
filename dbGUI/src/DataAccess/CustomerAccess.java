@@ -15,14 +15,19 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class CustomerAccess {
+    public static Connection connection = null;
+    public static PreparedStatement statement = null;
+    public static ResultSet set = null;
+
     /**
      * Observablelist that takes all customer data from the database.
      * */
     public static ObservableList<Customers> getCustomers() {
         ObservableList<Customers> customersObservableList = FXCollections.observableArrayList();
-        try (Connection connection = JDBC.openConnection()) {
-            PreparedStatement statement = connection.prepareStatement(SQLQueries.SELECT_CUSTOMERS_STATEMENT);
-            ResultSet set = statement.executeQuery();
+        try {
+            connection = JDBC.openConnection();
+            statement = connection.prepareStatement(SQLQueries.SELECT_CUSTOMERS_STATEMENT);
+            set = statement.executeQuery();
             while (set.next()) {
                 int customerID = set.getInt("Customer_ID");
                 String customerName = set.getString("Customer_Name");
@@ -36,7 +41,6 @@ public class CustomerAccess {
                         customerPhone, divisionName, customerID, divisionID);
                 // add each customer to the observable list of
                 customersObservableList.add(customer);}
-            JDBC.closeConnection();
         } catch (SQLException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error");
@@ -44,6 +48,17 @@ public class CustomerAccess {
             alert.setContentText("Error: " + e.getMessage() + "\nCause: " + e.getCause());
             alert.showAndWait();
             e.printStackTrace();
+        }
+        finally {
+            if (connection != null) {
+                connection = JDBC.closeConnection(); // close the connection
+            }
+            if (statement != null) {
+                statement = null; // nullify statement
+            }
+            if (set != null) {
+                set = null; // nullify set
+            }
         }
         return customersObservableList;
     }

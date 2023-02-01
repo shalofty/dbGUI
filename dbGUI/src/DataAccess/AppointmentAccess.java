@@ -12,26 +12,42 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class AppointmentAccess {
+
+    public static Connection connection = null;
+    public static PreparedStatement statement = null;
+    public static ResultSet set = null;
     /**
      * get all appointments from database
+     * @return appointmentsObservableList of all appointments
      * */
     public static ObservableList<Appointments> getAllAppointments() {
-        ObservableList<Appointments> appointmentsObservableList = FXCollections.observableArrayList();
-        try (Connection connection = JDBC.openConnection();
-            PreparedStatement statement = connection.prepareStatement(SQLQueries.GET_ALL_APPOINTMENTS_STATEMENT)) {
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                Appointments appointment = AppointmentMapper.map(resultSet);
-                appointmentsObservableList.add(appointment);
+        ObservableList<Appointments> appointmentsObservableList = FXCollections.observableArrayList(); // create observable list
+        try {
+            connection = JDBC.openConnection(); // open connection
+            statement = connection.prepareStatement(SQLQueries.GET_ALL_APPOINTMENTS_STATEMENT); // prepare statement
+            set = statement.executeQuery(); // execute query
+            // loop through result set
+            while (set.next()) {
+                Appointments appointment = AppointmentMapper.map(set); // map result set to appointment object
+                appointmentsObservableList.add(appointment); // add appointment to observable list
             }
-            JDBC.closeConnection();
         } catch (SQLException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error");
             alert.setHeaderText("Error retrieving appointments");
             alert.setContentText("Error: " + e.getMessage() + "\nCause: " + e.getCause());
             alert.showAndWait();
+        } finally {
+            if (set != null) {
+                set = null; // close result set
+            }
+            if (statement != null) {
+                statement = null; // close statement
+            }
+            if (connection != null) {
+                connection = JDBC.closeConnection(); // close connection
+            }
         }
-        return appointmentsObservableList;
+        return appointmentsObservableList; // return observable list
     }
 }

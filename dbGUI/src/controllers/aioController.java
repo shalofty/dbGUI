@@ -1,6 +1,7 @@
 package controllers;
 
 import DataAccess.*;
+import Exceptions.ExceptionHandler;
 import helper.JDBC;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -22,6 +23,7 @@ import java.util.ResourceBundle;
 public class aioController implements Initializable {
 
     @FXML public Tab appointmentsTab, customersTab, reportsTab, logTab;
+    @FXML public Connection connection = null;
 
     // Appointments Variables ///////////////////////////////////////////////////////////////////////////////////////////
     @FXML public TextField appIDField, contactIDField, userIDField, locationField, customerIDField, typeField, titleField;
@@ -47,8 +49,6 @@ public class aioController implements Initializable {
     @FXML public TableColumn<?, ?> customerIDRecordsColumn, nameColumn, phoneColumn, addressColumn, postalColumn, divisionColumn;
     @FXML public Button addCustomerButton, modifyCustomerButton, deleteCustomerButton, clearSelectedCustomerButton;
     @FXML public ObservableList<Customers> customersList = FXCollections.observableArrayList(CustomerAccess.getCustomers());
-//    @FXML public ObservableList<CountryAccess> countriesList = FXCollections.observableArrayList(CountryAccess.getCountries());
-//    @FXML public ObservableList<DivisionAccess> divisionsList = FXCollections.observableArrayList(DivisionAccess.getDivisions());
     @FXML public ObservableList<DivisionAccess> divisionsList = FXCollections.observableArrayList();
     @FXML public ObservableList<String> countryNames = FXCollections.observableArrayList();
     @FXML public ObservableList<String> divisionNames = FXCollections.observableArrayList();
@@ -77,10 +77,16 @@ public class aioController implements Initializable {
 
     // converting users localdatetime to UTC
     @FXML public LocalDateTime convertToUTC(LocalDateTime localDateTime) {
-        ZoneId localZone = ZoneId.systemDefault();
-        ZonedDateTime localZonedDateTime = localDateTime.atZone(localZone);
-        Instant instant = localZonedDateTime.toInstant();
-        return instant.atZone(ZoneOffset.UTC).toLocalDateTime();
+        try {
+            ZoneId localZone = ZoneId.systemDefault(); // Local Time Zone
+            ZonedDateTime localZonedDateTime = localDateTime.atZone(localZone); // Local Date and Time in Local Time Zone
+            Instant instant = localZonedDateTime.toInstant(); // Instant in UTC
+            return instant.atZone(ZoneOffset.UTC).toLocalDateTime(); // Instant in UTC converted to LocalDateTime
+        }
+        catch (Exception e) {
+            ExceptionHandler.eAlert(e); // eAlert method
+            throw e;
+        }
     }
 
     /**
@@ -89,24 +95,29 @@ public class aioController implements Initializable {
      * @param localStartTime - the start time of the appointment
      * @param localEndDate - the end date of the appointment
      * @param localEndTime - the end time of the appointment
+     * @return - true if the appointment is within business hours, false if not
      * */
     @FXML public boolean isWithinBusinessHours(LocalDate localStartDate,
                                                LocalTime localStartTime,
                                                LocalDate localEndDate,
                                                LocalTime localEndTime) {
-        ZoneId easternZoneId = ZoneId.of("America/New_York");
-        LocalDateTime startDateTime = LocalDateTime.of(localStartDate, localStartTime);
-        LocalDateTime endDateTime = LocalDateTime.of(localEndDate, localEndTime);
-        ZonedDateTime easternStartDateTime = startDateTime.atZone(easternZoneId);
-        ZonedDateTime easternEndDateTime = endDateTime.atZone(easternZoneId);
+        try {
+            ZoneId easternZoneId = ZoneId.of("America/New_York"); // Eastern Time Zone
+            LocalDateTime startDateTime = LocalDateTime.of(localStartDate, localStartTime); // Start Date and Time
+            LocalDateTime endDateTime = LocalDateTime.of(localEndDate, localEndTime); // End Date and Time
+            ZonedDateTime easternStartDateTime = startDateTime.atZone(easternZoneId); // Start Date and Time in Eastern Time Zone
+            ZonedDateTime easternEndDateTime = endDateTime.atZone(easternZoneId); // End Date and Time in Eastern Time Zone
 
-        LocalTime startTime = easternStartDateTime.toLocalTime();
-        LocalTime endTime = easternEndDateTime.toLocalTime();
-        LocalTime openTime = LocalTime.of(7, 59);
-        LocalTime closeTime = LocalTime.of(22, 1);
-        return startTime.isAfter(openTime) && endTime.isBefore(closeTime);
+            LocalTime startTime = easternStartDateTime.toLocalTime(); // Start Time in Eastern Time Zone
+            LocalTime endTime = easternEndDateTime.toLocalTime(); // End Time in Eastern Time Zone
+            LocalTime openTime = LocalTime.of(7, 59); // Business Hours Start Time
+            LocalTime closeTime = LocalTime.of(22, 1); // Business Hours End Time
+            return startTime.isAfter(openTime) && endTime.isBefore(closeTime); // Returns true if appointment is within business hours
+        } catch (Exception e) {
+            ExceptionHandler.eAlert(e); // eAlert method
+            throw e;
+        }
     }
-
 
     /**
      * selectAppointment selects an appointment from the tableview and populates the text fields
@@ -115,31 +126,26 @@ public class aioController implements Initializable {
         try {
             selectedAppointment = viewAppointments.getSelectionModel().getSelectedItem();
             if (selectedAppointment != null) {
-                appIDField.setText(String.valueOf(selectedAppointment.getAppointmentID()));
-                titleField.setText(String.valueOf(selectedAppointment.getAppointmentTitle()));
-                contactIDField.setText(String.valueOf(selectedAppointment.getContactID()));
-                userIDField.setText(String.valueOf(selectedAppointment.getUserID()));
-                locationField.setText(String.valueOf(selectedAppointment.getAppointmentLocation()));
-                customerIDField.setText(String.valueOf(selectedAppointment.getCustomerID()));
-                typeField.setText(String.valueOf(selectedAppointment.getAppointmentType()));
-                descriptionTextArea.setText(String.valueOf(selectedAppointment.getAppointmentDescription()));
-                startDatePicker.setValue(selectedAppointment.getStartTime().toLocalDate());
-                endDatePicker.setValue(selectedAppointment.getEndTime().toLocalDate());
-                startTimeBox.setValue(selectedAppointment.getStartTime().toLocalTime().toString());
-                endTimeBox.setValue(selectedAppointment.getEndTime().toLocalTime().toString());
-                addAppointmentButton.setDisable(true);
-                modifyAppointmentButton.setDisable(false);
-                deleteAppointmentButton.setDisable(false);
+                appIDField.setText(String.valueOf(selectedAppointment.getAppointmentID())); // Sets the appointment ID text field
+                titleField.setText(String.valueOf(selectedAppointment.getAppointmentTitle())); // Sets the appointment title text field
+                contactIDField.setText(String.valueOf(selectedAppointment.getContactID())); // Sets the contact ID text field
+                userIDField.setText(String.valueOf(selectedAppointment.getUserID())); // Sets the user ID text field
+                locationField.setText(String.valueOf(selectedAppointment.getAppointmentLocation())); // Sets the appointment location text field
+                customerIDField.setText(String.valueOf(selectedAppointment.getCustomerID())); // Sets the customer ID text field
+                typeField.setText(String.valueOf(selectedAppointment.getAppointmentType())); // Sets the appointment type text field
+                descriptionTextArea.setText(String.valueOf(selectedAppointment.getAppointmentDescription())); // Sets the appointment description text field
+                startDatePicker.setValue(selectedAppointment.getStartTime().toLocalDate()); // Sets the start date picker
+                endDatePicker.setValue(selectedAppointment.getEndTime().toLocalDate()); // Sets the end date picker
+                startTimeBox.setValue(selectedAppointment.getStartTime().toLocalTime().toString()); // Sets the start time combo box
+                endTimeBox.setValue(selectedAppointment.getEndTime().toLocalTime().toString()); // Sets the end time combo box
+                addAppointmentButton.setDisable(true); // Disables the add appointment button
+                modifyAppointmentButton.setDisable(false); // Enables the modify appointment button
+                deleteAppointmentButton.setDisable(false); // Enables the delete appointment button
             }
         }
         catch (Exception e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Error");
-            alert.setContentText("Error: " + e.getMessage() + "Cause: " + e.getCause());
-            alert.showAndWait();
-            System.out.println("Error: " + e.getMessage());
-            System.out.println("Cause: " + e.getCause());
+            ExceptionHandler.eAlert(e); // eAlert method
+            throw e;
         }
     }
 
@@ -147,60 +153,84 @@ public class aioController implements Initializable {
      * clearSelection clears the selected appointment and resets the buttons to their default state
      * */
     @FXML public void clearSelectedAppointment() {
-        selectedAppointment = null;
-        appIDField.clear();
-        titleField.clear();
-        contactIDField.clear();
-        userIDField.clear();
-        locationField.clear();
-        customerIDField.clear();
-        typeField.clear();
-        descriptionTextArea.clear();
-        startDatePicker.setValue(null);
-        endDatePicker.setValue(null);
-        startTimeBox.setValue(null);
-        endTimeBox.setValue(null);
-        addAppointmentButton.setDisable(false);
-        modifyAppointmentButton.setDisable(true);
-        deleteAppointmentButton.setDisable(true);
+        try {
+            selectedAppointment = null; // Clears the selected appointment
+            appIDField.clear(); // Clears the appointment ID text field
+            titleField.clear(); // Clears the appointment title text field
+            contactIDField.clear(); // Clears the contact ID text field
+            userIDField.clear(); // Clears the user ID text field
+            locationField.clear(); // Clears the appointment location text field
+            customerIDField.clear(); // Clears the customer ID text field
+            typeField.clear(); // Clears the appointment type text field
+            descriptionTextArea.clear(); // Clears the appointment description text field
+            startDatePicker.setValue(null); // Clears the start date picker
+            endDatePicker.setValue(null); // Clears the end date picker
+            startTimeBox.setValue(null); // Clears the start time combo box
+            endTimeBox.setValue(null); // Clears the end time combo box
+            addAppointmentButton.setDisable(false); // Enables the add appointment button
+            modifyAppointmentButton.setDisable(true); // Disables the modify appointment button
+            deleteAppointmentButton.setDisable(true); // Disables the delete appointment button
+        }
+        catch (Exception e) {
+            ExceptionHandler.eAlert(e); // eAlert method
+            throw e;
+        }
     }
 
     /**
      * generateAppointmentID generates a new appointment ID
      * @return newID
      * */
-    @FXML public int generateAppointmentID() {
-        Random randy = new Random();
-        int maxID = 9999;
-        int newID = randy.nextInt(maxID);
-        for (Appointments appointment : appointmentsList) {
-            if (appointment.getAppointmentID() == newID) {
-                return generateAppointmentID();
+    @FXML public int generateAppointmentID() throws RuntimeException {
+        try {
+            Random randy = new Random();
+            int maxID = 9999; // max appointment ID is 9999
+            int newID = randy.nextInt(maxID); // generate new ID
+            // check if the new ID is already in use
+            for (Appointments appointment : appointmentsList) {
+                // if the new ID is already in use, generate a new ID
+                if (appointment.getAppointmentID() == newID) {
+                    return generateAppointmentID();
+                }
             }
-        } return newID;
+            return newID; // return the new ID
+        }
+        catch (Exception e) {
+            ExceptionHandler.eAlert(e); // eAlert method
+            throw e;
+        }
     }
 
     /**
      * generateCustomerID generates a new customer ID
      * @return newID
      * */
-    @FXML public int generateCustomerID() {
-        Random randy = new Random();
-        int maxID = 9999;
-        int newID = randy.nextInt(maxID);
-        for (Customers customer : customersList) {
-            if (customer.getCustomerID() == newID) {
-                return generateCustomerID();
+    @FXML public int generateCustomerID() throws RuntimeException {
+        try {
+            Random randy = new Random();
+            int maxID = 9999; // max customer ID is 9999
+            int newID = randy.nextInt(maxID); // generate new ID
+            // check if the new ID is already in use
+            for (Customers customer : customersList) {
+                // if the new ID is already in use, generate a new ID
+                if (customer.getCustomerID() == newID) {
+                    return generateCustomerID();
+                }
             }
-        } return newID;
+            return newID; // return the new ID
+        }
+        catch (Exception e) {
+            ExceptionHandler.eAlert(e); // eAlert method
+            throw e;
+        }
     }
 
     /**
      * addAppointment adds a new appointment to the database
      * */
-    @FXML public void addAppointment() {
+    @FXML public void addAppointment() throws RuntimeException {
         try {
-            Connection connection = JDBC.getConnection(); // establish connection, passing into insertIntoAppointment()
+            connection = JDBC.getConnection(); // establish connection, passing into insertIntoAppointment()
             // generating new appointment ID and getting the values from the text fields
             int newAppointmentID = generateAppointmentID(); // generate new appointment ID
             String newTitle = titleField.getText();  // get title
@@ -222,7 +252,6 @@ public class aioController implements Initializable {
                 alert.setHeaderText("Error");
                 alert.setContentText("Error: Appointment is not within business hours.");
                 alert.showAndWait();
-                return;
             }
             // combining the date and time values
             LocalDateTime localStartDateTime = LocalDateTime.of(localStartDate, localStartTime);
@@ -253,28 +282,21 @@ public class aioController implements Initializable {
 
             updateAppointments(); // update the appointments table
             clearSelectedAppointment(); // clear the selected appointment
-            JDBC.closeConnection(); // close connection
-
         }
         catch (Exception e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Error");
-            alert.setContentText("Error: " + e.getMessage() + "Cause: " + e.getCause());
-            System.out.println("Error: " + e.getMessage());
-            System.out.println("Cause: " + e.getCause());
-            e.printStackTrace();
-            alert.showAndWait();
+            ExceptionHandler.eAlert(e); // eAlert method
+        } finally {
+            connection = JDBC.closeConnection(); // close the connection
         }
     }
 
     /**
      * modifyAppointment modifies an appointment in the database
      * */
-    @FXML public void modifyAppointment() {
+    @FXML public void modifyAppointment() throws RuntimeException {
         try {
             // open a connection, pass to updateAppoint() method below
-            Connection connection = JDBC.getConnection();
+            connection = JDBC.getConnection();
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Confirmation");
             alert.setHeaderText("Confirmation");
@@ -307,27 +329,23 @@ public class aioController implements Initializable {
                                                     contactID);
                 updateAppointments(); // update the appointments table
                 clearSelectedAppointment(); // clear the text fields
-                JDBC.closeConnection(); // close connection
+                connection = JDBC.closeConnection(); // close connection
             }
         }
         catch (Exception e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Error");
-            alert.setContentText("Error: " + e.getMessage() + "Cause: " + e.getCause());
-            System.out.println("Error: " + e.getMessage());
-            System.out.println("Cause: " + e.getCause());
-            e.printStackTrace();
-            alert.showAndWait();
+            ExceptionHandler.eAlert(e); // eAlert method
+        }
+        finally {
+            connection = JDBC.closeConnection(); // close the connection
         }
     }
 
     /**
      * deleteAppointment deletes an appointment from the database
      * */
-    @FXML public void deleteAppointment() {
+    @FXML public void deleteAppointment() throws RuntimeException {
         try {
-            Connection connection = JDBC.getConnection(); // open a connection
+            connection = JDBC.getConnection(); // open a connection
             int appointmentID = selectedAppointment.getAppointmentID(); // get the appointment ID
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Delete Appointment");
@@ -339,19 +357,15 @@ public class aioController implements Initializable {
                 SQLQueries.DELETE_APPOINTMENT_METHOD(connection, appointmentID);
                 updateAppointments(); // update the appointments table
                 clearSelectedAppointment(); // clear the selected appointment
-                JDBC.closeConnection(); // close connection
             } else {
                 alert.close();
             }
         }
         catch (Exception e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Error");
-            alert.setContentText("Error: " + e.getMessage() + "Cause: " + e.getCause());
-            alert.showAndWait();
-            System.out.println("Error: " + e.getMessage());
-            System.out.println("Cause: " + e.getCause());
+            ExceptionHandler.eAlert(e); // eAlert method
+        }
+        finally {
+            connection = JDBC.closeConnection(); // close the connection
         }
     }
 
@@ -361,20 +375,20 @@ public class aioController implements Initializable {
      * selectCustomer selects a customer from the tableview
      * disables add button, enables modify and delete buttons to prevent pointer exceptions
      * */
-    public void selectCustomer(){
+    public void selectCustomer() throws Exception {
         try {
-            JDBC.openConnection(); // establish connection
-            selectedCustomer = viewCustomers.getSelectionModel().getSelectedItem();
+            connection = JDBC.openConnection(); // establish connection
+            selectedCustomer = viewCustomers.getSelectionModel().getSelectedItem(); // get the selected customer
             if (selectedCustomer != null) {
-                customerIDField.setText(String.valueOf(selectedCustomer.getCustomerID()));
-                customerNameField.setText(selectedCustomer.getCustomerName());
-                addressField.setText(selectedCustomer.getCustomerAddress());
-                postalField.setText(selectedCustomer.getPostalCode());
-                phoneField.setText(selectedCustomer.getCustomerPhone());
-                divisionMenu.valueProperty().set(selectedCustomer.getCountryDivision());
+                customerIDField.setText(String.valueOf(selectedCustomer.getCustomerID())); // set the customer ID field
+                customerNameField.setText(selectedCustomer.getCustomerName()); // set the customer name field
+                addressField.setText(selectedCustomer.getCustomerAddress()); // set the address field
+                postalField.setText(selectedCustomer.getPostalCode()); // set the postal code field
+                phoneField.setText(selectedCustomer.getCustomerPhone()); // set the phone field
+                divisionMenu.valueProperty().set(selectedCustomer.getCountryDivision()); // set the division menu
 
-                ObservableList<CountryAccess> countryList = CountryAccess.getCountries();
-                ObservableList<DivisionAccess> divisionList = DivisionAccess.getDivisions();
+                ObservableList<CountryAccess> countryList = CountryAccess.getCountries(); // get the country list
+                ObservableList<DivisionAccess> divisionList = DivisionAccess.getDivisions(); // get the division list
 
                 // setting the country menu to the country of the selected customer
                 // loop through the division list
@@ -396,16 +410,14 @@ public class aioController implements Initializable {
                 modifyCustomerButton.setDisable(false);
                 deleteCustomerButton.setDisable(false);
             }
-            JDBC.closeConnection(); // close connection
         }
         catch (Exception e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Error");
-            alert.setContentText("Error: " + e.getMessage() + "Cause: " + e.getCause());
-            alert.showAndWait();
-            System.out.println("Error: " + e.getMessage());
-            System.out.println("Cause: " + e.getCause());
+            ExceptionHandler.eAlert(e); // eAlert method
+        }
+        finally {
+            if (connection != null) {
+                connection = JDBC.closeConnection(); // close the connection
+            }
         }
     }
 
@@ -413,22 +425,27 @@ public class aioController implements Initializable {
      * clearSelectedCustomer clears the selected customer
      * enables add button, disables modify and delete buttons to prevent pointer exceptions
      * */
-    public void clearSelectedCustomer() {
-        selectedCustomer = null;
-        customerIDField.clear();
-        customerNameField.clear();
-        addressField.clear();
-        postalField.clear();
-        phoneField.clear();
-        countryMenu.valueProperty().set(null);
-        divisionMenu.valueProperty().set(null);
-        addCustomerButton.setDisable(false);
-        modifyCustomerButton.setDisable(true);
-        deleteCustomerButton.setDisable(true);
+    public void clearSelectedCustomer() throws RuntimeException {
+        try {
+            selectedCustomer = null; // clear the selected customer
+            customerIDField.clear(); // clear the customer ID field
+            customerNameField.clear(); // clear the customer name field
+            addressField.clear(); // clear the address field
+            postalField.clear(); // clear the postal code field
+            phoneField.clear(); // clear the phone field
+            countryMenu.valueProperty().set(null); // clear the country menu
+            divisionMenu.valueProperty().set(null); // clear the division menu
+            addCustomerButton.setDisable(false); // enable add button
+            modifyCustomerButton.setDisable(true); // disable modify button
+            deleteCustomerButton.setDisable(true); // disable delete button
+        }
+        catch (Exception e) {
+            ExceptionHandler.eAlert(e); // eAlert method
+        }
     }
 
     // addCustomer
-    @FXML public void addCustomer() {
+    @FXML public void addCustomer() throws RuntimeException {
         try{
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Add Customer");
@@ -437,7 +454,7 @@ public class aioController implements Initializable {
             Optional<ButtonType> result;
             result = alert.showAndWait();
             if (result.isPresent() && result.get() == ButtonType.OK) {
-                Connection connection = JDBC.getConnection(); // establish connection
+                connection = JDBC.getConnection(); // establish connection
                 int customerID = Integer.parseInt(customerIDField.getText()); // get customer id
                 String customerName = customerNameField.getText(); // get customer name
                 String address = addressField.getText(); // get customer address
@@ -454,19 +471,17 @@ public class aioController implements Initializable {
                                                         phone,
                                                         division); // insert into customers
                 clearSelectedCustomer(); // clear selected customer
-                JDBC.closeConnection(); // close connection
             } else {
                 alert.close();
             }
         }
         catch (Exception e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Error");
-            alert.setContentText("Error: " + e.getMessage() + "Cause: " + e.getCause());
-            alert.showAndWait();
-            System.out.println("Error: " + e.getMessage());
-            System.out.println("Cause: " + e.getCause());
+            ExceptionHandler.eAlert(e); // eAlert method
+        }
+        finally {
+            if (connection != null) {
+                connection = JDBC.closeConnection(); // close the connection
+            }
         }
     }
 
@@ -496,7 +511,7 @@ public class aioController implements Initializable {
                 || startTimeBox.getValue() == null
                 || endTimeBox.getValue() == null
                 || startDatePicker.getValue() == null
-                || endDatePicker.getValue() == null;
+                || endDatePicker.getValue() == null; // return true if any of the fields are empty
     }
 
     /**
@@ -508,19 +523,19 @@ public class aioController implements Initializable {
                 || postalField.getText().isEmpty()
                 || phoneField.getText().isEmpty()
                 || countryMenu.getValue() == null
-                || divisionMenu.getValue() == null;
+                || divisionMenu.getValue() == null; // return true if any of the fields are empty
     }
 
     // Initialize and Support  /////////////////////////////////////////////////////////////////////////////////////////
 
     // updateAppointments
     public void updateAppointments() {
-        viewAppointments.setItems(appointmentsList);
+        viewAppointments.setItems(appointmentsList); // set the items in the table to the appointments list
     }
 
     // updateCustomers
     public void updateCustomers() {
-        viewCustomers.setItems(customersList);
+        viewCustomers.setItems(customersList); // set the items in the table to the customers list
     }
 
     @Override
@@ -528,60 +543,55 @@ public class aioController implements Initializable {
         try {
             // TODO
             // establishing connection to db
-            JDBC.openConnection();
+            connection = JDBC.openConnection();
 
-            // set up the times for the start and end time combo boxes
-            startTimeBox.setItems(times);
-            endTimeBox.setItems(times);
+            startTimeBox.setItems(times); // set the start time box items to the times list
+            endTimeBox.setItems(times); // set the end time box items to the times list
 
             // set up the Appointment columns in the table, must match the names of the variables in the model
-            appIDColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentID"));
-            titleColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentTitle"));
-            descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentDescription"));
-            locationColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentLocation"));
-            typeColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentType"));
-            customerIDAppointmentsColumn.setCellValueFactory(new PropertyValueFactory<>("customerID"));
-            userIDColumn.setCellValueFactory(new PropertyValueFactory<>("userID"));
-            contactIDColumn.setCellValueFactory(new PropertyValueFactory<>("contactID"));
-            startColumn.setCellValueFactory(new PropertyValueFactory<>("startTime"));
-            endColumn.setCellValueFactory(new PropertyValueFactory<>("endTime"));
+            appIDColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentID")); // set the cell value factory for the appointment ID column
+            titleColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentTitle")); // set the cell value factory for the appointment title column
+            descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentDescription")); // set the cell value factory for the appointment description column
+            locationColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentLocation")); // set the cell value factory for the appointment location column
+            typeColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentType")); // set the cell value factory for the appointment type column
+            customerIDAppointmentsColumn.setCellValueFactory(new PropertyValueFactory<>("customerID")); // set the cell value factory for the appointment customer ID column
+            userIDColumn.setCellValueFactory(new PropertyValueFactory<>("userID")); // set the cell value factory for the appointment user ID column
+            contactIDColumn.setCellValueFactory(new PropertyValueFactory<>("contactID")); // set the cell value factory for the appointment contact ID column
+            startColumn.setCellValueFactory(new PropertyValueFactory<>("startTime")); // set the cell value factory for the appointment start time column
+            endColumn.setCellValueFactory(new PropertyValueFactory<>("endTime")); // set the cell value factory for the appointment end time column
 
             // set up the Customer columns in the table, must match the names of the variables in the model
-            customerIDRecordsColumn.setCellValueFactory(new PropertyValueFactory<>("customerID"));
-            nameColumn.setCellValueFactory(new PropertyValueFactory<>("customerName"));
-            addressColumn.setCellValueFactory(new PropertyValueFactory<>("customerAddress"));
-            postalColumn.setCellValueFactory(new PropertyValueFactory<>("postalCode"));
-            phoneColumn.setCellValueFactory(new PropertyValueFactory<>("customerPhone"));
-            divisionColumn.setCellValueFactory(new PropertyValueFactory<>("divisionID"));
+            customerIDRecordsColumn.setCellValueFactory(new PropertyValueFactory<>("customerID")); // set the cell value factory for the customer ID column
+            nameColumn.setCellValueFactory(new PropertyValueFactory<>("customerName")); // set the cell value factory for the customer name column
+            addressColumn.setCellValueFactory(new PropertyValueFactory<>("customerAddress")); // set the cell value factory for the customer address column
+            postalColumn.setCellValueFactory(new PropertyValueFactory<>("postalCode")); // set the cell value factory for the customer postal code column
+            phoneColumn.setCellValueFactory(new PropertyValueFactory<>("customerPhone")); // set the cell value factory for the customer phone column
+            divisionColumn.setCellValueFactory(new PropertyValueFactory<>("divisionID")); // set the cell value factory for the customer division ID column
 
             // call getCountries method to populate an ObservableList to populate the country menu
-            ObservableList<CountryAccess> countriesList = CountryAccess.getCountries();
-            countriesList.stream().map(Country::getCountryName).forEach(countryObservableList::add);
-            countryMenu.setItems(countryObservableList);
+            ObservableList<CountryAccess> countriesList = CountryAccess.getCountries(); // get the list of countries from the db
+            countriesList.stream().map(Country::getCountryName).forEach(countryObservableList::add); // add the country names to the observable list
+            countryMenu.setItems(countryObservableList); // set the items in the country menu to the observable list
 
             // call getDivisions method to populate an ObservableList to populate the division menu
-            ObservableList<DivisionAccess> divisionsList = DivisionAccess.getDivisions();
-            divisionsList.stream().map(Division::getDivisionName).forEach(divisionObservableList::add);
-            divisionMenu.setItems(divisionObservableList);
+            ObservableList<DivisionAccess> divisionsList = DivisionAccess.getDivisions(); // get the list of divisions from the db
+            divisionsList.stream().map(Division::getDivisionName).forEach(divisionObservableList::add); // add the division names to the observable list
+            divisionMenu.setItems(divisionObservableList); // set the items in the division menu to the observable list
 
-            // setItems for the tableviews
-            viewAppointments.setItems(appointmentsList);
-            viewCustomers.setItems(customersList);
+            viewAppointments.setItems(appointmentsList); // set the items in the table to the appointments list
+            viewCustomers.setItems(customersList); // set the items in the table to the customers list
 
-            // update tables
-            updateAppointments();
-            updateCustomers();
-
-            JDBC.closeConnection(); // close connection to db
+            updateAppointments(); // update the appointments table
+            updateCustomers(); // update the customers table
+            connection = JDBC.closeConnection(); // close the connection
         }
         catch (Exception e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Error: aioController.java initialize");
-            alert.setContentText("Error: " + e.getMessage() + "Cause: " + e.getCause());
-            System.out.println("Error: " + e.getMessage());
-            System.out.println("Cause: " + e.getCause());
-            alert.showAndWait();
+            ExceptionHandler.eAlert(e); // eAlert method
+        }
+        finally {
+            if (connection != null) {
+                connection = JDBC.closeConnection(); // close the connection
+            }
         }
     }
 }

@@ -3,11 +3,9 @@ package helper;
 import controllers.LoginController;
 import javafx.scene.control.Alert;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.Instant;
+import Exceptions.ExceptionHandler;
 
 /**
  * JDBC class establishes a connection to the database
@@ -36,12 +34,24 @@ public abstract class JDBC {
         try {
             Class.forName(driver); // Locate Driver
             connection = DriverManager.getConnection(jdbcUrl, userName, passWord); // Reference Connection object
-            System.out.println(Instant.now() + ": " + userName + " connected to " + databaseName + ". session id: " + connection); // connection information to console
+            StackTraceElement trace = Thread.currentThread().getStackTrace()[2];
+            System.out.println(Instant.now() +
+                                ": " +
+                                trace.getFileName() +
+                                " ln" +
+                                trace.getLineNumber() +
+                                ". " +
+                                " CONNECTED(" +
+                                userName +
+                                ", " +
+                                databaseName +
+                                ") SESSION ID: " +
+                                connection);
+
         }
         catch (Exception e)
         {
-            System.out.println("Error:" + e.getMessage());
-            System.out.println("Cause:" + e.getCause());
+            ExceptionHandler.eAlert(e); // eAlert method
         }
         return connection;
     }
@@ -56,15 +66,24 @@ public abstract class JDBC {
     /**
      * closeConnection method closes the connection to the database
      * */
-    public static void closeConnection() {
+    public static Connection closeConnection() {
         try {
+            StackTraceElement trace = Thread.currentThread().getStackTrace()[2];
+            System.out.println(Instant.now() +
+                                ": " +
+                                trace.getFileName() +
+                                " ln" + trace.getLineNumber() +
+                                ". " + " DISCONNECTED("  + userName +
+                                ", " + databaseName +
+                                ") SESSION ID: " +
+                                connection);
             connection.close();
-            System.out.println(Instant.now() + ": " + userName + " disconnected from " + databaseName + ". session id: " + connection);
         }
         catch(Exception e)
         {
-            System.out.println("Error:" + e.getMessage());
+            ExceptionHandler.eAlert(e); // eAlert method
         }
+        return connection;
     }
 
     public static void setPreparedStatement(Connection connection, String sqlStatement) throws Exception {
