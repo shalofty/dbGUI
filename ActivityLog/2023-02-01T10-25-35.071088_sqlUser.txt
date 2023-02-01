@@ -1,0 +1,4 @@
+2023-02-01T15:25:32.609020700Z User: sqlUser. Session ID: com.mysql.cj.jdbc.ConnectionImpl@61f3c195. aioController.java . Line169. selectAppointment()
+2023-02-01T15:25:33.253232600Z User: sqlUser. Session ID: com.mysql.cj.jdbc.ConnectionImpl@61f3c195. aioController.java . Line169. selectAppointment()
+2023-02-01T15:25:33.574795700Z User: sqlUser. Session ID: com.mysql.cj.jdbc.ConnectionImpl@61f3c195. aioController.java . Line169. selectAppointment()
+2023-02-01T15:25:35.070079400Z User: sqlUser. Session ID: com.mysql.cj.jdbc.ConnectionImpl@61f3c195. aioController.java . Line578. exportActivity()
