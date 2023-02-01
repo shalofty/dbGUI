@@ -10,12 +10,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import Exceptions.ExceptionHandler;
 
 public class AppointmentAccess {
-
     public static Connection connection = null;
     public static PreparedStatement statement = null;
     public static ResultSet set = null;
+
     /**
      * get all appointments from database
      * @return appointmentsObservableList of all appointments
@@ -31,12 +32,10 @@ public class AppointmentAccess {
                 Appointments appointment = AppointmentMapper.map(set); // map result set to appointment object
                 appointmentsObservableList.add(appointment); // add appointment to observable list
             }
+            return appointmentsObservableList; // return observable list
         } catch (SQLException e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Error retrieving appointments");
-            alert.setContentText("Error: " + e.getMessage() + "\nCause: " + e.getCause());
-            alert.showAndWait();
+            ExceptionHandler.eAlert(e); // eAlert method
+            throw new RuntimeException(e);
         } finally {
             if (set != null) {
                 set = null; // close result set
@@ -48,6 +47,5 @@ public class AppointmentAccess {
                 connection = JDBC.closeConnection(); // close connection
             }
         }
-        return appointmentsObservableList; // return observable list
     }
 }

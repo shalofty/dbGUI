@@ -1,5 +1,6 @@
 package DataAccess;
 
+import Exceptions.ExceptionHandler;
 import helper.JDBC;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -33,7 +34,7 @@ public class ContactAccess {
             return contactsObservableList; // return observable list
         }
         catch (SQLException e) {
-            System.out.println("ContactAccess.getAllContacts()" + "\nSQLException: " + e.getMessage());
+            ExceptionHandler.eAlert(e); // handle exception
             throw e;
         }
         finally {
@@ -56,9 +57,6 @@ public class ContactAccess {
      * @return contactID
      */
     public static String findContactID(String contactName) throws SQLException {
-        connection = null;
-        statement = null;
-        set = null;
         try {
             connection = JDBC.openConnection(); // open connection
             statement = connection.prepareStatement(SQLQueries.SELECT_CONTACTS_BY_NAME_STATEMENT); // prepare statement
@@ -71,12 +69,7 @@ public class ContactAccess {
             }
         }
         catch (SQLException e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Error finding contact ID");
-            alert.setContentText("Error finding contact ID: " + e.getMessage());
-            e.printStackTrace();
-            alert.showAndWait();
+            ExceptionHandler.eAlert(e); // handle exception
             throw e;
         }
         finally {
@@ -106,7 +99,7 @@ public class ContactAccess {
             return new Contacts(contactID, contactName, contactEmail); // return contact
         }
         catch (SQLException e) {
-            System.out.println("ContactAccess.createContact()" + "\nSQLException: " + e.getMessage());
+            ExceptionHandler.eAlert(e); // handle exception
             throw e;
         }
     }

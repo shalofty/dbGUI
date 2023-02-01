@@ -1,5 +1,6 @@
 package controllers;
 
+import Exceptions.ExceptionHandler;
 import helper.JDBC;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -62,14 +63,7 @@ public class LoginController implements Initializable {
             }
         }
         catch (Exception e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Start Failed");
-            alert.setHeaderText("Start Failed");
-            alert.setContentText("The username or password you entered is incorrect.");
-            alert.showAndWait();
-            System.out.println("Error: " + e.getMessage());
-            System.out.println("Error: " + e.getCause());
-            e.printStackTrace();
+            ExceptionHandler.eAlert(e);
         }
     }
 }

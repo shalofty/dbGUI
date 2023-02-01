@@ -1,5 +1,6 @@
 package DataAccess;
 
+import Exceptions.ExceptionHandler;
 import helper.JDBC;
 
 import javafx.collections.FXCollections;
@@ -23,8 +24,8 @@ public class CustomerAccess {
      * Observablelist that takes all customer data from the database.
      * */
     public static ObservableList<Customers> getCustomers() {
-        ObservableList<Customers> customersObservableList = FXCollections.observableArrayList();
         try {
+            ObservableList<Customers> customersObservableList = FXCollections.observableArrayList();
             connection = JDBC.openConnection();
             statement = connection.prepareStatement(SQLQueries.SELECT_CUSTOMERS_STATEMENT);
             set = statement.executeQuery();
@@ -41,25 +42,21 @@ public class CustomerAccess {
                         customerPhone, divisionName, customerID, divisionID);
                 // add each customer to the observable list of
                 customersObservableList.add(customer);}
+            return customersObservableList; // return the observable list
         } catch (SQLException e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Error retrieving customers");
-            alert.setContentText("Error: " + e.getMessage() + "\nCause: " + e.getCause());
-            alert.showAndWait();
-            e.printStackTrace();
+            ExceptionHandler.eAlert(e);
+            throw new RuntimeException(e);
         }
         finally {
-            if (connection != null) {
-                connection = JDBC.closeConnection(); // close the connection
+            if (set != null) {
+                set = null; // nullify set
             }
             if (statement != null) {
                 statement = null; // nullify statement
             }
-            if (set != null) {
-                set = null; // nullify set
+            if (connection != null) {
+                connection = JDBC.closeConnection(); // close the connection
             }
         }
-        return customersObservableList;
     }
 }

@@ -1,5 +1,6 @@
 package DataAccess;
 
+import Exceptions.ExceptionHandler;
 import helper.JDBC;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -12,6 +13,8 @@ import java.sql.SQLException;
 
 public class DivisionAccess extends Division {
     public static Connection connection;
+    public static PreparedStatement statement;
+    public static ResultSet set;
     /**
      * @param divisionID
      * @param divisionName
@@ -29,13 +32,14 @@ public class DivisionAccess extends Division {
     public static ObservableList<DivisionAccess> getDivisions() throws SQLException {
         try {
             connection = JDBC.openConnection(); // open the connection
-            PreparedStatement statement = JDBC.openConnection().prepareStatement(SQLQueries.SELECT_DIVISIONS);
-            ResultSet set = statement.executeQuery();
-            ObservableList<DivisionAccess> divisionsObservableList = FXCollections.observableArrayList();
+            statement = JDBC.openConnection().prepareStatement(SQLQueries.SELECT_DIVISIONS); // prepare the statement
+            set = statement.executeQuery(); // execute the statement
+            ObservableList<DivisionAccess> divisionsObservableList = FXCollections.observableArrayList(); // create an observable list
+            // loop through the result set
             while (set.next()) {
-                int divisionID = set.getInt("Division_ID");
-                String divisionName = set.getString("Division");
-                int countryID = set.getInt("Country_ID");
+                int divisionID = set.getInt("Division_ID"); // get the division ID
+                String divisionName = set.getString("Division"); // get the division name
+                int countryID = set.getInt("Country_ID"); // get the country ID
                 // param ordering must match the constructor in the Customers model
                 DivisionAccess division = new DivisionAccess(divisionID, divisionName, countryID);
                 // add each customer to the observable list of
@@ -43,10 +47,12 @@ public class DivisionAccess extends Division {
             }
             return divisionsObservableList; // return the observable list
         } catch (SQLException e) {
-            e.printStackTrace();
+            ExceptionHandler.eAlert(e);
             throw e;
         } finally {
-            connection.close(); // close the connection
+            if (set != null) set.close(); // close connection
+            if (statement != null) statement.close(); // close statement
+            if (connection != null) connection.close(); // close connection
         }
     }
 }

@@ -3,6 +3,9 @@ package Exceptions;
 import javafx.scene.control.Alert;
 
 public class ExceptionHandler {
+    /**
+     * exception handling method
+     * */
     public static void eAlert(Exception e) {
         StackTraceElement trace = Thread.currentThread().getStackTrace()[2];
         Alert alert = new Alert(Alert.AlertType.ERROR);

@@ -125,6 +125,7 @@ public class SQLQueries {
         }
         catch (Exception e) {
             ExceptionHandler.eAlert(e); // eAlert method
+            throw e;
         }
     }
 
@@ -165,6 +166,7 @@ public class SQLQueries {
         }
         catch (Exception e) {
             ExceptionHandler.eAlert(e); // eAlert method
+            throw e;
         }
     }
 
@@ -208,6 +210,7 @@ public class SQLQueries {
         }
         catch (Exception e) {
             ExceptionHandler.eAlert(e); // eAlert method
+            throw e;
         }
     }
 }

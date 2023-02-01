@@ -1,6 +1,6 @@
 package company;
 
-import helper.JDBC;
+import Exceptions.ExceptionHandler;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -21,13 +21,10 @@ public class Start extends Application {
 
     public static void main(String[] args) throws Exception {
         try {
-//            JDBC.openConnection();
             launch(args);
-//            JDBC.closeConnection();
         }
         catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-            System.out.println("Cause: " + e.getCause());
+            ExceptionHandler.eAlert(e);
         }
     }
 }
