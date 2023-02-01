@@ -10,10 +10,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.stage.DirectoryChooser;
 import models.*;
 
-import java.io.File;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -49,7 +47,7 @@ public class aioController implements Initializable {
     @FXML public RadioButton viewByWeek, viewByMonth;
     @FXML public TableColumn<?, ?> appIDColumn, titleColumn, descriptionColumn, locationColumn, typeColumn, customerIDAppointmentsColumn, userIDColumn, contactIDColumn, startColumn, endColumn;
     @FXML public Button addAppointmentButton, modifyAppointmentButton, deleteAppointmentButton, clearSelectionButton;
-    @FXML public ObservableList<Appointments> appointmentsList = FXCollections.observableArrayList(AppointmentAccess.getAppointments());
+    @FXML public ObservableList<Appointments> appointmentsList = FXCollections.observableArrayList(AppointmentAccess.allAppointments());
     @FXML public Appointments selectedAppointment;
 
     // Customer Variables ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -382,7 +380,7 @@ public class aioController implements Initializable {
      * */
     @FXML public void deleteAppointment() throws RuntimeException {
         try {
-            connection = JDBC.getConnection(); // open a connection
+            connection = JDBC.openConnection(); // open a connection
             int appointmentID = selectedAppointment.getAppointmentID(); // get the appointment ID
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Delete Appointment");
@@ -390,9 +388,9 @@ public class aioController implements Initializable {
             alert.setContentText("Are you sure you want to delete this appointment?");
             Optional<ButtonType> result;
             result = alert.showAndWait();
+            // if the user clicks OK, delete the appointment
             if (result.isPresent() && result.get() == ButtonType.OK) {
-                SQLQueries.DELETE_APPOINTMENT_METHOD(connection, appointmentID);
-                updateAppointments(); // update the appointments table
+                SQLQueries.DELETE_APPOINTMENT_METHOD(connection, appointmentID); // delete the appointment
                 clearSelectedAppointment(); // clear the selected appointment
             } else {
                 alert.close();
@@ -403,6 +401,7 @@ public class aioController implements Initializable {
         }
         finally {
             connection = JDBC.closeConnection(); // close the connection
+            updateAppointments(); // update the appointments table
             trackActivity(); // track activity
         }
     }
@@ -598,10 +597,71 @@ public class aioController implements Initializable {
 
     }
 
-    // deleteCustomer
-    @FXML public void deleteCustomer(ActionEvent event) {
+//    // deleteCustomer
+//    @FXML public void deleteCustomer(ActionEvent event) {
+//        // check if the selected customer has any appointments
+//        if (AppointmentAccess.checkCustomerAppointments(selectedCustomer.getCustomerID())) {
+//            Alert alert = new Alert(Alert.AlertType.ERROR);
+//            alert.setTitle("Error");
+//            alert.setHeaderText("Customer has Appointments");
+//            alert.setContentText("This customer has appointments and cannot be deleted.");
+//            alert.showAndWait();
+//        } else {
+//            try {
+//                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+//                alert.setTitle("Delete Customer");
+//                alert.setHeaderText("Deleting Customer from Database");
+//                alert.setContentText("Are you sure you want to delete this customer?");
+//                Optional<ButtonType> result;
+//                result = alert.showAndWait();
+//                if (result.isPresent() && result.get() == ButtonType.OK) {
+//                    connection = JDBC.openConnection(); // establish connection
+//                    int customerID = selectedCustomer.getCustomerID(); // get customer id
+//                    SQLQueries.DELETE_CUSTOMER_METHOD(connection, customerID); // delete customer
+//                    clearSelectedCustomer(); // clear selected customer
+//                } else {
+//                    alert.close();
+//                }
+//            }
+//            catch (Exception e) {
+//                ExceptionHandler.eAlert(e); // eAlert method
+//            }
+//            finally {
+//                updateCustomers(); // update customers tableview
+//                trackActivity(); // track activity
+//            }
+//        }
+//    }
 
-        System.out.println("Delete Customer");
+    // a method that deletes a customer after using AppointmentAccess.checkCustomerAppointments validate the customer has no appointments
+    public void deleteCustomer(ActionEvent event) {
+        try {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Delete Customer");
+            alert.setHeaderText("Deleting Customer from Database");
+            alert.setContentText("Are you sure you want to delete this customer?");
+            Optional<ButtonType> result;
+            result = alert.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.OK && AppointmentAccess.noAppointments(selectedCustomer.getCustomerID())) {
+                connection = JDBC.openConnection(); // establish connection
+                int customerID = selectedCustomer.getCustomerID(); // get customer id
+                SQLQueries.DELETE_CUSTOMER_METHOD(connection, customerID); // delete customer
+                clearSelectedCustomer(); // clear selected customer
+            } else {
+                Alert hasAppointments = new Alert(Alert.AlertType.ERROR);
+                hasAppointments.setTitle("Error");
+                hasAppointments.setHeaderText("Customer has Appointments");
+                hasAppointments.setContentText("This customer has appointments and cannot be deleted.");
+                hasAppointments.showAndWait();
+            }
+        }
+        catch (Exception e) {
+            ExceptionHandler.eAlert(e); // eAlert method
+        }
+        finally {
+            updateCustomers(); // update customers tableview
+            trackActivity(); // track activity
+        }
     }
 
     // Data Validation Tools ///////////////////////////////////////////////////////////////////////////////////////////
@@ -740,7 +800,7 @@ public class aioController implements Initializable {
     public void updateAppointments() {
         try {
             viewAppointments.getItems().clear(); // clear the items in the table
-            ObservableList<Appointments> newAppointments = FXCollections.observableArrayList(AppointmentAccess.getAppointments()); // create a new observable list
+            ObservableList<Appointments> newAppointments = FXCollections.observableArrayList(AppointmentAccess.allAppointments()); // create a new observable list
             connection = JDBC.openConnection(); // establish connection
             viewAppointments.setItems(newAppointments); // set the items in the table to the appointments list
         }

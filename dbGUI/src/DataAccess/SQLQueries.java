@@ -21,9 +21,9 @@ public class SQLQueries {
             "(?, ?, ?, ?, ?, ?, ?);\n";
     public static final String CHECK_USER = "SELECT * FROM users WHERE User_Name = ? AND Password = ?";
     public static final String SELECT_USER_ID_STATEMENT = "SELECT User_ID FROM users WHERE User_Name = ?";
-
     /// Appointment Statements
     public static final String GET_ALL_APPOINTMENTS_STATEMENT = "SELECT * from appointments";
+    public static final String GET_ALL_APPOINTMENTS_BY_CUSTOMER_ID_STATEMENT = "SELECT * FROM appointments WHERE Customer_ID = ?";
     public static final String DELETE_FROM_APPOINTMENTS_STATEMENT = "DELETE FROM appointments WHERE Appointment_ID=?";
     public static final String APPOINTMENT_INSERT_STATEMENT =
             "INSERT INTO appointments " +
@@ -50,11 +50,9 @@ public class SQLQueries {
             "End = ?, " +
             "Last_Update = ?, " +
             "Last_Updated_By = ? WHERE Appointment_ID = ?";
-
     /// Contacts Statements
     public static final String SELECT_ALL_CONTACTS_STATEMENT = "SELECT * from contacts";
     public static final String SELECT_CONTACTS_BY_NAME_STATEMENT = "SELECT Contact_ID FROM contacts WHERE Contact_Name = ?";
-
     /// Customer Statements
     public static final String SELECT_CUSTOMERS_STATEMENT =
             "SELECT customers.Customer_ID, " +
@@ -66,7 +64,6 @@ public class SQLQueries {
             "first_level_divisions.Division from customers " +
             "INNER JOIN first_level_divisions " +
             "ON customers.Division_ID = first_level_divisions.Division_ID";
-
     public static final String INSERT_CUSTOMER_STATEMENT =
             "INSERT INTO customers " +
             "(Customer_ID, " +
@@ -79,7 +76,6 @@ public class SQLQueries {
             "Last_Update, " +
             "Last_Updated_By, " +
             "Division_ID) VALUES (?,?,?,?,?,?,?,?,?,?)";
-
     public static final String UPDATE_CUSTOMER_STATEMENT =
             "UPDATE customers " +
             "SET Customer_Name = ?, " +
@@ -90,24 +86,16 @@ public class SQLQueries {
             "Last_Updated_By = ?, " +
             "Division_ID = ? " +
             "WHERE Customer_ID = ?";
-
     public static final String DELETE_FROM_CUSTOMERS_STATEMENT = "DELETE FROM customers WHERE Customer_ID=?";
     public static final String SELECT_DIVISIONS = "SELECT * from first_level_divisions";
     public static final String SELECT_ID_BY_DIVISION = "SELECT Division_ID FROM first_level_divisions WHERE Division = ?";
     public static final String SELECT_COUNTRIES = "SELECT Country_ID, Country FROM countries";
-
     public static final String SELECT_COUNTRY_FROM_DIVISION =
             "SELECT countries.Country\n" +
             "FROM countries\n" +
             "JOIN first_level_divisions ON countries.Country_ID = first_level_divisions.Country_ID\n" +
             "JOIN customers ON first_level_divisions.Division_ID = customers.Division_ID\n" +
             "WHERE customers.Division_ID = ?";
-
-
-//            "SELECT customers.Customer_ID, " + "customers.Customer_Name, countries.Country " +
-//            "FROM customers " +
-//            "INNER JOIN countries ON customers.Division_ID = countries.Country_ID";
-
     public static final String GET_DIVISION_FOR_COUNTRY =
             "SELECT first_level_divisions.Division_ID, first_level_divisions.Division\n" +
             "FROM countries\n" +
@@ -279,6 +267,20 @@ public class SQLQueries {
         catch (Exception e) {
             ExceptionHandler.eAlert(e); // eAlert method
             throw e;
+        }
+    }
+
+    // deleteFromCustomers deletes a customer from the database
+    public static void DELETE_CUSTOMER_METHOD(Connection connection, int customerID)
+    {
+        try {
+            JDBC.setPreparedStatement(connection, SQLQueries.DELETE_FROM_CUSTOMERS_STATEMENT); // set the prepared statement
+            PreparedStatement statement = JDBC.getPreparedStatement(); // get the prepared statement
+            statement.setInt(1, customerID); // set the customer ID
+            statement.execute(); // execute the statement
+        }
+        catch (Exception e) {
+            ExceptionHandler.eAlert(e); // eAlert method
         }
     }
 }
