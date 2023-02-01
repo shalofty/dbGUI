@@ -466,12 +466,12 @@ public class aioController implements Initializable {
                 String division = divisionMenu.getValue(); // get customer division
                 int divisionID = DivisionAccess.getDivisionID(division); // get division ID
                 SQLQueries.INSERT_INTO_CUSTOMERS_METHOD(connection,
-                        customerID,
-                        customerName,
-                        address,
-                        postalCode,
-                        phone,
-                        divisionID); // insert into customers
+                                                        customerID,
+                                                        customerName,
+                                                        address,
+                                                        postalCode,
+                                                        phone,
+                                                        divisionID); // insert into customers
                 clearSelectedCustomer(); // clear selected customer
             } else {
                 alert.close();
@@ -531,7 +531,10 @@ public class aioController implements Initializable {
 
     // Initialize and Support  /////////////////////////////////////////////////////////////////////////////////////////
 
-    // updateAppointments
+    /**
+     * updateAppointments updates the appointments tableview
+     * clears the tableview, creates a new observable list, establishes connection, sets the items in the tableview to the new observable list
+     * */
     public void updateAppointments() {
         try {
             viewAppointments.getItems().clear(); // clear the items in the table
@@ -549,7 +552,10 @@ public class aioController implements Initializable {
         }
     }
 
-    // updateCustomers
+    /**
+     * updateCustomers updates the customers tableview
+     * clears the tableview, creates a new observable list, establishes connection, sets the items in the tableview to the new observable list
+     * */
     public void updateCustomers() {
         try {
             viewCustomers.getItems().clear(); // clear the items in the table
