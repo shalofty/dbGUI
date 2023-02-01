@@ -15,10 +15,8 @@ import models.*;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.Timestamp;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.ResourceBundle;
@@ -40,7 +38,7 @@ public class aioController implements Initializable {
     @FXML public RadioButton viewByWeek, viewByMonth;
     @FXML public TableColumn<?, ?> appIDColumn, titleColumn, descriptionColumn, locationColumn, typeColumn, customerIDAppointmentsColumn, userIDColumn, contactIDColumn, startColumn, endColumn;
     @FXML public Button addAppointmentButton, modifyAppointmentButton, deleteAppointmentButton, clearSelectionButton;
-    @FXML public ObservableList<Appointments> appointmentsList = FXCollections.observableArrayList(AppointmentAccess.getAllAppointments());
+    @FXML public ObservableList<Appointments> appointmentsList = FXCollections.observableArrayList(AppointmentAccess.getAppointments());
     @FXML public Appointments selectedAppointment;
 
     // Customer Variables ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -535,7 +533,20 @@ public class aioController implements Initializable {
 
     // updateAppointments
     public void updateAppointments() {
-        viewAppointments.setItems(appointmentsList); // set the items in the table to the appointments list
+        try {
+            viewAppointments.getItems().clear(); // clear the items in the table
+            ObservableList<Appointments> newAppointments = FXCollections.observableArrayList(AppointmentAccess.getAppointments()); // create a new observable list
+            connection = JDBC.openConnection(); // establish connection
+            viewAppointments.setItems(newAppointments); // set the items in the table to the appointments list
+        }
+        catch (Exception e) {
+            ExceptionHandler.eAlert(e); // eAlert method
+        }
+        finally {
+            if (connection != null) {
+                connection = JDBC.closeConnection(); // close the connection
+            }
+        }
     }
 
     // updateCustomers

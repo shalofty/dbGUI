@@ -3,7 +3,6 @@ package DataAccess;
 import helper.JDBC;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.Alert;
 import models.Appointments;
 
 import java.sql.Connection;
@@ -21,7 +20,7 @@ public class AppointmentAccess {
      * get all appointments from database
      * @return appointmentsObservableList of all appointments
      * */
-    public static ObservableList<Appointments> getAllAppointments() {
+    public static ObservableList<Appointments> getAppointments() {
         ObservableList<Appointments> appointmentsObservableList = FXCollections.observableArrayList(); // create observable list
         try {
             connection = JDBC.openConnection(); // open connection
