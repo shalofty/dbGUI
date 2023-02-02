@@ -2,7 +2,7 @@ package models;
 
 public class Users {
     private final String userName, userPassword;
-    private static int userID;
+    private int userID;
 
     /**
      * constructor for Users
@@ -48,7 +48,7 @@ public class Users {
     /**
      * @return userID
      * */
-    public static int getUserID() {
+    public int getUserID() {
         return userID;
     }
 }

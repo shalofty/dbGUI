@@ -17,9 +17,9 @@ public class ContactAccess {
     public static Connection connection = null;
     public static PreparedStatement statement = null;
     public static ResultSet set = null;
+
     /**
      * Create observablelist from all contacts.
-     * @throws SQLException
      * @return contactsObservableList
      */
     public static ObservableList<Contacts> getAllContacts() throws SQLException {
@@ -53,8 +53,8 @@ public class ContactAccess {
 
     /**
      * Find contact ID given contact name.
-     * @throws SQLException
      * @return contactID
+     * TESTED ✓
      */
     public static int findContactID(String contactName) throws SQLException {
         try {
@@ -62,35 +62,37 @@ public class ContactAccess {
             statement = connection.prepareStatement(SQLQueries.SELECT_CONTACTS_BY_NAME_STATEMENT); // prepare statement
             statement.setString(1, contactName); // set contact name
             set = statement.executeQuery(); // execute query
-            int contactID = 0;
-            while (set.next()) {
-                if (Objects.equals(contactName, set.getString("Contact_ID"))) {
-                    contactID = set.getInt("Contact_ID"); // get contact ID
-                }
+            if (set.next()) {
+                return set.getInt("Contact_ID"); // return contact ID
             }
-            return contactID; // return contact ID
+            else {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Contact not found");
+                alert.setContentText("Contact not found in database.");
+                alert.showAndWait();
+            }
         }
         catch (SQLException e) {
             ExceptionHandler.eAlert(e); // handle exception
-            throw e;
+            throw e; // throw exception
         }
         finally {
             if (set != null) {
-                set.close();
+                set.close(); // close result set
             }
             if (statement != null) {
-                statement.close();
+                statement.close(); // close statement
             }
             if (connection != null) {
-                connection.close();
+                connection.close(); // close connection
             }
-        }
+        } return -1; // return -1 if contact not found
     }
 
     /**
      * Create contact object from result set.
-     * @throws SQLException
-     * @param set
+     * @param set result set from query execution
      * @return contact
      */
     private static Contacts createContact(ResultSet set) throws SQLException {
@@ -107,6 +109,11 @@ public class ContactAccess {
     }
 
     // a method that generates an ObservableList of all contacts to be used in aioController in a ComboBox
+    /**
+     * @return contactsObservableList of contact names
+     * called in aioController initialize method to populate contactComboBox
+     * TESTED ✓
+     */
     public static ObservableList<String> getContactNames() throws SQLException {
         ObservableList<String> contactsObservableList = FXCollections.observableArrayList(); // create observable list
         try {
@@ -136,7 +143,12 @@ public class ContactAccess {
         }
     }
 
-    // a method that generates a String Contact_Name from a given Contact_ID
+    /**
+     * @param contactID contact ID to get contact name
+     * @return contactName contact name from contact ID
+     * called in aioController initialize & ContactAccess getContactNames methods
+     * TESTED ✓
+     */
     public static String getContactName(int contactID) throws SQLException {
         try {
             connection = JDBC.openConnection(); // open connection

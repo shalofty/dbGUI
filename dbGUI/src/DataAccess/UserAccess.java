@@ -4,6 +4,7 @@ import Exceptions.ExceptionHandler;
 import helper.JDBC;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Alert;
 import models.Users;
 
 import java.sql.*;
@@ -47,36 +48,6 @@ public class UserAccess extends Users {
             }
         }
     }
-
-    // a method that returns an observable list of all the user_id's and usernames from the database
-//    public static ObservableList<Users> getAllUsers() throws SQLException {
-//        ObservableList<Users> usersObservableList = FXCollections.observableArrayList(); // create observable list
-//        try {
-//            connection = JDBC.openConnection(); // open connection
-//            statement = connection.prepareStatement(SQLQueries.SELECT_ALL_USERS_STATEMENT); // prepare statement
-//            set = statement.executeQuery(); // execute query
-//            // loop through result set
-//            while (set.next()) {
-//                usersObservableList.add(createUser(set)); // add user to observable list
-//            }
-//            return usersObservableList; // return observable list
-//        }
-//        catch (SQLException e) {
-//            ExceptionHandler.eAlert(e); // handle exception
-//            throw e;
-//        }
-//        finally {
-//            if (set != null) {
-//                set.close();
-//            }
-//            if (statement != null) {
-//                statement.close();
-//            }
-//            if (connection != null) {
-//                connection.close();
-//            }
-//        }
-//    }
 
     // a method that returns an observable list of all the user_id's in the database
     public static ObservableList<Integer> getAllUserIDs() throws SQLException {
@@ -198,5 +169,77 @@ public class UserAccess extends Users {
                 connection.close();
             }
         }
+    }
+
+    // a method that verifies a user password for a given user ID from the database
+    public static boolean verifyUserPassword(int userID, String password) throws SQLException {
+        try {
+            connection = JDBC.openConnection(); // open connection
+            statement = connection.prepareStatement(SQLQueries.SELECT_USER_PASSWORD_STATEMENT); // prepare statement
+            statement.setInt(1, userID); // set parameters
+            set = statement.executeQuery(); // execute query
+            if (!set.isBeforeFirst()) {
+                return false; // return false if no user is found
+            }
+            if (set.next()) {
+                return set.getString("Password").equals(password); // return true if the password matches
+            }
+        }
+        catch (SQLException e) {
+            ExceptionHandler.eAlert(e); // handle exception
+            throw e;
+        }
+        finally {
+            if (set != null) {
+                set.close();
+            }
+            if (statement != null) {
+                statement.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+        }
+        return false; // return false if no user is found
+    }
+
+    // SELECT_USER_PASSWORD_STATEMENT SQL
+    public static final String SELECT_USER_PASSWORD_STATEMENT = "SELECT Password FROM users WHERE User_ID = ?";
+
+    // a method that returns a user_id based on username and password
+public static int getUserID(String userName, String password) throws SQLException {
+        try {
+            connection = JDBC.openConnection(); // open connection
+            statement = connection.prepareStatement(SQLQueries.SELECT_USER_ID_STATEMENT); // prepare statement
+            statement.setString(1, userName); // set parameters
+            statement.setString(2, password); // set parameters
+            set = statement.executeQuery(); // execute query
+            if (!set.isBeforeFirst()) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Invalid Username or Password");
+                alert.setContentText("Please enter a valid username and password.");
+                alert.showAndWait();
+            }
+            if (set.next()) {
+                return set.getInt("User_ID"); // return the user id
+            }
+        }
+        catch (SQLException e) {
+            ExceptionHandler.eAlert(e); // handle exception
+            throw e;
+        }
+        finally {
+            if (set != null) {
+                set.close();
+            }
+            if (statement != null) {
+                statement.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+        }
+        return -1; // return 0 if no user is found
     }
 }

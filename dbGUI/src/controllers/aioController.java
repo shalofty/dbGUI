@@ -2,6 +2,7 @@ package controllers;
 
 import DataAccess.*;
 import Exceptions.ExceptionHandler;
+import Exceptions.GateKeeper;
 import helper.JDBC;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -11,6 +12,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import models.*;
+import Time.HotTubTimeMachine;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -25,6 +27,7 @@ import java.sql.SQLException;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class aioController implements Initializable {
@@ -38,12 +41,14 @@ public class aioController implements Initializable {
     // Appointments Variables ///////////////////////////////////////////////////////////////////////////////////////////
     @FXML public Label userCreds;
     @FXML public TextField appIDField, contactIDField, userIDField, locationField, customerIDField, typeField, titleField;
-    @FXML public DatePicker startDatePicker, endDatePicker;
+    @FXML public DatePicker datePicker, endDatePicker;
     @FXML public ComboBox<String> contactsMenu = new ComboBox<>();
     @FXML public ComboBox<String> customersMenu = new ComboBox<>();
     @FXML public ComboBox<String> usersMenu = new ComboBox<>();
-    @FXML public ComboBox<String> startTimeBox = new ComboBox<>();
-    @FXML public ComboBox<String> endTimeBox = new ComboBox<>();
+    @FXML public ComboBox<String> startHourBox = new ComboBox<>();
+    @FXML public ComboBox<String> endHourBox = new ComboBox<>();
+    @FXML public ComboBox<String> startMinBox = new ComboBox<>();
+    @FXML public ComboBox<String> endMinBox = new ComboBox<>();
     @FXML public ObservableList<String> times = FXCollections.observableArrayList("08:00", "09:00", "10:00", "11:00", "12:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00");
     @FXML public TextArea descriptionTextArea;
     @FXML public TableView<Appointments> viewAppointments;
@@ -157,6 +162,22 @@ public class aioController implements Initializable {
         }
     }
 
+    @FXML public LocalDateTime convertFromUTC(LocalDateTime utcDateTime) {
+        try {
+            ZoneId localZone = ZoneId.systemDefault(); // Local Time Zone
+            ZonedDateTime utcZonedDateTime = utcDateTime.atZone(ZoneOffset.UTC); // UTC Date and Time in UTC Time Zone
+            Instant instant = utcZonedDateTime.toInstant(); // Instant in UTC
+            return instant.atZone(localZone).toLocalDateTime(); // Instant in UTC converted to LocalDateTime
+        }
+        catch (Exception e) {
+            ExceptionHandler.eAlert(e); // eAlert method
+            throw e;
+        }
+        finally {
+            trackActivity(); // trackActivity method
+        }
+    }
+
     /**
      * isWithinBusinessHours checks if the appointment is within business hours
      * @param localStartDate - the start date of the appointment
@@ -205,10 +226,16 @@ public class aioController implements Initializable {
                 locationField.setText(String.valueOf(selectedAppointment.getAppointmentLocation())); // Sets the appointment location text field
                 typeField.setText(String.valueOf(selectedAppointment.getAppointmentType())); // Sets the appointment type text field
                 descriptionTextArea.setText(String.valueOf(selectedAppointment.getAppointmentDescription())); // Sets the appointment description text field
-                startDatePicker.setValue(selectedAppointment.getStartTime().toLocalDate()); // Sets the start date picker
-                endDatePicker.setValue(selectedAppointment.getEndTime().toLocalDate()); // Sets the end date picker
-                startTimeBox.setValue(selectedAppointment.getStartTime().toLocalTime().toString()); // Sets the start time combo box
-                endTimeBox.setValue(selectedAppointment.getEndTime().toLocalTime().toString()); // Sets the end time combo box
+                datePicker.setValue(selectedAppointment.getStartTime().toLocalDate()); // Sets the start date picker
+//                endDatePicker.setValue(selectedAppointment.getEndTime().toLocalDate()); // Sets the end date picker
+//                startTimeBox.setValue(selectedAppointment.getStartTime().toLocalTime().toString()); // Sets the start time combo box
+//                endTimeBox.setValue(selectedAppointment.getEndTime().toLocalTime().toString()); // Sets the end time combo box
+
+                startHourBox.setValue(String.valueOf(selectedAppointment.getStartTime().getHour())); // Sets the start hour combo box
+                endHourBox.setValue(String.valueOf(selectedAppointment.getEndTime().getHour())); // Sets the end hour combo box
+                startMinBox.setValue(String.valueOf(selectedAppointment.getStartTime().getMinute())); // Sets the start minute combo box
+                endMinBox.setValue(String.valueOf(selectedAppointment.getEndTime().getMinute())); // Sets the end minute combo box
+
                 addAppointmentButton.setDisable(true); // Disables the add appointment button
                 modifyAppointmentButton.setDisable(false); // Enables the modify appointment button
                 deleteAppointmentButton.setDisable(false); // Enables the delete appointment button
@@ -231,10 +258,11 @@ public class aioController implements Initializable {
             selectedAppointment = null; // Clears the selected appointment
             contactsMenu.setValue("Contacts"); // Clears the contact combo box
             customersMenu.setValue("Customers"); // Clears the customer combo box
+            usersMenu.setValue("Users"); // Clears the user combo box
             addAppointmentButton.setDisable(false); // Enables the add appointment button
             Stream.of(appIDField, titleField).forEach(TextInputControl::clear); // Clears the appointment ID and title text fields
             Stream.of(userIDField, locationField, typeField, descriptionTextArea).forEach(TextInputControl::clear); // Clears the user ID, location, description and type text fields
-            Stream.of(startDatePicker, endDatePicker, startTimeBox, endTimeBox).forEach(c->c.setValue(null)); // Clears the start date, end date, start time and end time combo boxes
+            Stream.of(datePicker, startHourBox, endHourBox, startMinBox, startHourBox).forEach(c->c.setValue(null)); // Clears the start date, end date, start time and end time combo boxes
             Stream.of(modifyAppointmentButton, deleteAppointmentButton).forEach(c->c.setDisable(true)); // Disables the modify and delete appointment buttons
         }
         catch (Exception e) {
@@ -306,67 +334,65 @@ public class aioController implements Initializable {
     @FXML public void addAppointment() throws Exception {
         try {
             connection = JDBC.openConnection(); // establish connection, passing into insertIntoAppointment()
-            // generating new appointment ID and getting the values from the text fields
-            int newAppointmentID = generateAppointmentID(); // generate new appointment ID
-            String newTitle = titleField.getText();  // get title
-            String newDescriptionText = descriptionTextArea.getText(); // get description
-            String newLocation = locationField.getText(); // get location
-            String newType = typeField.getText(); // get type
-            // getting the values from the date pickers
-            LocalDate localStartDate = startDatePicker.getValue(); // get start date
-            LocalDate localEndDate = endDatePicker.getValue(); // get end date
-            // getting the values from the combo boxes
-            // formatting the date and time values
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm"); // formatter to HH:mm
-            LocalTime localStartTime = LocalTime.parse(startTimeBox.getValue(), formatter); // get start time
-            LocalTime localEndTime = LocalTime.parse(endTimeBox.getValue(), formatter); // get end time
-            // checking if the appointment is within business hours
-            if (!isWithinBusinessHours(localStartDate, localStartTime, localEndDate, localEndTime)) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Error");
-                alert.setHeaderText("Scheduling Error");
-                alert.setContentText("Error: Appointment is not within business hours." + "\nPlease choose a time between 8:00 AM and 10:00 PM.");
-                alert.showAndWait();
-            }
-            // combining the date and time values
-            LocalDateTime localStartDateTime = LocalDateTime.of(localStartDate, localStartTime);
-            LocalDateTime localEndDateTime = LocalDateTime.of(localEndDate, localEndTime);
-            // convert to UTC for storage
-            LocalDateTime utcStartDT = convertToUTC(localStartDateTime);
-            LocalDateTime utcEndDT = convertToUTC(localEndDateTime);
-            // formatting to String
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:");
-            String startDT = dtf.format(utcStartDT);
-            String endDT = dtf.format(utcEndDT);
-//            int newCustomerID = Integer.parseInt(customerIDField.getText()); // get customer ID
-            int newCustomerID = CustomerAccess.getCustomerIDByName(customersMenu.getValue()); // find customer ID
-            int newUserID = Integer.parseInt(userIDField.getText()); // get user ID
-            String contactName = contactsMenu.getValue(); // get contact
-            int newContactID = ContactAccess.findContactID(contactName); // find contact ID
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION); // confirmation alert
+            confirm.setTitle("Confirmation"); // set title
+            confirm.setHeaderText("You are about to add an appointment."); // set header text
+            confirm.setContentText("Are you sure you want to add this appointment?"); // set content text
+            Optional<ButtonType> result = confirm.showAndWait(); // show alert and wait for user input
+            String password = passwordPrompt(); // passwordPrompt method
+            if (result.get() == ButtonType.OK) { // if the user clicks OK
+                // generating new appointment ID and getting the values from the text fields
+                int newAppointmentID = generateAppointmentID(); // generate new appointment ID
+                String newTitle = titleField.getText();  // get title
+                String newDescriptionText = descriptionTextArea.getText(); // get description
+                String newLocation = locationField.getText(); // get location
+                String newType = typeField.getText(); // get type
 
-            if (appointmentFormVerification()) {
+                LocalDate localDate = datePicker.getValue(); // get date
+                LocalTime localStartTime = LocalTime.of(Integer.parseInt(startHourBox.getValue()), Integer.parseInt(startMinBox.getValue())); // get start time
+                LocalTime localEndTime = LocalTime.of(Integer.parseInt(endHourBox.getValue()), Integer.parseInt(endMinBox.getValue())); // get end time
+
+                if (!HotTubTimeMachine.isWithinBusinessHours(localDate, localStartTime, localEndTime)) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error");
+                    alert.setHeaderText("Appointment is outside of business hours.");
+                    alert.setContentText("Please select a time between 8:00 AM and 10:00 PM.");
+                    alert.showAndWait();
+                }
+
+                LocalDateTime startDT = HotTubTimeMachine.getDateTimeFromPickers(datePicker, startHourBox, endMinBox); // get start date and time
+                LocalDateTime endDT = HotTubTimeMachine.getDateTimeFromPickers(datePicker, startHourBox, endMinBox); // get end date and time
+
+                LocalDateTime startUTC = HotTubTimeMachine.convertToUTC(startDT); // convert start date and time to UTC
+                LocalDateTime endUTC = HotTubTimeMachine.convertToUTC(endDT); // convert end date and time to UTC
+
+                // convert startUTC and endUTC to strings
+                String startUTCString = startUTC.toString();
+                String endUTCString = endUTC.toString();
+
+                int newCustomerID = CustomerAccess.getCustomerIDByName(customersMenu.getValue()); // find customer ID
+                String userName = usersMenu.getValue(); // get username
+                int userID = UserAccess.getUserID(userName, password); // get user ID
+                String contactName = contactsMenu.getValue(); // get contact
+                int contactID = ContactAccess.findContactID(contactName); // find contact ID
+
                 // adding the new appointment to the database
-                SQLQueries.INSERT_INTO_APPOINTMENTS_METHOD(connection,
-                                                    newAppointmentID,
-                                                    newTitle,
-                                                    newDescriptionText,
-                                                    newLocation,
-                                                    newType,
-                                                    startDT,
-                                                    endDT,
-                                                    newCustomerID,
-                                                    newUserID,
-                                                    newContactID);
+                if (GateKeeper.verifyTraveler(userName, userID, password)) { // verifyTraveler method
+                    SQLQueries.INSERT_INTO_APPOINTMENTS_METHOD(connection,
+                                                                newAppointmentID,
+                                                                newTitle,
+                                                                newDescriptionText,
+                                                                newLocation,
+                                                                newType,
+                                                                startUTCString,
+                                                                endUTCString,
+                                                                newCustomerID,
+                                                                userID,
+                                                                contactID); // insertIntoAppointment method
+                    successAlert(); // successAlert method
+                }
+                clearSelectedAppointment(); // clear the selected appointment
             }
-            else {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Error");
-                alert.setHeaderText("Error");
-                alert.setContentText("Error: Please fill out all fields.");
-                alert.showAndWait();
-            }
-
-            clearSelectedAppointment(); // clear the selected appointment
         }
         catch (Exception e) {
             ExceptionHandler.eAlert(e); // eAlert method
@@ -379,55 +405,63 @@ public class aioController implements Initializable {
     }
 
     /**
+     * quick scratch code, create package for these later
+     * */
+    public void successAlert() {
+        Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+        successAlert.setTitle("Success");
+        successAlert.setHeaderText("Success");
+        successAlert.setContentText("Appointment successfully modified.");
+        successAlert.showAndWait();
+    }
+
+    /**
      * modifyAppointment modifies an appointment in the database
      * */
     @FXML public void modifyAppointment() throws RuntimeException {
         try {
-            // open a connection, pass to updateAppoint() method below
-            connection = JDBC.openConnection();
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            connection = JDBC.openConnection(); // establish connection, passing into insertIntoAppointment()
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION); // confirmation alert
             alert.setTitle("Confirmation");
-            alert.setHeaderText("Confirmation");
+            alert.setHeaderText("You are about to modify an appointment.");
             alert.setContentText("Are you sure you want to modify this appointment?");
-            Optional<ButtonType> result = alert.showAndWait();
-            if (selectedAppointment != null && result.isPresent() && result.get() == ButtonType.OK && appointmentFormVerification()) {
+            Optional<ButtonType> result = alert.showAndWait(); // show the alert
+            String password = passwordPrompt(); // passwordPrompt method
+            if (selectedAppointment != null && appointmentFormVerification()) {
                 int appointmentID = selectedAppointment.getAppointmentID(); // getting the appointment ID
-                String title = titleField.getText(); // getting the title
-                String location = locationField.getText(); // getting the location
-                String type = typeField.getText(); // getting the type
-                String descriptionText = descriptionTextArea.getText(); // getting the description
-                int customerID = Integer.parseInt(customerIDField.getText()); // getting the customer ID
-                int contactID = Integer.parseInt(contactIDField.getText()); // getting the contact ID
-                int userID = Integer.parseInt(userIDField.getText()); // getting the user ID
-                LocalDate startDate = startDatePicker.getValue(); // getting the start date
-                LocalDate endDate = endDatePicker.getValue(); // getting the end date
-                LocalTime startTime = LocalTime.parse(startTimeBox.getValue()); // getting the start time
-                LocalTime endTime = LocalTime.parse(endTimeBox.getValue()); // getting the end time
-                // combining the date and time values
-                LocalDateTime startDateTime = LocalDateTime.of(startDate, startTime); // start date and time
-                LocalDateTime endDateTime = LocalDateTime.of(endDate, endTime); // end date and time
-                if (!isWithinBusinessHours(startDate, startTime, endDate, endTime)) { // checking if the appointment is within business hours
-                    Alert alert1 = new Alert(Alert.AlertType.ERROR);
-                    alert1.setTitle("Error");
-                    alert1.setHeaderText("Scheduling Error");
-                    alert1.setContentText("Error: Appointment is not within business hours." +
-                            "\nPlease choose a time between 8:00 AM and 10:00 PM.");
-                    alert1.showAndWait();
+                String title = selectedAppointment.getAppointmentTitle(); // getting the title
+                String location = selectedAppointment.getAppointmentLocation(); // getting the location
+                String type = selectedAppointment.getAppointmentType(); // getting the type
+                String descriptionText = selectedAppointment.getAppointmentDescription(); // getting the description
+
+                int customerID = selectedAppointment.getCustomerID(); // getting the customer ID
+                int userID = selectedAppointment.getUserID(); // getting the user ID
+                String userName = selectedAppointment.getUserName(userID); // getting the username
+
+                int contactID = selectedAppointment.getContactID(); // get contact
+                String contactName = selectedAppointment.getContactName(contactID); // get contact name
+
+                // getting values from the selected appointment
+                LocalDateTime appointmentStartTime = selectedAppointment.getStartTime(); // getting the start date
+                LocalDateTime appointmentEndTime = selectedAppointment.getEndTime(); // getting the end date
+
+                Stream.of(startHourBox, endHourBox).forEach(box -> box.setItems(HotTubTimeMachine.getHours())); // set the start and end time boxes to the times list
+                Stream.of(startMinBox, endMinBox).forEach(box -> box.setItems(HotTubTimeMachine.getMinutes())); // set the start and end minute boxes to the minutes list
+
+                if (GateKeeper.verifyTraveler(userName, userID, password)) { // verifyLogin method
+                    SQLQueries.UPDATE_APPOINTMENT_METHOD(connection,
+                                                        appointmentID,
+                                                        title,
+                                                        descriptionText,
+                                                        location,
+                                                        type,
+                                                        appointmentStartTime,
+                                                        appointmentEndTime,
+                                                        customerID,
+                                                        userID,
+                                                        contactID); // update the appointment
+                    successAlert(); // successAlert method
                 }
-                // convert to UTC for storage
-                LocalDateTime utcStartDT = convertToUTC(startDateTime); // start date and time in UTC
-                LocalDateTime utcEndDT = convertToUTC(endDateTime); // end date and time in UTC
-                SQLQueries.UPDATE_APPOINTMENT_METHOD(connection,
-                                                    appointmentID,
-                                                    title,
-                                                    descriptionText,
-                                                    location,
-                                                    type,
-                                                    utcStartDT,
-                                                    utcEndDT,
-                                                    customerID,
-                                                    userID,
-                                                    contactID);
                 clearSelectedAppointment(); // clear the text fields
             }
         }
@@ -438,7 +472,7 @@ public class aioController implements Initializable {
             connection = JDBC.closeConnection(); // close the connection
             updateAppointments(); // update the appointments table
             trackActivity(); // track activity
-        }
+        } throw new RuntimeException("Error: Appointment could not be modified.");
     }
 
     /**
@@ -806,10 +840,11 @@ public class aioController implements Initializable {
      * uses lambda expressions to check if any of the fields are empty
      * */
     public boolean emptyAppMenus() {
-        return Stream.of(startTimeBox.getValue(),
-                        endTimeBox.getValue(),
-                        startDatePicker.getValue(),
-                        endDatePicker.getValue()).anyMatch(Objects::isNull);
+        return Stream.of(startHourBox.getValue(),
+                        endHourBox.getValue(),
+                        startMinBox.getValue(),
+                        endMinBox.getValue(),
+                        datePicker.getValue()).anyMatch(Objects::isNull);
     }
 
     /**
@@ -830,6 +865,36 @@ public class aioController implements Initializable {
      * */
     public boolean appointmentFormVerification() {
         return !emptyAppFields() && !emptyAppMenus(); // return true if both methods return true
+    }
+
+    // a method that alerts the user asking for a password
+    public void passwordAlert() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION); // create an alert
+        alert.setTitle("Password"); // set the title
+        alert.setHeaderText("Oops! The password you entered was incorrect."); // set the header text
+        alert.setContentText("Please enter the correct password."); // set the content text
+        alert.showAndWait(); // show the alert
+    }
+
+    // prompt the user to type in their password
+    public String passwordPrompt() {
+        try {
+            TextInputDialog dialog = new TextInputDialog(); // create a text input dialog
+            dialog.setTitle("Password Requirement"); // set the title
+            dialog.setHeaderText("A password is required when performing database operations."); // set the header text
+            dialog.setContentText("Please enter your password:"); // set the content text
+            Optional<String> result = dialog.showAndWait(); // show the dialog
+            if (result.isPresent()) {
+                return result.get();
+            }
+        } catch (Exception e) {
+            ExceptionHandler.eAlert(e);
+            throw e;
+        }
+        finally {
+            trackActivity();
+        }
+        return null;
     }
 
     // Initialize and Support  /////////////////////////////////////////////////////////////////////////////////////////
@@ -988,7 +1053,18 @@ public class aioController implements Initializable {
             usersMenu.setValue("Users"); // set the user combo box to the user names
             customersMenu.setItems(CustomerAccess.getAllCustomerNameStrings()); // Sets the customer combo box
             customersMenu.setValue("Customers"); // Sets the customer combo box
-            Stream.of(startTimeBox, endTimeBox).forEach(box -> box.setItems(times)); // set the start and end time boxes to the times list
+
+            // lambda expression to populate hour boxes
+            IntStream.rangeClosed(8, 22).forEach(hour -> {
+                startHourBox.getItems().add(String.valueOf(hour)); // add the hours to the start hour combo box
+                endHourBox.getItems().add(String.valueOf(hour)); // add the hours to the end hour combo box
+            });
+
+            // lambda expression to populate minute boxes
+            IntStream.rangeClosed(0, 59).forEach(minute -> {
+                startMinBox.getItems().add(String.valueOf(minute)); // add the minutes to the start minute combo box
+                endMinBox.getItems().add(String.valueOf(minute)); // add the minutes to the end minute combo box
+            });
 
             // set up the Appointment columns in the table, must match the names of the variables in the model
             appIDColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentID")); // set the cell value factory for the appointment ID column

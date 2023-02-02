@@ -1,17 +1,11 @@
 package DataAccess;
 
 import helper.JDBC;
-import javafx.scene.control.Alert;
 
 import java.sql.*;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import Exceptions.ExceptionHandler;
-import models.Contacts;
-import models.Users;
 
 public class SQLQueries {
     /**
@@ -24,10 +18,12 @@ public class SQLQueries {
             "(?, ?, ?, ?, ?, ?, ?);\n";
     public static final String SELECT_ALL_USERS_STATEMENT = "SELECT User_ID, User_Name FROM users"; // select all users
     public static final String SELECT_ALL_USER_IDS_STATEMENT = "SELECT User_ID FROM users"; // select all user IDs
-    public static final String SELECT_ALL_USER_NAMES_STATEMENT = "SELECT User_Name FROM users";
+    public static final String SELECT_ALL_USER_NAMES_STATEMENT = "SELECT User_Name FROM users"; // select all user names
+    public static final String SELECT_USER_PASSWORD_STATEMENT = "SELECT Password FROM users WHERE User_ID = ?"; // select user password by user ID
     public static final String SELECT_USER_NAME_STATEMENT = "SELECT User_Name FROM users WHERE User_ID = ?"; // select user name by user ID
-    public static final String CHECK_USER = "SELECT * FROM users WHERE User_Name = ? AND Password = ?"; // check user credentials
-    public static final String SELECT_USER_ID_STATEMENT = "SELECT User_ID FROM users WHERE User_Name = ?"; // select user ID by user name
+    public static final String GET_USER_ID = "SELECT User_ID, Password FROM users WHERE User_Name = ?"; // get user ID by user name
+    public static final String CHECK_USER = "SELECT * FROM users WHERE User_Name = ? AND Password = ? AND User_ID = ?"; // check user credentials
+    public static final String SELECT_USER_ID_STATEMENT = "SELECT User_ID FROM users WHERE User_Name = ? AND Password = ?"; // select user ID by user name
     /// Appointment Statements
     public static final String GET_ALL_APPOINTMENTS_STATEMENT = "SELECT * from appointments"; // select all appointments
     public static final String GET_ALL_APPOINTMENTS_WITHIN_7_DAYS_STATEMENT = "SELECT * FROM appointments WHERE Start BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 7 DAY);"; // select all appointments within 7 days
@@ -58,7 +54,8 @@ public class SQLQueries {
             "Start = ?, " +
             "End = ?, " +
             "Last_Update = ?, " +
-            "Last_Updated_By = ? WHERE Appointment_ID = ?"; // update appointment
+            "Last_Updated_By = ? " +
+            "WHERE Appointment_ID = ?"; // update appointment
     /// Contacts Statements
     public static final String SELECT_ALL_CONTACTS_STATEMENT = "SELECT * from contacts"; // select all contacts
     public static String SELECT_CONTACTS_BY_ID_STATEMENT = "SELECT Contact_Name FROM contacts WHERE Contact_ID = ?"; // select contact name by contact ID
@@ -153,8 +150,8 @@ public class SQLQueries {
             statement.setTimestamp(10, Timestamp.valueOf(LocalDateTime.now())); // last update
             statement.setString(11, JDBC.getUsername()); // last updated by
             statement.setInt(12, customerID); // customer ID
-            statement.setInt(13, Users.getUserID()); // user ID
-            statement.setInt(14, Contacts.getContactID()); // contact ID
+            statement.setInt(13, userID); // user ID
+            statement.setInt(14, contactID); // contact ID
             statement.execute();
         }
         catch (Exception e) {
@@ -189,7 +186,7 @@ public class SQLQueries {
             statement.setTimestamp(5, Timestamp.valueOf(start)); // start
             statement.setTimestamp(6, Timestamp.valueOf(end)); // end
             statement.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now())); // last update
-            statement.setString(8, JDBC.getUsername()); // last updated by
+            statement.setInt(8, userID); // last updated by
             statement.setInt(9, ID); // appointment ID
 
 //            statement.setInt(12, customerID); // customer ID
