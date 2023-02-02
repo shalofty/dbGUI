@@ -6,6 +6,7 @@ import helper.JDBC;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -47,7 +48,7 @@ public class aioController implements Initializable {
     @FXML public ObservableList<String> times = FXCollections.observableArrayList("08:00", "09:00", "10:00", "11:00", "12:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00");
     @FXML public TextArea descriptionTextArea;
     @FXML public TableView<Appointments> viewAppointments;
-    @FXML public RadioButton viewByWeek, viewByMonth;
+    @FXML public RadioButton radioWeek, radioMonth;
     @FXML public TableColumn<?, ?> appIDColumn, titleColumn, descriptionColumn, locationColumn, typeColumn, customerIDAppointmentsColumn, userIDColumn, contactColumn, startColumn, endColumn;
     @FXML public Button addAppointmentButton, modifyAppointmentButton, deleteAppointmentButton, clearSelectionButton;
     @FXML public ObservableList<Appointments> appointmentsList = FXCollections.observableArrayList(AppointmentAccess.allAppointments());
@@ -74,7 +75,55 @@ public class aioController implements Initializable {
 
     // Appointments Tab Methods ////////////////////////////////////////////////////////////////////////////////////////
     // viewByWeek
+    //  a function that displays appointments that are within 7 days of the current date
+
+
+    // a method that displays appointments that are within 7 days or 30 days of the current date depending on the radio button selected
+    @FXML public void viewWeek() {
+        try {
+            if (radioWeek.isSelected()) { // if the week radio button is selected
+                radioMonth.setSelected(false); // unselect the month radio button
+                appointmentsList.clear(); // clear the appointments list
+                appointmentsList.addAll(AppointmentAccess.allAppointmentsWithin7Days()); // add all appointments within 7 days to the list
+                viewAppointments.setItems(appointmentsList); // set the appointments list to the table view
+            }
+            else {
+                appointmentsList.clear(); // clear the appointments list
+                appointmentsList.addAll(AppointmentAccess.allAppointments()); // add all appointments to the list
+                viewAppointments.setItems(appointmentsList); // set the appointments list to the table view
+            }
+        }
+        catch (Exception e) {
+            ExceptionHandler.eAlert(e);
+        }
+        finally {
+            trackActivity(); // track activity
+        }
+    }
+
     // viewByMonth
+    //  a function that displays appointments that are within 30 days of the current date
+    @FXML public void viewMonth() {
+        try {
+            if (radioMonth.isSelected()) { // if the month radio button is selected
+                radioWeek.setSelected(false); // unselect the week radio button
+                appointmentsList.clear(); // clear the appointments list
+                appointmentsList.addAll(AppointmentAccess.allAppointmentsWithin30Days()); // add all appointments within 30 days to the list
+                viewAppointments.setItems(appointmentsList); // set the appointments list to the table view
+            }
+            else {
+                appointmentsList.clear(); // clear the appointments list
+                appointmentsList.addAll(AppointmentAccess.allAppointments()); // add all appointments to the list
+                viewAppointments.setItems(appointmentsList); // set the appointments list to the table view
+            }
+        }
+        catch (Exception e) {
+            ExceptionHandler.eAlert(e);
+        }
+        finally {
+            trackActivity(); // track activity
+        }
+    }
 
     // timeConversion methods
     // militaryTime
@@ -448,11 +497,12 @@ public class aioController implements Initializable {
                 postalField.setText(selectedCustomer.getPostalCode()); // set the postal code field
                 phoneField.setText(selectedCustomer.getCustomerPhone()); // set the phone field
 
+                // Brace yourselves, code is coming
                 // set the division menu
                 countryMenu.valueProperty().addListener((observable, oldValue, newValue) -> {
                     int selectedCountryID = 0;  // create a variable to hold the country ID
-                    try {
-                        // get the country ID
+                    try { // try to get the selected country ID
+                        // loop through the countries
                         for (Country country : CountryAccess.getCountries()) {
                             // if the country name equals the new value, set the country ID
                             if (country.getCountryName().equals(newValue)) {
@@ -465,7 +515,7 @@ public class aioController implements Initializable {
                     }
 
                     ObservableList<String> relatedDivisionsList = FXCollections.observableArrayList(); // create a new observable list
-                    try {
+                    try { // try to get the selected country division using the country ID
                         // loop through the divisions
                         for (DivisionAccess division : DivisionAccess.getDivisions()) {
                             // if the country ID matches the selected country ID, add the division name to the list
@@ -884,6 +934,12 @@ public class aioController implements Initializable {
         }
     }
 
+    /**
+     * initialize initializes the controller class
+     * @param url
+     * @param resourceBundle
+     * uses a lambda expression to set the cell value factory for the contact column considering constraints of the entity relationships
+     * */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         try {

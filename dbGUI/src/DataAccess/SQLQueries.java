@@ -25,6 +25,8 @@ public class SQLQueries {
     public static final String SELECT_USER_ID_STATEMENT = "SELECT User_ID FROM users WHERE User_Name = ?";
     /// Appointment Statements
     public static final String GET_ALL_APPOINTMENTS_STATEMENT = "SELECT * from appointments";
+    public static final String GET_ALL_APPOINTMENTS_WITHIN_7_DAYS_STATEMENT = "SELECT * FROM appointments WHERE Start BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 7 DAY);";
+    public static final String GET_ALL_APPOINTMENTS_WITHIN_30_DAYS_STATEMENT = "SELECT * FROM appointments WHERE start BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 30 DAY)";
     public static final String GET_ALL_APPOINTMENTS_BY_CUSTOMER_ID_STATEMENT = "SELECT * FROM appointments WHERE Customer_ID = ?";
     public static final String DELETE_FROM_APPOINTMENTS_STATEMENT = "DELETE FROM appointments WHERE Appointment_ID=?";
     public static final String APPOINTMENT_INSERT_STATEMENT =
