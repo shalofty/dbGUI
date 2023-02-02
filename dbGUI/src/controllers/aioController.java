@@ -440,8 +440,9 @@ public class aioController implements Initializable {
         try {
             connection = JDBC.openConnection(); // establish connection
             selectedCustomer = viewCustomers.getSelectionModel().getSelectedItem(); // get the selected customer
+            System.out.println(selectedCustomer);
             if (selectedCustomer != null) {
-                customerIDField.setText(String.valueOf(selectedCustomer.getCustomerID())); // set the customer ID field
+                customerRecordsIDField.setText(String.valueOf(selectedCustomer.getCustomerID())); // set the customer ID field
                 customerNameField.setText(selectedCustomer.getCustomerName()); // set the customer name field
                 addressField.setText(selectedCustomer.getCustomerAddress()); // set the address field
                 postalField.setText(selectedCustomer.getPostalCode()); // set the postal code field
@@ -502,6 +503,7 @@ public class aioController implements Initializable {
         }
         catch (Exception e) {
             ExceptionHandler.eAlert(e); // eAlert method
+            throw e;
         }
         finally {
             if (connection != null) {
@@ -518,7 +520,7 @@ public class aioController implements Initializable {
     public void clearSelectedCustomer() throws RuntimeException {
         try {
             selectedCustomer = null; // clear the selected customer
-            customerIDField.clear(); // clear the customer ID field
+            customerRecordsIDField.clear(); // clear the customer ID field
             customerNameField.clear(); // clear the customer name field
             addressField.clear(); // clear the address field
             postalField.clear(); // clear the postal code field
@@ -891,6 +893,8 @@ public class aioController implements Initializable {
             InetAddress ip = InetAddress.getLocalHost(); // get the local host
             userCreds.setText(JDBC.getUsername() + " from " + ip); // set the user credentials label to the username
             connection = JDBC.openConnection();// establishing connection to db
+            customersMenu.setItems(CustomerAccess.getAllCustomerNameStrings()); // Sets the customer combo box
+            customersMenu.setValue("Customers"); // Sets the customer combo box
             startTimeBox.setItems(times); // set the start time box items to the times list
             endTimeBox.setItems(times); // set the end time box items to the times list
             // set up the Appointment columns in the table, must match the names of the variables in the model
