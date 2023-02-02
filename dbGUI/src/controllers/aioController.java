@@ -174,7 +174,6 @@ public class aioController implements Initializable {
             LocalDateTime endDateTime = LocalDateTime.of(localEndDate, localEndTime); // End Date and Time
             ZonedDateTime easternStartDateTime = startDateTime.atZone(easternZoneId); // Start Date and Time in Eastern Time Zone
             ZonedDateTime easternEndDateTime = endDateTime.atZone(easternZoneId); // End Date and Time in Eastern Time Zone
-
             LocalTime startTime = easternStartDateTime.toLocalTime(); // Start Time in Eastern Time Zone
             LocalTime endTime = easternEndDateTime.toLocalTime(); // End Time in Eastern Time Zone
             LocalTime openTime = LocalTime.of(7, 59); // Business Hours Start Time
@@ -224,25 +223,18 @@ public class aioController implements Initializable {
 
     /**
      * clearSelection clears the selected appointment and resets the buttons to their default state
+     * uses lambda expressions to clear the text fields, combo boxes and date pickers
      * */
     @FXML public void clearSelectedAppointment() {
         try {
             selectedAppointment = null; // Clears the selected appointment
-            appIDField.clear(); // Clears the appointment ID text field
-            titleField.clear(); // Clears the appointment title text field
             contactsMenu.setValue("Contacts"); // Clears the contact combo box
             customersMenu.setValue("Customers"); // Clears the customer combo box
-            userIDField.clear(); // Clears the user ID text field
-            locationField.clear(); // Clears the appointment location text field
-            typeField.clear(); // Clears the appointment type text field
-            descriptionTextArea.clear(); // Clears the appointment description text field
-            startDatePicker.setValue(null); // Clears the start date picker
-            endDatePicker.setValue(null); // Clears the end date picker
-            startTimeBox.setValue(null); // Clears the start time combo box
-            endTimeBox.setValue(null); // Clears the end time combo box
             addAppointmentButton.setDisable(false); // Enables the add appointment button
-            modifyAppointmentButton.setDisable(true); // Disables the modify appointment button
-            deleteAppointmentButton.setDisable(true); // Disables the delete appointment button
+            Stream.of(appIDField, titleField).forEach(TextInputControl::clear); // Clears the appointment ID and title text fields
+            Stream.of(userIDField, locationField, typeField, descriptionTextArea).forEach(TextInputControl::clear); // Clears the user ID, location, description and type text fields
+            Stream.of(startDatePicker, endDatePicker, startTimeBox, endTimeBox).forEach(c->c.setValue(null)); // Clears the start date, end date, start time and end time combo boxes
+            Stream.of(modifyAppointmentButton, deleteAppointmentButton).forEach(c->c.setDisable(true)); // Disables the modify and delete appointment buttons
         }
         catch (Exception e) {
             ExceptionHandler.eAlert(e); // eAlert method
@@ -564,20 +556,19 @@ public class aioController implements Initializable {
     /**
      * clearSelectedCustomer clears the selected customer
      * enables add button, disables modify and delete buttons to prevent pointer exceptions
+     * uses lambda expressions to clear the text fields, menus, and disable the buttons
      * */
     public void clearSelectedCustomer() throws RuntimeException {
         try {
             selectedCustomer = null; // clear the selected customer
-            customerRecordsIDField.clear(); // clear the customer ID field
-            customerNameField.clear(); // clear the customer name field
-            addressField.clear(); // clear the address field
-            postalField.clear(); // clear the postal code field
-            phoneField.clear(); // clear the phone field
-            countryMenu.valueProperty().set(null); // clear the country menu
-            divisionMenu.valueProperty().set(null); // clear the division menu
+            Stream.of(customerRecordsIDField,
+                    customerNameField,
+                    addressField,
+                    postalField,
+                    phoneField).forEach(TextInputControl::clear); // clear the text fields
+            Stream.of(countryMenu, divisionMenu).forEach(c -> c.setValue(null)); // clear the country and division menus
+            Stream.of(modifyCustomerButton, deleteCustomerButton).forEach(c -> c.setDisable(true)); // disable modify and delete buttons
             addCustomerButton.setDisable(false); // enable add button
-            modifyCustomerButton.setDisable(true); // disable modify button
-            deleteCustomerButton.setDisable(true); // disable delete button
         }
         catch (Exception e) {
             ExceptionHandler.eAlert(e); // eAlert method
