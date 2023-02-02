@@ -28,8 +28,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.ResourceBundle;
 
-import static models.Contacts.getContactID;
-
 public class aioController implements Initializable {
 
     @FXML public Connection connection = null;
@@ -43,6 +41,7 @@ public class aioController implements Initializable {
     @FXML public TextField appIDField, contactIDField, userIDField, locationField, customerIDField, typeField, titleField;
     @FXML public DatePicker startDatePicker, endDatePicker;
     @FXML public ComboBox<String> contactsMenu = new ComboBox<>();
+    @FXML public ComboBox<String> customersMenu = new ComboBox<>();
     @FXML public ComboBox<String> startTimeBox = new ComboBox<>();
     @FXML public ComboBox<String> endTimeBox = new ComboBox<>();
     @FXML public ObservableList<String> times = FXCollections.observableArrayList("08:00", "09:00", "10:00", "11:00", "12:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00");
@@ -66,7 +65,7 @@ public class aioController implements Initializable {
     @FXML public Button modifyCustomerButton;
     @FXML public Button deleteCustomerButton;
     @FXML public Button clearSelectedCustomerButton;
-    @FXML public ObservableList<Customers> customersList = FXCollections.observableArrayList(CustomerAccess.getCustomers());
+    @FXML public ObservableList<Customers> customersList = FXCollections.observableArrayList(CustomerAccess.getAllCustomers());
     @FXML public ObservableList<DivisionAccess> divisionsList = FXCollections.observableArrayList();
     @FXML public ObservableList<String> countryNames = FXCollections.observableArrayList();
     @FXML public ObservableList<String> divisionNames = FXCollections.observableArrayList();
@@ -153,9 +152,10 @@ public class aioController implements Initializable {
                 appIDField.setText(String.valueOf(selectedAppointment.getAppointmentID())); // Sets the appointment ID text field
                 titleField.setText(String.valueOf(selectedAppointment.getAppointmentTitle())); // Sets the appointment title text field
                 contactsMenu.setValue(String.valueOf(selectedAppointment.getContactName(selectedAppointment.getContactID()))); // Sets the contact combo box
+                customersMenu.setItems(CustomerAccess.getAllCustomerNameStrings()); // Sets the customer combo box
+                customersMenu.setValue(String.valueOf(selectedAppointment.getCustomerName(selectedAppointment.getCustomerID()))); // Sets the customer combo box
                 userIDField.setText(String.valueOf(selectedAppointment.getUserID())); // Sets the user ID text field
                 locationField.setText(String.valueOf(selectedAppointment.getAppointmentLocation())); // Sets the appointment location text field
-                customerIDField.setText(String.valueOf(selectedAppointment.getCustomerID())); // Sets the customer ID text field
                 typeField.setText(String.valueOf(selectedAppointment.getAppointmentType())); // Sets the appointment type text field
                 descriptionTextArea.setText(String.valueOf(selectedAppointment.getAppointmentDescription())); // Sets the appointment description text field
                 startDatePicker.setValue(selectedAppointment.getStartTime().toLocalDate()); // Sets the start date picker
@@ -183,10 +183,10 @@ public class aioController implements Initializable {
             selectedAppointment = null; // Clears the selected appointment
             appIDField.clear(); // Clears the appointment ID text field
             titleField.clear(); // Clears the appointment title text field
-            contactsMenu.setValue(null); // Clears the contact combo box
+            contactsMenu.setValue("Contacts"); // Clears the contact combo box
+            customersMenu.setValue("Customers"); // Clears the customer combo box
             userIDField.clear(); // Clears the user ID text field
             locationField.clear(); // Clears the appointment location text field
-            customerIDField.clear(); // Clears the customer ID text field
             typeField.clear(); // Clears the appointment type text field
             descriptionTextArea.clear(); // Clears the appointment description text field
             startDatePicker.setValue(null); // Clears the start date picker
@@ -868,7 +868,7 @@ public class aioController implements Initializable {
     public void updateCustomers() {
         try {
             viewCustomers.getItems().clear(); // clear the items in the table
-            ObservableList<Customers> newCustomers = FXCollections.observableArrayList(CustomerAccess.getCustomers()); // create a new observable list
+            ObservableList<Customers> newCustomers = FXCollections.observableArrayList(CustomerAccess.getAllCustomers()); // create a new observable list
             connection = JDBC.openConnection(); // establish connection
             viewCustomers.setItems(newCustomers); // set the items in the table to the customers list
         }
@@ -918,9 +918,7 @@ public class aioController implements Initializable {
                 }
                 return new SimpleStringProperty(contactName); // return the contact name
             });
-            viewAppointments.getColumns().add(contactColumn); // add the contact column to the table
-
-
+            viewAppointments.getColumns().add(3, contactColumn); // add the contact column to the table
 
             // set up the Customer columns in the table, must match the names of the variables in the model
             customerIDRecordsColumn.setCellValueFactory(new PropertyValueFactory<>("customerID")); // set the cell value factory for the customer ID column

@@ -2,6 +2,7 @@ package models;
 
 import DataAccess.ContactAccess;
 import Exceptions.ExceptionHandler;
+import DataAccess.CustomerAccess;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -92,6 +93,17 @@ public final class Appointments {
      * */
     public int getCustomerID() {
         return customerID;
+    }
+
+    // get customerName from customerID
+    public String getCustomerName(int customerID) throws SQLException {
+        try{
+            return CustomerAccess.getCustomerNameByID(customerID);
+        }
+        catch (Exception e) {
+            ExceptionHandler.eAlert(e);
+            throw e;
+        }
     }
 
     /**

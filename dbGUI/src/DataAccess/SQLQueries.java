@@ -89,6 +89,7 @@ public class SQLQueries {
             "Last_Updated_By = ?, " +
             "Division_ID = ? " +
             "WHERE Customer_ID = ?";
+    public static final String SELECT_CUSTOMER_NAME_BY_ID_STATEMENT = "SELECT Customer_Name FROM customers WHERE Customer_ID = ?";
     public static final String DELETE_FROM_CUSTOMERS_STATEMENT = "DELETE FROM customers WHERE Customer_ID=?";
     public static final String SELECT_DIVISIONS = "SELECT * from first_level_divisions";
     public static final String SELECT_ID_BY_DIVISION = "SELECT Division_ID FROM first_level_divisions WHERE Division = ?";

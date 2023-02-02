@@ -5,7 +5,6 @@ import helper.JDBC;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.Alert;
 import models.Customers;
 
 import java.sql.Connection;
@@ -23,7 +22,7 @@ public class CustomerAccess {
     /**
      * Observablelist that takes all customer data from the database.
      * */
-    public static ObservableList<Customers> getCustomers() {
+    public static ObservableList<Customers> getAllCustomers() {
         try {
             ObservableList<Customers> customersObservableList = FXCollections.observableArrayList();
             connection = JDBC.openConnection();
@@ -43,6 +42,70 @@ public class CustomerAccess {
                 // add each customer to the observable list of
                 customersObservableList.add(customer);}
             return customersObservableList; // return the observable list
+        } catch (SQLException e) {
+            ExceptionHandler.eAlert(e);
+            throw new RuntimeException(e);
+        }
+        finally {
+            if (set != null) {
+                set = null; // nullify set
+            }
+            if (statement != null) {
+                statement = null; // nullify statement
+            }
+            if (connection != null) {
+                connection = JDBC.closeConnection(); // close the connection
+            }
+        }
+    }
+
+    /**
+     * getAllCustomerNameStrings method to get all customer names from the database.
+     * used to populate the customer name combo box
+     * @return an observable list of strings
+     * */
+    public static ObservableList<String> getAllCustomerNameStrings() {
+        try {
+            ObservableList<String> customerNames = FXCollections.observableArrayList(); // create an observable list of strings
+            connection = JDBC.openConnection(); // open the connection
+            statement = connection.prepareStatement(SQLQueries.SELECT_CUSTOMERS_STATEMENT); // prepare the statement
+            set = statement.executeQuery(); // execute the statement
+            while (set.next()) { // while there is a next result
+                String customerName = set.getString("Customer_Name"); // get the customer name
+                customerNames.add(customerName); // add the customer name to the observable list
+            }
+            return customerNames; // return the observable list
+        } catch (SQLException e) {
+            ExceptionHandler.eAlert(e);
+            throw new RuntimeException(e);
+        } finally {
+            if (set != null) {
+                set = null;
+            }
+            if (statement != null) {
+                statement = null;
+            }
+            if (connection != null) {
+                connection = JDBC.closeConnection();
+            }
+        }
+    }
+
+    /**
+     * getCustomerNameByID method to get a customer name by ID
+     * @param customerID the customer ID
+     * @return the customer name
+     * */
+    public static String getCustomerNameByID(int customerID) {
+        try {
+            connection = JDBC.openConnection(); // open the connection
+            statement = connection.prepareStatement(SQLQueries.SELECT_CUSTOMER_NAME_BY_ID_STATEMENT); // prepare the statement
+            statement.setInt(1, customerID); // set the customer ID
+            set = statement.executeQuery(); // execute the statement
+            if (set.next()) { // if there is a next result
+                return set.getString("Customer_Name"); // return the customer name
+            }
+            return null;
         } catch (SQLException e) {
             ExceptionHandler.eAlert(e);
             throw new RuntimeException(e);
