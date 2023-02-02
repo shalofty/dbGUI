@@ -6,7 +6,6 @@ import helper.JDBC;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -25,9 +24,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.Optional;
-import java.util.Random;
-import java.util.ResourceBundle;
+import java.util.*;
+import java.util.stream.Stream;
 
 public class aioController implements Initializable {
 
@@ -35,7 +33,7 @@ public class aioController implements Initializable {
     @FXML public PreparedStatement preparedStatement = null;
     @FXML public Tab appointmentsTab, customersTab, reportsTab, logTab;
     @FXML public TextArea logTextArea, dbActivityTextArea;
-    @FXML public static Button exportButton, exportDBButton;
+    @FXML public static Button exportButton, exportDBButton, logoutButton;
 
     // Appointments Variables ///////////////////////////////////////////////////////////////////////////////////////////
     @FXML public Label userCreds;
@@ -74,11 +72,10 @@ public class aioController implements Initializable {
 
 
     // Appointments Tab Methods ////////////////////////////////////////////////////////////////////////////////////////
-    // viewByWeek
-    //  a function that displays appointments that are within 7 days of the current date
 
-
-    // a method that displays appointments that are within 7 days or 30 days of the current date depending on the radio button selected
+    /**
+     * viewByWeek - a method that displays appointments that are within 7 days of the current date
+     * */
     @FXML public void viewWeek() {
         try {
             if (radioWeek.isSelected()) { // if the week radio button is selected
@@ -101,8 +98,9 @@ public class aioController implements Initializable {
         }
     }
 
-    // viewByMonth
-    //  a function that displays appointments that are within 30 days of the current date
+    /**
+     * viewByMonth - a method that displays appointments that are within 30 days of the current date
+     * */
     @FXML public void viewMonth() {
         try {
             if (radioMonth.isSelected()) { // if the month radio button is selected
@@ -352,7 +350,7 @@ public class aioController implements Initializable {
             String newContact = contactsMenu.getValue(); // get contact
             int newContactID = ContactAccess.findContactID(newContact); // find contact ID
 
-            if (!emptyAppointmentField()) {
+            if (appointmentFormVerification()) {
                 // adding the new appointment to the database
                 SQLQueries.INSERT_INTO_APPOINTMENTS_METHOD(connection,
                                                     newAppointmentID,
@@ -397,7 +395,7 @@ public class aioController implements Initializable {
             alert.setHeaderText("Confirmation");
             alert.setContentText("Are you sure you want to modify this appointment?");
             Optional<ButtonType> result = alert.showAndWait();
-            if (selectedAppointment != null && result.isPresent() && result.get() == ButtonType.OK && !emptyAppointmentField()) {
+            if (selectedAppointment != null && result.isPresent() && result.get() == ButtonType.OK && appointmentFormVerification()) {
                 int appointmentID = selectedAppointment.getAppointmentID(); // getting the appointment ID
                 String title = titleField.getText(); // getting the title
                 String location = locationField.getText(); // getting the location
@@ -609,7 +607,7 @@ public class aioController implements Initializable {
                 String division = divisionMenu.getValue(); // get customer division
                 int divisionID = DivisionAccess.getDivisionID(division); // get division ID
                 // if the fields are not empty, insert into customers table
-                if (!emptyCustomerField()) {
+                if (customerFormVerification()) {
                     SQLQueries.INSERT_INTO_CUSTOMERS_METHOD(connection,
                                                             customerID,
                                                             customerName,
@@ -665,7 +663,7 @@ public class aioController implements Initializable {
                 String division = divisionMenu.getValue(); // get customer division
                 int divisionID = DivisionAccess.getDivisionID(division); // get division ID
                 // if the customer fields are not empty, update the customer
-                if (!emptyCustomerField()) {
+                if (customerFormVerification()) {
                     SQLQueries.UPDATE_CUSTOMER_METHOD(connection,
                                                         customerID,
                                                         customerName,
@@ -673,6 +671,13 @@ public class aioController implements Initializable {
                                                         postalCode,
                                                         phone,
                                                         divisionID); // update customers
+                }
+                else {
+                    Alert emptyFieldsAlert = new Alert(Alert.AlertType.ERROR);
+                    emptyFieldsAlert.setTitle("Error");
+                    emptyFieldsAlert.setHeaderText("Error Adding Customer");
+                    emptyFieldsAlert.setContentText("Please fill out all fields.");
+                    emptyFieldsAlert.showAndWait();
                 }
                 clearSelectedCustomer(); // clear selected customer
             } else {
@@ -770,32 +775,70 @@ public class aioController implements Initializable {
     }
 
     /**
-     * checks if a field is empty and returns true if it is
+     * customerLocationsLambda checks if the countryMenu and divisionMenu are empty
+     * @return true if either field is empty
+     * uses lambda expressions to check if any of the fields are empty
      * */
-    public boolean emptyAppointmentField() {
-        return appIDField.getText().isEmpty()
-                || contactIDField.getText().isEmpty()
-                || userIDField.getText().isEmpty()
-                || locationField.getText().isEmpty()
-                || customerIDField.getText().isEmpty()
-                || typeField.getText().isEmpty()
-                || titleField.getText().isEmpty()
-                || startTimeBox.getValue() == null
-                || endTimeBox.getValue() == null
-                || startDatePicker.getValue() == null
-                || endDatePicker.getValue() == null; // return true if any of the fields are empty
+    public boolean customerLocationsCheck() {
+        return Stream.of(countryMenu.getValue(),
+                divisionMenu.getValue()).noneMatch(Objects::isNull);
     }
 
     /**
-     * checks if a field is empty and returns true if it is
+     * customerFieldsLambda checks if any of the customer fields are empty
+     * @return true if any of the fields are empty
+     * uses lambda expressions to check if any of the fields are empty
      * */
-    public boolean emptyCustomerField() {
-        return customerNameField.getText().isEmpty()
-                || addressField.getText().isEmpty()
-                || postalField.getText().isEmpty()
-                || phoneField.getText().isEmpty()
-                || countryMenu.getValue() == null
-                || divisionMenu.getValue() == null; // return true if any of the fields are empty
+    public boolean customerFieldsCheck() {
+        return Stream.of(customerNameField.getText(),
+                addressField.getText(),
+                postalField.getText(),
+                phoneField.getText(),
+                countryMenu.getValue(),
+                divisionMenu.getValue()).noneMatch(String::isEmpty);
+    }
+
+    /**
+     * customerFormVerification checks if any of the customer fields are empty
+     * combines the customerFieldsCheck and customerLocationsCheck methods
+     * created for readability
+     * */
+    public boolean customerFormVerification() {
+        return customerFieldsCheck() && customerLocationsCheck(); // return true if both methods return true
+    }
+
+    /**
+     * appointmentTimeLambda checks if startTimeBox, endTImeBox, startDatePicker and endDatePicker are empty
+     * uses lambda expressions to check if any of the fields are empty
+     * */
+    public boolean appointmentTimeCheck() {
+        return Stream.of(startTimeBox.getValue(),
+                endTimeBox.getValue(),
+                startDatePicker.getValue(),
+                endDatePicker.getValue()).noneMatch(Objects::isNull);
+    }
+
+    /**
+     * appointmentFieldsLambda checks if any of the appointment fields are empty
+     *  uses lambda expressions to check if any of the fields are empty
+     * */
+    public boolean appointmentFieldsCheck() {
+        return Stream.of(appIDField.getText(),
+                contactIDField.getText(),
+                userIDField.getText(),
+                locationField.getText(),
+                customerIDField.getText(),
+                typeField.getText(),
+                titleField.getText()).noneMatch(String::isEmpty);
+    }
+
+    /**
+     * appointmentFormVerification checks if any of the appointment fields are empty
+     * combines the appointmentFieldsCheck and appointmentTimeCheck methods
+     * created for readability
+     * */
+    public boolean appointmentFormVerification() {
+        return appointmentFieldsCheck() && appointmentTimeCheck(); // return true if both methods return true
     }
 
     // Initialize and Support  /////////////////////////////////////////////////////////////////////////////////////////
@@ -876,7 +919,7 @@ public class aioController implements Initializable {
      * trackLogins tracks the logins and displays them in the dbActivityTextArea
      * */
     @FXML public void trackLogins() {
-        try (BufferedReader eyeSpy = new BufferedReader(new FileReader("ActivityLog/loginActivity.txt"));) {
+        try (BufferedReader eyeSpy = new BufferedReader(new FileReader("ActivityLog/loginActivity.txt"))) {
             StringBuilder agentZero = new StringBuilder(); // create a string builder
             String spyLine = eyeSpy.readLine(); // read the first line
             while (spyLine != null) {
@@ -936,9 +979,10 @@ public class aioController implements Initializable {
 
     /**
      * initialize initializes the controller class
-     * @param url
-     * @param resourceBundle
+     * @param url is the url
+     * @param resourceBundle is the resource bundle
      * uses a lambda expression to set the cell value factory for the contact column considering constraints of the entity relationships
+     * also incorporates streams to filter countries and first level divisions
      * */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {

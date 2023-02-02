@@ -27,15 +27,15 @@
                      <children>
                         <TableView fx:id="viewAppointments" layoutX="14.0" layoutY="18.0" onMouseClicked="#selectAppointment" prefHeight="326.0" prefWidth="879.0">
                            <columns>
-                              <TableColumn fx:id="appIDColumn" prefWidth="105.0" text="Appointment ID" />
-                              <TableColumn fx:id="titleColumn" prefWidth="68.0" text="Title" />
-                              <TableColumn fx:id="descriptionColumn" prefWidth="98.0" text="Description" />
-                              <TableColumn fx:id="typeColumn" text="Type" />
+                              <TableColumn fx:id="appIDColumn" prefWidth="46.0" text="ID" />
+                              <TableColumn fx:id="titleColumn" prefWidth="79.0" text="Title" />
+                              <TableColumn fx:id="descriptionColumn" prefWidth="136.0" text="Description" />
+                              <TableColumn fx:id="typeColumn" prefWidth="90.0" text="Type" />
                               <TableColumn fx:id="locationColumn" prefWidth="97.0" text="Location" />
                               <TableColumn fx:id="startColumn" prefWidth="91.0" text="Start Time" />
                               <TableColumn fx:id="endColumn" prefWidth="87.0" text="End Time" />
                               <TableColumn fx:id="customerIDAppointmentsColumn" prefWidth="92.0" text="Customer ID" />
-                              <TableColumn fx:id="userIDColumn" prefWidth="74.0" text="User ID" />
+                              <TableColumn fx:id="userIDColumn" prefWidth="75.0" text="User ID" />
                            </columns>
                         </TableView>
                         <GridPane layoutX="14.0" layoutY="379.0" prefHeight="343.0" prefWidth="153.0">
@@ -78,6 +78,7 @@
                         <Button fx:id="clearSelectionButton" layoutX="14.0" layoutY="352.0" mnemonicParsing="false" onAction="#clearSelectedAppointment" prefHeight="25.0" prefWidth="152.0" text="Clear Selection" />
                         <Label layoutX="179.0" layoutY="356.0" prefHeight="17.0" prefWidth="77.0" text="Logged in as:" />
                         <Label fx:id="userCreds" layoutX="256.0" layoutY="356.0" prefHeight="17.0" prefWidth="489.0" text="credentials" textFill="#9c2bf8" />
+                        <Button fx:id="logoutButton" layoutX="830.0" layoutY="689.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="64.0" text="Logout" />
                      </children>
                   </AnchorPane>
             </content>
