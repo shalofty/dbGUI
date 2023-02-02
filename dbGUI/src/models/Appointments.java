@@ -1,9 +1,16 @@
 package models;
 
+import DataAccess.ContactAccess;
+import Exceptions.ExceptionHandler;
+
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 
 public final class Appointments {
-    private final String appointmentTitle, appointmentDescription, appointmentLocation, appointmentType;
+    private final String appointmentTitle;
+    private final String appointmentDescription;
+    private final String appointmentLocation;
+    private final String appointmentType;
     private final int appointmentID;
     public final int customerID, userID, contactID;
     private final LocalDateTime startTime, endTime;
@@ -93,6 +100,21 @@ public final class Appointments {
      * */
     public int getContactID() {
         return contactID;
+    }
+
+    /**
+     * getContactName method to get contact name from contactID
+     * @return contactName from contactID as a string from ContactAccess
+     * practically redundent, should've just called in the controller, but I'm too lazy to change it :P
+     * */
+    public String getContactName(int contactID) throws SQLException {
+        try{
+            return ContactAccess.getContactName(contactID);
+        }
+        catch (Exception e) {
+            ExceptionHandler.eAlert(e);
+            throw e;
+        }
     }
 
     /**

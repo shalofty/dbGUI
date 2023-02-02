@@ -1,8 +1,14 @@
 package models;
 
+import helper.JDBC;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
+import java.sql.PreparedStatement;
+
 public final class Contacts {
     public final String contactName, contactEmail;
-    public final int contactID;
+    public static int contactID;
 
     public Contacts(int contactID, String contactName, String contactEmail) {
         if (contactID <= 0) {
@@ -14,7 +20,7 @@ public final class Contacts {
         if (contactEmail == null || contactEmail.isEmpty()) {
             throw new IllegalArgumentException("Invalid contact email");
         }
-        this.contactID = contactID;
+        Contacts.contactID = contactID;
         this.contactName = contactName;
         this.contactEmail = contactEmail;
     }
@@ -36,7 +42,7 @@ public final class Contacts {
     /**
      * @return contactID
      * */
-    public int getContactID() {
+    public static int getContactID() {
         return contactID;
     }
 

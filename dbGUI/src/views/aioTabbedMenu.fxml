@@ -29,14 +29,13 @@
                            <columns>
                               <TableColumn fx:id="appIDColumn" prefWidth="105.0" text="Appointment ID" />
                               <TableColumn fx:id="titleColumn" prefWidth="68.0" text="Title" />
-                              <TableColumn fx:id="descriptionColumn" prefWidth="116.0" text="Description" />
-                              <TableColumn fx:id="contactIDColumn" prefWidth="98.0" text="Contact ID" />
-                              <TableColumn fx:id="userIDColumn" prefWidth="79.0" text="User ID" />
-                              <TableColumn fx:id="locationColumn" prefWidth="85.0" text="Location" />
-                              <TableColumn fx:id="startColumn" prefWidth="86.0" text="Start Time" />
+                              <TableColumn fx:id="descriptionColumn" prefWidth="98.0" text="Description" />
+                              <TableColumn fx:id="userIDColumn" text="User ID" />
+                              <TableColumn fx:id="locationColumn" prefWidth="97.0" text="Location" />
+                              <TableColumn fx:id="startColumn" prefWidth="91.0" text="Start Time" />
                               <TableColumn fx:id="endColumn" prefWidth="87.0" text="End Time" />
                               <TableColumn fx:id="customerIDAppointmentsColumn" prefWidth="92.0" text="Customer ID" />
-                              <TableColumn fx:id="typeColumn" prefWidth="60.0" text="Type" />
+                              <TableColumn fx:id="typeColumn" prefWidth="74.0" text="Type" />
                            </columns>
                         </TableView>
                         <GridPane layoutX="14.0" layoutY="379.0" prefHeight="343.0" prefWidth="153.0">
@@ -59,7 +58,6 @@
                            <children>
                               <TextField fx:id="appIDField" disable="true" editable="false" prefHeight="13.0" prefWidth="153.0" promptText="Appointment ID" />
                               <TextField fx:id="titleField" promptText="Title" GridPane.rowIndex="1" />
-                              <TextField fx:id="contactIDField" promptText="Contact ID" GridPane.rowIndex="2" />
                               <TextField fx:id="userIDField" promptText="User ID" GridPane.rowIndex="3" />
                               <TextField fx:id="locationField" promptText="Location" GridPane.rowIndex="4" />
                               <TextField fx:id="customerIDField" editable="false" promptText="Auto-Generated ID" GridPane.rowIndex="9" />
@@ -68,6 +66,7 @@
                               <DatePicker fx:id="endDatePicker" prefHeight="25.0" prefWidth="161.0" promptText="End Date" GridPane.rowIndex="6" />
                               <ComboBox fx:id="startTimeBox" prefWidth="150.0" promptText="Start Time" GridPane.rowIndex="7" />
                               <ComboBox fx:id="endTimeBox" prefWidth="150.0" promptText="End Time" GridPane.rowIndex="8" />
+                              <ComboBox fx:id="contactsMenu" prefHeight="22.0" prefWidth="153.0" promptText="Contacts" GridPane.rowIndex="2" />
                            </children>
                         </GridPane>
                         <TextArea fx:id="descriptionTextArea" layoutX="175.0" layoutY="384.0" prefHeight="237.0" prefWidth="718.0" promptText="Appointment Description..." />
@@ -124,10 +123,10 @@
                      <children>
                         <TextArea fx:id="logTextArea" editable="false" layoutX="14.0" layoutY="30.0" prefHeight="348.0" prefWidth="880.0" />
                         <Button fx:id="exportButton" layoutX="14.0" layoutY="385.0" mnemonicParsing="false" onAction="#exportActivity" prefHeight="25.0" prefWidth="109.0" text="Export" />
-                        <TextArea fx:id="dbActivityTextArea" layoutX="14.0" layoutY="457.0" prefHeight="257.0" prefWidth="880.0" />
+                        <TextArea fx:id="dbActivityTextArea" layoutX="14.0" layoutY="457.0" prefHeight="257.0" prefWidth="586.0" />
                         <Separator layoutY="419.0" prefHeight="6.0" prefWidth="908.0" />
-                        <Label layoutX="14.0" layoutY="6.0" text="User Activity" />
-                        <Label layoutX="14.0" layoutY="432.0" text="Database Activity" />
+                        <Label layoutX="14.0" layoutY="6.0" prefHeight="17.0" prefWidth="119.0" text="Session Activity" />
+                        <Label layoutX="14.0" layoutY="432.0" text="User Activity" />
                      </children></AnchorPane>
                </content>
             </Tab>

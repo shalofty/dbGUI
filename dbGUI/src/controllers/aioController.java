@@ -3,9 +3,9 @@ package controllers;
 import DataAccess.*;
 import Exceptions.ExceptionHandler;
 import helper.JDBC;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -16,6 +16,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -26,6 +27,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.Random;
 import java.util.ResourceBundle;
+
+import static models.Contacts.getContactID;
 
 public class aioController implements Initializable {
 
@@ -39,13 +42,14 @@ public class aioController implements Initializable {
     @FXML public Label userCreds;
     @FXML public TextField appIDField, contactIDField, userIDField, locationField, customerIDField, typeField, titleField;
     @FXML public DatePicker startDatePicker, endDatePicker;
+    @FXML public ComboBox<String> contactsMenu = new ComboBox<>();
     @FXML public ComboBox<String> startTimeBox = new ComboBox<>();
     @FXML public ComboBox<String> endTimeBox = new ComboBox<>();
     @FXML public ObservableList<String> times = FXCollections.observableArrayList("08:00", "09:00", "10:00", "11:00", "12:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00");
     @FXML public TextArea descriptionTextArea;
     @FXML public TableView<Appointments> viewAppointments;
     @FXML public RadioButton viewByWeek, viewByMonth;
-    @FXML public TableColumn<?, ?> appIDColumn, titleColumn, descriptionColumn, locationColumn, typeColumn, customerIDAppointmentsColumn, userIDColumn, contactIDColumn, startColumn, endColumn;
+    @FXML public TableColumn<?, ?> appIDColumn, titleColumn, descriptionColumn, locationColumn, typeColumn, customerIDAppointmentsColumn, userIDColumn, contactColumn, startColumn, endColumn;
     @FXML public Button addAppointmentButton, modifyAppointmentButton, deleteAppointmentButton, clearSelectionButton;
     @FXML public ObservableList<Appointments> appointmentsList = FXCollections.observableArrayList(AppointmentAccess.allAppointments());
     @FXML public Appointments selectedAppointment;
@@ -148,7 +152,7 @@ public class aioController implements Initializable {
             if (selectedAppointment != null) {
                 appIDField.setText(String.valueOf(selectedAppointment.getAppointmentID())); // Sets the appointment ID text field
                 titleField.setText(String.valueOf(selectedAppointment.getAppointmentTitle())); // Sets the appointment title text field
-                contactIDField.setText(String.valueOf(selectedAppointment.getContactID())); // Sets the contact ID text field
+                contactsMenu.setValue(String.valueOf(selectedAppointment.getContactName(selectedAppointment.getContactID()))); // Sets the contact combo box
                 userIDField.setText(String.valueOf(selectedAppointment.getUserID())); // Sets the user ID text field
                 locationField.setText(String.valueOf(selectedAppointment.getAppointmentLocation())); // Sets the appointment location text field
                 customerIDField.setText(String.valueOf(selectedAppointment.getCustomerID())); // Sets the customer ID text field
@@ -165,7 +169,6 @@ public class aioController implements Initializable {
         }
         catch (Exception e) {
             ExceptionHandler.eAlert(e); // eAlert method
-            throw e;
         }
         finally {
             trackActivity(); // trackActivity method
@@ -180,7 +183,7 @@ public class aioController implements Initializable {
             selectedAppointment = null; // Clears the selected appointment
             appIDField.clear(); // Clears the appointment ID text field
             titleField.clear(); // Clears the appointment title text field
-            contactIDField.clear(); // Clears the contact ID text field
+            contactsMenu.setValue(null); // Clears the contact combo box
             userIDField.clear(); // Clears the user ID text field
             locationField.clear(); // Clears the appointment location text field
             customerIDField.clear(); // Clears the customer ID text field
@@ -297,7 +300,8 @@ public class aioController implements Initializable {
             String endDT = dtf.format(utcEndDT);
             int newCustomerID = Integer.parseInt(customerIDField.getText()); // get customer ID
             int newUserID = Integer.parseInt(userIDField.getText()); // get user ID
-            int newContactID = Integer.parseInt(contactIDField.getText()); // get contact ID
+            String newContact = contactsMenu.getValue(); // get contact
+            int newContactID = ContactAccess.findContactID(newContact); // find contact ID
 
             if (!emptyAppointmentField()) {
                 // adding the new appointment to the database
@@ -745,6 +749,40 @@ public class aioController implements Initializable {
     // Initialize and Support  /////////////////////////////////////////////////////////////////////////////////////////
 
     /**
+     * fifteenMinuteAlert checks if there is an appointment within fifteen minutes of the current local time
+     * if there is an appointment within fifteen minutes, an alert is displayed
+     * */
+    public void fifteenMinuteAlert() {
+        try {
+            connection = JDBC.openConnection(); // establish connection
+            JDBC.setPreparedStatement(connection, SQLQueries.GET_ALL_APPOINTMENTS_STATEMENT); // set the prepared statement
+            PreparedStatement statement = JDBC.getPreparedStatement(); // get the prepared statement
+            ResultSet resultSet = statement.executeQuery(); // execute the query
+            // loop through the result set
+            while (resultSet.next()) {
+                // if the appointment is within fifteen minutes of the current local time
+                if (resultSet.getTimestamp("Start").toLocalDateTime().isBefore(LocalDateTime.now().plusMinutes(15)) &&
+                        resultSet.getTimestamp("Start").toLocalDateTime().isAfter(LocalDateTime.now())) {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Appointment Alert");
+                    alert.setHeaderText("Appointment within 15 minutes");
+                    alert.setContentText("You have an appointment within 15 minutes.");
+                    alert.showAndWait();
+                }
+            }
+        }
+        catch (Exception e) {
+            ExceptionHandler.eAlert(e); // eAlert method
+        }
+        finally {
+            if (connection != null) {
+                connection = JDBC.closeConnection(); // close the connection
+            }
+            trackActivity(); // track activity
+        }
+    }
+
+    /**
      * trackActivity tracks the activity of the user and logs it to the activity log
      * viewable in the activity log tab
      * */
@@ -789,7 +827,12 @@ public class aioController implements Initializable {
         try (BufferedReader eyeSpy = new BufferedReader(new FileReader("ActivityLog/loginActivity.txt"));) {
             StringBuilder agentZero = new StringBuilder(); // create a string builder
             String spyLine = eyeSpy.readLine(); // read the first line
-            agentZero.append(spyLine).append("\n"); // append the first line
+            while (spyLine != null) {
+                spyLine = eyeSpy.readLine(); // read the next line
+                if (spyLine != null) {
+                    agentZero.append(spyLine).append("\n"); // append the line to the string builder
+                }
+            }
             dbActivityTextArea.appendText(agentZero.toString()); // append the string builder to the text area
         }
         catch (Exception e) {
@@ -844,13 +887,12 @@ public class aioController implements Initializable {
         try {
             // TODO
             trackLogins(); // track logins
-            userCreds.setText(JDBC.getUsername()); // set the user credentials label to the username
-            // establishing connection to db
-            connection = JDBC.openConnection();
-
+            fifteenMinuteAlert(); // fifteen minute alert
+            InetAddress ip = InetAddress.getLocalHost(); // get the local host
+            userCreds.setText(JDBC.getUsername() + " from " + ip); // set the user credentials label to the username
+            connection = JDBC.openConnection();// establishing connection to db
             startTimeBox.setItems(times); // set the start time box items to the times list
             endTimeBox.setItems(times); // set the end time box items to the times list
-
             // set up the Appointment columns in the table, must match the names of the variables in the model
             appIDColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentID")); // set the cell value factory for the appointment ID column
             titleColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentTitle")); // set the cell value factory for the appointment title column
@@ -859,9 +901,26 @@ public class aioController implements Initializable {
             typeColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentType")); // set the cell value factory for the appointment type column
             customerIDAppointmentsColumn.setCellValueFactory(new PropertyValueFactory<>("customerID")); // set the cell value factory for the appointment customer ID column
             userIDColumn.setCellValueFactory(new PropertyValueFactory<>("userID")); // set the cell value factory for the appointment user ID column
-            contactIDColumn.setCellValueFactory(new PropertyValueFactory<>("contactID")); // set the cell value factory for the appointment contact ID column
             startColumn.setCellValueFactory(new PropertyValueFactory<>("startTime")); // set the cell value factory for the appointment start time column
             endColumn.setCellValueFactory(new PropertyValueFactory<>("endTime")); // set the cell value factory for the appointment end time column
+
+            // lambda expression to set the cell value factory for the contact column
+            ObservableList<Appointments> appointmentsObservableList = FXCollections.observableArrayList(AppointmentAccess.allAppointments()); // create an observable list of appointments
+            TableColumn<Appointments, String> contactColumn = new TableColumn<>("Contact"); // create a new table column for the contact
+            contactColumn.setCellValueFactory(cellData -> { // set the cell value factory for the contact column
+                Appointments appointment = cellData.getValue(); // get the value of the cell
+                int contactID = appointment.getContactID(); // get the contact ID
+                String contactName = ""; // create a string for the contact name
+                try { // try to get the contact name
+                    contactName = ContactAccess.getContactName(contactID); // get the contact name
+                } catch (SQLException e) { // catch the exception
+                    ExceptionHandler.eAlert(e); // eAlert method
+                }
+                return new SimpleStringProperty(contactName); // return the contact name
+            });
+            viewAppointments.getColumns().add(contactColumn); // add the contact column to the table
+
+
 
             // set up the Customer columns in the table, must match the names of the variables in the model
             customerIDRecordsColumn.setCellValueFactory(new PropertyValueFactory<>("customerID")); // set the cell value factory for the customer ID column
@@ -881,9 +940,11 @@ public class aioController implements Initializable {
             divisionsList.stream().map(Division::getDivisionName).forEach(divisionObservableList::add); // add the division names to the observable list
             divisionMenu.setItems(divisionObservableList); // set the items in the division menu to the observable list
 
+            ObservableList<String> contactsList = FXCollections.observableArrayList(ContactAccess.getContactNames()); // get the list of contact names from the db
+            contactsMenu.setItems(contactsList); // set the items in the contact menu to the observable list
+
             viewAppointments.setItems(appointmentsList); // set the items in the table to the appointments list
             viewCustomers.setItems(customersList); // set the items in the table to the customers list
-
             connection = JDBC.closeConnection(); // close the connection
         }
         catch (Exception e) {
@@ -894,7 +955,6 @@ public class aioController implements Initializable {
                 connection = JDBC.closeConnection(); // close the connection
             }
             trackActivity(); // track activity
-            exportActivity(); // export activity after every session
         }
     }
 }

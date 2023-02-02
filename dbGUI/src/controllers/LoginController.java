@@ -29,10 +29,12 @@ import controllers.aioController;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URL;
 import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.ResourceBundle;
@@ -98,12 +100,14 @@ public class LoginController implements Initializable {
         else {
             success = "FAILED";
         }
-        String time = LocalDateTime.now().toString().replace(":", "-"); // gets the current time and replaces the : with -
-        String userName = usernameField.getText(); // gets the username from the username field
-        String userLog = time + ": User: " + userName + ", " + success + "\n"; // creates a string variable called userLog
-        String fileName = "loginActivity.txt"; // creates a string variable called fileName
-        String filePath = "ActivityLog/"; // creates a string variable called filePath
+
         try {
+            InetAddress ip = InetAddress.getLocalHost(); // gets the local host
+            String time = LocalDateTime.now().toString().replace(":", "-"); // gets the current time and replaces the : with -
+            String userName = usernameField.getText(); // gets the username from the username field
+            String userLog = ip + ", Time: " + time + ": User: " + userName + ", " + success + "\n"; // creates a string variable called userLog
+            String fileName = "loginActivity.txt"; // creates a string variable called fileName
+            String filePath = "ActivityLog/"; // creates a string variable called filePath
             FileWriter fileWriter = new FileWriter(filePath + fileName, true); // creates a new FileWriter object
             fileWriter.write(userLog); // writes the userLog string to the file
             fileWriter.close(); // closes the file

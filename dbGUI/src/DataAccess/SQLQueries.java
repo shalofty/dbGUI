@@ -9,6 +9,8 @@ import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import Exceptions.ExceptionHandler;
+import models.Contacts;
+import models.Users;
 
 public class SQLQueries {
     /**
@@ -52,6 +54,7 @@ public class SQLQueries {
             "Last_Updated_By = ? WHERE Appointment_ID = ?";
     /// Contacts Statements
     public static final String SELECT_ALL_CONTACTS_STATEMENT = "SELECT * from contacts";
+    public static String SELECT_CONTACTS_BY_ID_STATEMENT = "SELECT Contact_Name FROM contacts WHERE Contact_ID = ?";
     public static final String SELECT_CONTACTS_BY_NAME_STATEMENT = "SELECT Contact_ID FROM contacts WHERE Contact_Name = ?";
     /// Customer Statements
     public static final String SELECT_CUSTOMERS_STATEMENT =
@@ -135,8 +138,8 @@ public class SQLQueries {
             statement.setTimestamp(10, Timestamp.valueOf(LocalDateTime.now())); // last update
             statement.setString(11, JDBC.getUsername()); // last updated by
             statement.setInt(12, customerID); // customer ID
-            statement.setInt(13, ContactAccess.findContactID(userID)); // user ID
-            statement.setInt(14, ContactAccess.findContactID(contactID)); // contact ID
+            statement.setInt(13, Users.getUserID()); // user ID
+            statement.setInt(14, Contacts.getContactID()); // contact ID
             statement.execute();
         }
         catch (Exception e) {

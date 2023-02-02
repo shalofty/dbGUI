@@ -55,14 +55,15 @@ public class ContactAccess {
      * @throws SQLException
      * @return contactID
      */
-    public static int findContactID(int contactID) throws SQLException {
+    public static int findContactID(String contactName) throws SQLException {
         try {
             connection = JDBC.openConnection(); // open connection
             statement = connection.prepareStatement(SQLQueries.SELECT_CONTACTS_BY_NAME_STATEMENT); // prepare statement
-            statement.setInt(1, contactID); // set contact name
+            statement.setString(1, contactName); // set contact name
             set = statement.executeQuery(); // execute query
+            int contactID = 0;
             while (set.next()) {
-                if (contactID == set.getInt("Contact_ID")) {
+                if (contactName == set.getString("Contact_ID")) {
                     contactID = set.getInt("Contact_ID"); // get contact ID
                 }
             }
@@ -101,6 +102,66 @@ public class ContactAccess {
         catch (SQLException e) {
             ExceptionHandler.eAlert(e); // handle exception
             throw e;
+        }
+    }
+
+    // a method that generates an ObservableList of all contacts to be used in aioController in a ComboBox
+    public static ObservableList<String> getContactNames() throws SQLException {
+        ObservableList<String> contactsObservableList = FXCollections.observableArrayList(); // create observable list
+        try {
+            connection = JDBC.openConnection(); // open connection
+            statement = connection.prepareStatement(SQLQueries.SELECT_ALL_CONTACTS_STATEMENT); // prepare statement
+            set = statement.executeQuery(); // execute query
+            // loop through result set
+            while (set.next()) {
+                contactsObservableList.add(set.getString("Contact_Name")); // add contact to observable list
+            }
+            return contactsObservableList; // return observable list
+        }
+        catch (SQLException e) {
+            ExceptionHandler.eAlert(e); // handle exception
+            throw e;
+        }
+        finally {
+            if (set != null) {
+                set.close(); // close result set
+            }
+            if (statement != null) {
+                statement.close(); // close statement
+            }
+            if (connection != null) {
+                connection.close(); // close connection
+            }
+        }
+    }
+
+    // a method that generates a String Contact_Name from a given Contact_ID
+    public static String getContactName(int contactID) throws SQLException {
+        try {
+            connection = JDBC.openConnection(); // open connection
+            statement = connection.prepareStatement(SQLQueries.SELECT_CONTACTS_BY_ID_STATEMENT); // prepare statement
+            statement.setInt(1, contactID); // set contact ID
+            set = statement.executeQuery(); // execute query
+            String contactName = "";
+            while (set.next()) {
+                contactName = set.getString("Contact_Name"); // get contact name
+            }
+            return contactName; // return contact name
+        }
+        catch (SQLException e) {
+            ExceptionHandler.eAlert(e); // handle exception
+            throw e;
+        }
+        finally {
+            if (set != null) {
+                set.close(); // close result set
+            }
+            if (statement != null) {
+                statement.close(); // close statement
+            }
+            if (connection != null) {
+                connection.close(); // close connection
+            }
         }
     }
 }

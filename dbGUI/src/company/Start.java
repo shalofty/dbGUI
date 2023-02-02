@@ -10,10 +10,9 @@ public class Start extends Application {
 
     @Override
     public void start(Stage stage) throws Exception{
-//        JDBC.openConnection(); // Test connection to database
-        FXMLLoader fxmlLoader = new FXMLLoader(Start.class.getResource("/views/loginMenu.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 630, 415);
-        stage.setResizable(false);
+        FXMLLoader fxmlLoader = new FXMLLoader(Start.class.getResource("/views/loginMenu.fxml")); // sets the location of the loader to the loginMenu.fxml file
+        Scene scene = new Scene(fxmlLoader.load(), 630, 415); // sets the scene to the loginMenu.fxml file
+        stage.setResizable(false); // sets the stage to not be resizable
         stage.setTitle("Schedulizer | Stephan Haloftis | shaloft@wgu.edu");
         stage.setScene(scene);
         stage.show();
@@ -21,7 +20,7 @@ public class Start extends Application {
 
     public static void main(String[] args) throws Exception {
         try {
-            launch(args);
+            launch(args); // launches the application
         }
         catch (Exception e) {
             ExceptionHandler.eAlert(e);

@@ -21,6 +21,6 @@ public class AppointmentMapper {
         int customerID = resultSet.getInt("Customer_ID"); // Customer_ID
         int userID = resultSet.getInt("User_ID"); // User_ID
         int contactID = resultSet.getInt("Contact_ID"); // Contact_ID
-        return new Appointments(appointmentID, appointmentTitle, appointmentDescription, appointmentLocation, appointmentType, startTime, endTime, customerID, userID, contactID);
+        return new Appointments(appointmentID, appointmentTitle, appointmentDescription, appointmentLocation, appointmentType, startTime, endTime, customerID, contactID, userID);
     }
 }

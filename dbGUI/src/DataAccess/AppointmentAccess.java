@@ -83,4 +83,6 @@ public class AppointmentAccess {
         ObservableList<Appointments> appointmentsObservableList = allAppointmentsByCustomerID(customerID); // get all appointments for customer
         return appointmentsObservableList.isEmpty(); // return true if list is empty
     }
+
+
 }

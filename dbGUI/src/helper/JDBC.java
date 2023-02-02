@@ -3,8 +3,12 @@ package helper;
 import controllers.LoginController;
 import javafx.scene.control.Alert;
 
+import java.net.InetAddress;
 import java.sql.*;
 import java.time.Instant;
+import java.time.LocalTime;
+import java.time.ZoneId;
+
 import Exceptions.ExceptionHandler;
 
 /**
@@ -32,11 +36,13 @@ public abstract class JDBC {
     public static Connection openConnection()
     {
         try {
+            InetAddress address = InetAddress.getLocalHost(); // get the local host address
             Class.forName(driver); // Locate Driver
             connection = DriverManager.getConnection(jdbcUrl, userName, passWord); // Reference Connection object
             StackTraceElement trace = Thread.currentThread().getStackTrace()[2];
-            System.out.println(Instant.now() +
+            System.out.println(LocalTime.now(ZoneId.systemDefault()) +
                                 ": " +
+                                address + " " +
                                 trace.getFileName() +
                                 " ln" +
                                 trace.getLineNumber() +
@@ -68,14 +74,21 @@ public abstract class JDBC {
      * */
     public static Connection closeConnection() {
         try {
+            InetAddress address = InetAddress.getLocalHost(); // get the local host address
             StackTraceElement trace = Thread.currentThread().getStackTrace()[2];
-            System.out.println(Instant.now() +
-                                ": " + trace.getFileName() +
-                                " ln" + trace.getLineNumber() +
-                                ". " + " DISCONNECTED("  + userName +
-                                ", " + databaseName +
-                                ") SESSION ID: " +
-                                connection);
+            System.out.println(LocalTime.now(ZoneId.systemDefault()) +
+                                            ": " +
+                                            address + " " +
+                                            trace.getFileName() +
+                                            " ln" +
+                                            trace.getLineNumber() +
+                                            ". " +
+                                            " DISCONNECTED(" +
+                                            userName +
+                                            ", " +
+                                            databaseName +
+                                            ") SESSION ID: " +
+                                            connection);
             connection.close();
         }
         catch(Exception e)
