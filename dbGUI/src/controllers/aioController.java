@@ -41,6 +41,7 @@ public class aioController implements Initializable {
     @FXML public DatePicker startDatePicker, endDatePicker;
     @FXML public ComboBox<String> contactsMenu = new ComboBox<>();
     @FXML public ComboBox<String> customersMenu = new ComboBox<>();
+    @FXML public ComboBox<String> usersMenu = new ComboBox<>();
     @FXML public ComboBox<String> startTimeBox = new ComboBox<>();
     @FXML public ComboBox<String> endTimeBox = new ComboBox<>();
     @FXML public ObservableList<String> times = FXCollections.observableArrayList("08:00", "09:00", "10:00", "11:00", "12:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00");
@@ -200,7 +201,7 @@ public class aioController implements Initializable {
                 contactsMenu.setValue(String.valueOf(selectedAppointment.getContactName(selectedAppointment.getContactID()))); // Sets the contact combo box
                 customersMenu.setItems(CustomerAccess.getAllCustomerNameStrings()); // Sets the customer combo box
                 customersMenu.setValue(String.valueOf(selectedAppointment.getCustomerName(selectedAppointment.getCustomerID()))); // Sets the customer combo box
-                userIDField.setText(String.valueOf(selectedAppointment.getUserID())); // Sets the user ID text field
+                usersMenu.setValue(String.valueOf(selectedAppointment.getUserName(selectedAppointment.getUserID()))); // Sets the user combo box
                 locationField.setText(String.valueOf(selectedAppointment.getAppointmentLocation())); // Sets the appointment location text field
                 typeField.setText(String.valueOf(selectedAppointment.getAppointmentType())); // Sets the appointment type text field
                 descriptionTextArea.setText(String.valueOf(selectedAppointment.getAppointmentDescription())); // Sets the appointment description text field
@@ -983,6 +984,8 @@ public class aioController implements Initializable {
             InetAddress ip = InetAddress.getLocalHost(); // get the local host
             userCreds.setText(JDBC.getUsername() + " from " + ip); // set the user credentials label to the username
             connection = JDBC.openConnection();// establishing connection to db
+            usersMenu.setItems(UserAccess.getAllUserNames()); // set the user combo box to the user names
+            usersMenu.setValue("Users"); // set the user combo box to the user names
             customersMenu.setItems(CustomerAccess.getAllCustomerNameStrings()); // Sets the customer combo box
             customersMenu.setValue("Customers"); // Sets the customer combo box
             Stream.of(startTimeBox, endTimeBox).forEach(box -> box.setItems(times)); // set the start and end time boxes to the times list

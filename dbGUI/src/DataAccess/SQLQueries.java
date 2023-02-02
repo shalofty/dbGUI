@@ -19,11 +19,12 @@ public class SQLQueries {
      * To make the code look a bit cleaner
      * */
     /// User Statement
-    public static final String INSERT_ON_LOGIN_STATEMENT = "INSERT INTO client_schedule.users " +
+    public static final String INSERT_NEW_USER_STATEMENT = "INSERT INTO client_schedule.users " +
             "(USER_ID, User_Name, Password, Create_Date, Created_By, Last_Update, Last_Updated_By)\n" + "VALUES " +
             "(?, ?, ?, ?, ?, ?, ?);\n";
     public static final String SELECT_ALL_USERS_STATEMENT = "SELECT User_ID, User_Name FROM users"; // select all users
     public static final String SELECT_ALL_USER_IDS_STATEMENT = "SELECT User_ID FROM users"; // select all user IDs
+    public static final String SELECT_ALL_USER_NAMES_STATEMENT = "SELECT User_Name FROM users";
     public static final String SELECT_USER_NAME_STATEMENT = "SELECT User_Name FROM users WHERE User_ID = ?"; // select user name by user ID
     public static final String CHECK_USER = "SELECT * FROM users WHERE User_Name = ? AND Password = ?"; // check user credentials
     public static final String SELECT_USER_ID_STATEMENT = "SELECT User_ID FROM users WHERE User_Name = ?"; // select user ID by user name
