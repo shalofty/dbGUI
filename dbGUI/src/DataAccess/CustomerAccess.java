@@ -122,4 +122,32 @@ public class CustomerAccess {
             }
         }
     }
+
+    // a method to find the customer ID by their name
+    public static int getCustomerIDByName(String customerName) {
+        try {
+            connection = JDBC.openConnection(); // open the connection
+            statement = connection.prepareStatement(SQLQueries.SELECT_CUSTOMER_ID_BY_NAME_STATEMENT); // prepare the statement
+            statement.setString(1, customerName); // set the customer name
+            set = statement.executeQuery(); // execute the statement
+            if (set.next()) { // if there is a next result
+                return set.getInt("Customer_ID"); // return the customer ID
+            }
+            return 0;
+        } catch (SQLException e) {
+            ExceptionHandler.eAlert(e);
+            throw new RuntimeException(e);
+        }
+        finally {
+            if (set != null) {
+                set = null; // nullify set
+            }
+            if (statement != null) {
+                statement = null; // nullify statement
+            }
+            if (connection != null) {
+                connection = JDBC.closeConnection(); // close the connection
+            }
+        }
+    }
 }

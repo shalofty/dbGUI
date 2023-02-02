@@ -3,11 +3,12 @@ package DataAccess;
 import helper.JDBC;
 import javafx.scene.control.Alert;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
 import Exceptions.ExceptionHandler;
 import models.Contacts;
 import models.Users;
@@ -21,14 +22,17 @@ public class SQLQueries {
     public static final String INSERT_ON_LOGIN_STATEMENT = "INSERT INTO client_schedule.users " +
             "(USER_ID, User_Name, Password, Create_Date, Created_By, Last_Update, Last_Updated_By)\n" + "VALUES " +
             "(?, ?, ?, ?, ?, ?, ?);\n";
-    public static final String CHECK_USER = "SELECT * FROM users WHERE User_Name = ? AND Password = ?";
-    public static final String SELECT_USER_ID_STATEMENT = "SELECT User_ID FROM users WHERE User_Name = ?";
+    public static final String SELECT_ALL_USERS_STATEMENT = "SELECT User_ID, User_Name FROM users"; // select all users
+    public static final String SELECT_ALL_USER_IDS_STATEMENT = "SELECT User_ID FROM users"; // select all user IDs
+    public static final String SELECT_USER_NAME_STATEMENT = "SELECT User_Name FROM users WHERE User_ID = ?"; // select user name by user ID
+    public static final String CHECK_USER = "SELECT * FROM users WHERE User_Name = ? AND Password = ?"; // check user credentials
+    public static final String SELECT_USER_ID_STATEMENT = "SELECT User_ID FROM users WHERE User_Name = ?"; // select user ID by user name
     /// Appointment Statements
-    public static final String GET_ALL_APPOINTMENTS_STATEMENT = "SELECT * from appointments";
-    public static final String GET_ALL_APPOINTMENTS_WITHIN_7_DAYS_STATEMENT = "SELECT * FROM appointments WHERE Start BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 7 DAY);";
-    public static final String GET_ALL_APPOINTMENTS_WITHIN_30_DAYS_STATEMENT = "SELECT * FROM appointments WHERE start BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 30 DAY)";
-    public static final String GET_ALL_APPOINTMENTS_BY_CUSTOMER_ID_STATEMENT = "SELECT * FROM appointments WHERE Customer_ID = ?";
-    public static final String DELETE_FROM_APPOINTMENTS_STATEMENT = "DELETE FROM appointments WHERE Appointment_ID=?";
+    public static final String GET_ALL_APPOINTMENTS_STATEMENT = "SELECT * from appointments"; // select all appointments
+    public static final String GET_ALL_APPOINTMENTS_WITHIN_7_DAYS_STATEMENT = "SELECT * FROM appointments WHERE Start BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 7 DAY);"; // select all appointments within 7 days
+    public static final String GET_ALL_APPOINTMENTS_WITHIN_30_DAYS_STATEMENT = "SELECT * FROM appointments WHERE start BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 30 DAY)"; // select all appointments within 30 days
+    public static final String GET_ALL_APPOINTMENTS_BY_CUSTOMER_ID_STATEMENT = "SELECT * FROM appointments WHERE Customer_ID = ?"; // select all appointments by customer ID
+    public static final String DELETE_FROM_APPOINTMENTS_STATEMENT = "DELETE FROM appointments WHERE Appointment_ID=?"; // delete appointment by appointment ID
     public static final String APPOINTMENT_INSERT_STATEMENT =
             "INSERT INTO appointments " +
             "(Appointment_ID, " +
@@ -44,7 +48,7 @@ public class SQLQueries {
             "Last_Updated_By, " +
             "Customer_ID, " +
             "User_ID, " +
-            "Contact_ID) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            "Contact_ID) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)"; // insert appointment
     public static final String UPDATE_APPOINTMENT_STATEMENT =
             "UPDATE appointments SET Title = ?, " +
             "Description = ?, " +
@@ -53,11 +57,11 @@ public class SQLQueries {
             "Start = ?, " +
             "End = ?, " +
             "Last_Update = ?, " +
-            "Last_Updated_By = ? WHERE Appointment_ID = ?";
+            "Last_Updated_By = ? WHERE Appointment_ID = ?"; // update appointment
     /// Contacts Statements
-    public static final String SELECT_ALL_CONTACTS_STATEMENT = "SELECT * from contacts";
-    public static String SELECT_CONTACTS_BY_ID_STATEMENT = "SELECT Contact_Name FROM contacts WHERE Contact_ID = ?";
-    public static final String SELECT_CONTACTS_BY_NAME_STATEMENT = "SELECT Contact_ID FROM contacts WHERE Contact_Name = ?";
+    public static final String SELECT_ALL_CONTACTS_STATEMENT = "SELECT * from contacts"; // select all contacts
+    public static String SELECT_CONTACTS_BY_ID_STATEMENT = "SELECT Contact_Name FROM contacts WHERE Contact_ID = ?"; // select contact name by contact ID
+    public static final String SELECT_CONTACTS_BY_NAME_STATEMENT = "SELECT Contact_ID FROM contacts WHERE Contact_Name = ?"; // select contact ID by contact name
     /// Customer Statements
     public static final String SELECT_CUSTOMERS_STATEMENT =
             "SELECT customers.Customer_ID, " +
@@ -68,7 +72,7 @@ public class SQLQueries {
             "customers.Division_ID, " +
             "first_level_divisions.Division from customers " +
             "INNER JOIN first_level_divisions " +
-            "ON customers.Division_ID = first_level_divisions.Division_ID";
+            "ON customers.Division_ID = first_level_divisions.Division_ID"; // select all customers
     public static final String INSERT_CUSTOMER_STATEMENT =
             "INSERT INTO customers " +
             "(Customer_ID, " +
@@ -80,7 +84,7 @@ public class SQLQueries {
             "Created_By, " +
             "Last_Update, " +
             "Last_Updated_By, " +
-            "Division_ID) VALUES (?,?,?,?,?,?,?,?,?,?)";
+            "Division_ID) VALUES (?,?,?,?,?,?,?,?,?,?)"; // insert customer
     public static final String UPDATE_CUSTOMER_STATEMENT =
             "UPDATE customers " +
             "SET Customer_Name = ?, " +
@@ -90,23 +94,25 @@ public class SQLQueries {
             "Last_Update = ?, " +
             "Last_Updated_By = ?, " +
             "Division_ID = ? " +
-            "WHERE Customer_ID = ?";
-    public static final String SELECT_CUSTOMER_NAME_BY_ID_STATEMENT = "SELECT Customer_Name FROM customers WHERE Customer_ID = ?";
-    public static final String DELETE_FROM_CUSTOMERS_STATEMENT = "DELETE FROM customers WHERE Customer_ID=?";
-    public static final String SELECT_DIVISIONS = "SELECT * from first_level_divisions";
-    public static final String SELECT_ID_BY_DIVISION = "SELECT Division_ID FROM first_level_divisions WHERE Division = ?";
-    public static final String SELECT_COUNTRIES = "SELECT Country_ID, Country FROM countries";
+            "WHERE Customer_ID = ?"; // update customer
+    public static final String SELECT_CUSTOMER_NAME_BY_ID_STATEMENT = "SELECT Customer_Name FROM customers WHERE Customer_ID = ?"; // select customer name by customer ID
+    public static final String SELECT_CUSTOMER_ID_BY_NAME_STATEMENT = "SELECT Customer_ID FROM customers WHERE Customer_Name = ?"; // select customer ID by customer name
+
+    public static final String DELETE_FROM_CUSTOMERS_STATEMENT = "DELETE FROM customers WHERE Customer_ID=?"; // delete customer by customer ID
+    public static final String SELECT_DIVISIONS = "SELECT * from first_level_divisions"; // select all divisions
+    public static final String SELECT_ID_BY_DIVISION = "SELECT Division_ID FROM first_level_divisions WHERE Division = ?"; // select division ID by division name
+    public static final String SELECT_COUNTRIES = "SELECT Country_ID, Country FROM countries"; // select all countries
     public static final String SELECT_COUNTRY_FROM_DIVISION =
             "SELECT countries.Country\n" +
             "FROM countries\n" +
             "JOIN first_level_divisions ON countries.Country_ID = first_level_divisions.Country_ID\n" +
             "JOIN customers ON first_level_divisions.Division_ID = customers.Division_ID\n" +
-            "WHERE customers.Division_ID = ?";
+            "WHERE customers.Division_ID = ?"; // select country by division ID
     public static final String GET_DIVISION_FOR_COUNTRY =
             "SELECT first_level_divisions.Division_ID, first_level_divisions.Division\n" +
             "FROM countries\n" +
             "JOIN first_level_divisions ON countries.Country_ID = first_level_divisions.Country_ID\n" +
-            "WHERE countries.Country = ?";
+            "WHERE countries.Country = ?"; // select division by country name
 
     /// Appointment Methods //////////////////////////////////////////////////////////////////////////
     /**
@@ -123,7 +129,7 @@ public class SQLQueries {
                                                        int customerID,
                                                        int userID,
                                                        int contactID)
-        throws Exception {
+        throws Exception, SQLException {
         try {
             // set the parameters for the prepared statement
             // the order of the parameters must match the order of the columns in the database
@@ -136,6 +142,11 @@ public class SQLQueries {
             statement.setString(5, type); // type
             statement.setString(6, start); // start
             statement.setString(7, end); // end
+
+            // This might work
+//            String[] columns = new String[]{title, description, location, type, start, end}; // array of columns
+//            IntStream.range(0,columns.length).forEach(i-> {try {statement.setString(i+2, columns[i]);} catch (SQLException e) {throw new RuntimeException(e);}}); // set the parameters for the prepared statement
+
             statement.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now())); // create date
             statement.setString(9, JDBC.getUsername()); // created by
             statement.setTimestamp(10, Timestamp.valueOf(LocalDateTime.now())); // last update
@@ -147,7 +158,6 @@ public class SQLQueries {
         }
         catch (Exception e) {
             ExceptionHandler.eAlert(e); // eAlert method
-            throw e;
         }
     }
 

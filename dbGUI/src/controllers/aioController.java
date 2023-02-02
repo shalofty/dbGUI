@@ -302,7 +302,7 @@ public class aioController implements Initializable {
     /**
      * addAppointment adds a new appointment to the database
      * */
-    @FXML public void addAppointment() throws RuntimeException {
+    @FXML public void addAppointment() throws Exception {
         try {
             connection = JDBC.openConnection(); // establish connection, passing into insertIntoAppointment()
             // generating new appointment ID and getting the values from the text fields
@@ -337,10 +337,11 @@ public class aioController implements Initializable {
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:");
             String startDT = dtf.format(utcStartDT);
             String endDT = dtf.format(utcEndDT);
-            int newCustomerID = Integer.parseInt(customerIDField.getText()); // get customer ID
+//            int newCustomerID = Integer.parseInt(customerIDField.getText()); // get customer ID
+            int newCustomerID = CustomerAccess.getCustomerIDByName(customersMenu.getValue()); // find customer ID
             int newUserID = Integer.parseInt(userIDField.getText()); // get user ID
-            String newContact = contactsMenu.getValue(); // get contact
-            int newContactID = ContactAccess.findContactID(newContact); // find contact ID
+            String contactName = contactsMenu.getValue(); // get contact
+            int newContactID = ContactAccess.findContactID(contactName); // find contact ID
 
             if (appointmentFormVerification()) {
                 // adding the new appointment to the database
@@ -368,6 +369,7 @@ public class aioController implements Initializable {
         }
         catch (Exception e) {
             ExceptionHandler.eAlert(e); // eAlert method
+            throw e;
         } finally {
             connection = JDBC.closeConnection(); // close the connection
             updateAppointments(); // update the appointments table
@@ -802,25 +804,22 @@ public class aioController implements Initializable {
      * appointmentTimeLambda checks if startTimeBox, endTImeBox, startDatePicker and endDatePicker are empty
      * uses lambda expressions to check if any of the fields are empty
      * */
-    public boolean appointmentTimeCheck() {
+    public boolean emptyAppMenus() {
         return Stream.of(startTimeBox.getValue(),
-                endTimeBox.getValue(),
-                startDatePicker.getValue(),
-                endDatePicker.getValue()).noneMatch(Objects::isNull);
+                        endTimeBox.getValue(),
+                        startDatePicker.getValue(),
+                        endDatePicker.getValue()).anyMatch(Objects::isNull);
     }
 
     /**
      * appointmentFieldsLambda checks if any of the appointment fields are empty
      *  uses lambda expressions to check if any of the fields are empty
      * */
-    public boolean appointmentFieldsCheck() {
-        return Stream.of(appIDField.getText(),
-                contactIDField.getText(),
-                userIDField.getText(),
-                locationField.getText(),
-                customerIDField.getText(),
-                typeField.getText(),
-                titleField.getText()).noneMatch(String::isEmpty);
+    public boolean emptyAppFields() {
+        return Stream.of(userIDField.getText(),
+                        locationField.getText(),
+                        typeField.getText(),
+                        titleField.getText()).anyMatch(String::isEmpty);
     }
 
     /**
@@ -829,7 +828,7 @@ public class aioController implements Initializable {
      * created for readability
      * */
     public boolean appointmentFormVerification() {
-        return appointmentFieldsCheck() && appointmentTimeCheck(); // return true if both methods return true
+        return !emptyAppFields() && !emptyAppMenus(); // return true if both methods return true
     }
 
     // Initialize and Support  /////////////////////////////////////////////////////////////////////////////////////////
@@ -986,8 +985,8 @@ public class aioController implements Initializable {
             connection = JDBC.openConnection();// establishing connection to db
             customersMenu.setItems(CustomerAccess.getAllCustomerNameStrings()); // Sets the customer combo box
             customersMenu.setValue("Customers"); // Sets the customer combo box
-            startTimeBox.setItems(times); // set the start time box items to the times list
-            endTimeBox.setItems(times); // set the end time box items to the times list
+            Stream.of(startTimeBox, endTimeBox).forEach(box -> box.setItems(times)); // set the start and end time boxes to the times list
+
             // set up the Appointment columns in the table, must match the names of the variables in the model
             appIDColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentID")); // set the cell value factory for the appointment ID column
             titleColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentTitle")); // set the cell value factory for the appointment title column

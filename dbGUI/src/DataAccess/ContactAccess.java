@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Objects;
 
 public class ContactAccess {
     public static Connection connection = null;
@@ -63,7 +64,7 @@ public class ContactAccess {
             set = statement.executeQuery(); // execute query
             int contactID = 0;
             while (set.next()) {
-                if (contactName == set.getString("Contact_ID")) {
+                if (Objects.equals(contactName, set.getString("Contact_ID"))) {
                     contactID = set.getInt("Contact_ID"); // get contact ID
                 }
             }
