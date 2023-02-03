@@ -1,4 +1,7 @@
-package models;
+package Models;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 public final class Customers {
     private final String customerName, customerAddress, postalCode, customerPhone, countryDivision;
@@ -72,6 +75,10 @@ public final class Customers {
      * */
     public int getDivisionID() {
         return divisionID;
+    }
+
+    public static ObservableList<Customers> getCustomersList() {
+        return FXCollections.<Customers>observableArrayList();
     }
 
     /**

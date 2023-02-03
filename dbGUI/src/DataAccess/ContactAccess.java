@@ -1,17 +1,16 @@
 package DataAccess;
 
 import Exceptions.ExceptionHandler;
-import helper.JDBC;
+import Helper.JDBC;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
-import models.Contacts;
+import Models.Contacts;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Objects;
 
 public class ContactAccess {
     public static Connection connection = null;
@@ -108,10 +107,10 @@ public class ContactAccess {
         }
     }
 
-    // a method that generates an ObservableList of all contacts to be used in aioController in a ComboBox
+    // a method that generates an ObservableList of all contacts to be used in CentralNervousSystem in a ComboBox
     /**
      * @return contactsObservableList of contact names
-     * called in aioController initialize method to populate contactComboBox
+     * called in CentralNervousSystem initialize method to populate contactComboBox
      * TESTED ✓
      */
     public static ObservableList<String> getContactNames() throws SQLException {
@@ -146,7 +145,7 @@ public class ContactAccess {
     /**
      * @param contactID contact ID to get contact name
      * @return contactName contact name from contact ID
-     * called in aioController initialize & ContactAccess getContactNames methods
+     * called in CentralNervousSystem initialize & ContactAccess getContactNames methods
      * TESTED ✓
      */
     public static String getContactName(int contactID) throws SQLException {

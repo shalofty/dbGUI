@@ -1,10 +1,4 @@
-package models;
-
-import helper.JDBC;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-
-import java.sql.PreparedStatement;
+package Models;
 
 public final class Contacts {
     public final String contactName, contactEmail;

@@ -1,15 +1,21 @@
 package Exceptions;
 import DataAccess.SQLQueries;
-import helper.JDBC;
+import Helper.JDBC;
 
 import java.sql.*;
 
 public class GateKeeper {
+    /**
+     * verifyTraveler() returns true if the credentials are verified.
+     * @param username the username
+     * @param user_id the user_id
+     * @param password the password
+     * */
     public static boolean verifyTraveler(String username, int user_id, String password) throws Exception {
-        boolean isVerified = false;
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet set = null;
+        boolean isVerified = false; // Initialize the boolean to false
+        Connection connection = null; // Initialize the connection
+        PreparedStatement statement = null; // Initialize the prepared statement
+        ResultSet set = null; // Initialize the result set
 
         try {
             connection = JDBC.openConnection(); // Open a connection to the database

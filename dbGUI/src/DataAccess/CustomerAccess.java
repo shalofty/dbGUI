@@ -1,11 +1,11 @@
 package DataAccess;
 
 import Exceptions.ExceptionHandler;
-import helper.JDBC;
+import Helper.JDBC;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import models.Customers;
+import Models.Customers;
 
 import java.sql.Connection;
 

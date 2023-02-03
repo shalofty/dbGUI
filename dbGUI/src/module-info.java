@@ -8,7 +8,7 @@ module dbGUI {
     opens company;
     opens controllers;
     opens DataAccess;
-    opens helper;
-    opens models;
+    opens Helper;
+    opens Models;
     opens views;
 }

@@ -1,11 +1,11 @@
 package DataAccess;
 
 import Exceptions.ExceptionHandler;
-import helper.JDBC;
+import Helper.JDBC;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
-import models.Users;
+import Models.Users;
 
 import java.sql.*;
 import java.time.LocalDateTime;

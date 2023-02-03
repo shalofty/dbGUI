@@ -1,9 +1,11 @@
-package models;
+package Models;
 
 import DataAccess.ContactAccess;
 import Exceptions.ExceptionHandler;
 import DataAccess.CustomerAccess;
 import DataAccess.UserAccess;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -147,6 +149,10 @@ public final class Appointments {
             ExceptionHandler.eAlert(e);
             throw e;
         }
+    }
+
+    public static ObservableList<Appointments> getAppointmentsList() {
+        return FXCollections.<Appointments>observableArrayList();
     }
 
     /**

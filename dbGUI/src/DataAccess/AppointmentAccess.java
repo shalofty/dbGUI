@@ -1,9 +1,9 @@
 package DataAccess;
 
-import helper.JDBC;
+import Helper.JDBC;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import models.Appointments;
+import Models.Appointments;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

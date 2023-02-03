@@ -10,12 +10,8 @@
 
 package controllers;
 
-import DataAccess.SQLQueries;
-import DataAccess.UserAccess;
 import Exceptions.ExceptionHandler;
-import helper.JDBC;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+import Helper.JDBC;
 import javafx.fxml.FXML;
 
 import javafx.fxml.FXMLLoader;
@@ -25,18 +21,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
-import controllers.aioController;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URL;
-import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
-import java.util.Objects;
 import java.util.ResourceBundle;
 
 public class LoginController implements Initializable {

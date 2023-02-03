@@ -3,7 +3,9 @@ package controllers;
 import DataAccess.*;
 import Exceptions.ExceptionHandler;
 import Exceptions.GateKeeper;
-import helper.JDBC;
+import NumericNexus.NumberGenie;
+import Helper.JDBC;
+import TheAgency.AgentFord;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -11,8 +13,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import models.*;
-import Time.HotTubTimeMachine;
+import Models.*;
+import Merlin.HotTubTimeMachine;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -25,46 +27,44 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.*;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class aioController implements Initializable {
+public class CentralNervousSystem implements Initializable {
 
     @FXML public Connection connection = null;
     @FXML public PreparedStatement preparedStatement = null;
     @FXML public Tab appointmentsTab, customersTab, reportsTab, logTab;
-    @FXML public TextArea logTextArea, dbActivityTextArea;
-    @FXML public static Button exportButton, exportDBButton, logoutButton;
+    @FXML public TextArea nightVisionGoggles, infraredGoggles;
+    @FXML public static Button espionageButton, exportDBButton, logoutButton;
 
     // Appointments Variables ///////////////////////////////////////////////////////////////////////////////////////////
     @FXML public Label userCreds;
     @FXML public TextField appIDField, contactIDField, userIDField, locationField, customerIDField, typeField, titleField;
-    @FXML public DatePicker datePicker, endDatePicker;
-    @FXML public ComboBox<String> contactsMenu = new ComboBox<>();
-    @FXML public ComboBox<String> customersMenu = new ComboBox<>();
-    @FXML public ComboBox<String> usersMenu = new ComboBox<>();
-    @FXML public ComboBox<String> startHourBox = new ComboBox<>();
-    @FXML public ComboBox<String> endHourBox = new ComboBox<>();
-    @FXML public ComboBox<String> startMinBox = new ComboBox<>();
-    @FXML public ComboBox<String> endMinBox = new ComboBox<>();
-    @FXML public ObservableList<String> times = FXCollections.observableArrayList("08:00", "09:00", "10:00", "11:00", "12:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00");
-    @FXML public TextArea descriptionTextArea;
-    @FXML public TableView<Appointments> viewAppointments;
-    @FXML public RadioButton radioWeek, radioMonth;
+    @FXML public DatePicker datePicker;
+    @FXML public ComboBox<String> contactsMenu = new ComboBox<>(); // Contacts Menu
+    @FXML public ComboBox<String> customersMenu = new ComboBox<>(); // Customers Menu
+    @FXML public ComboBox<String> usersMenu = new ComboBox<>(); // Users Menu
+    @FXML public ComboBox<String> startHourBox = new ComboBox<>(); // Start Hour Menu
+    @FXML public ComboBox<String> endHourBox = new ComboBox<>(); // End Hour Menu
+    @FXML public ComboBox<String> startMinBox = new ComboBox<>(); // Start Minute Menu
+    @FXML public ComboBox<String> endMinBox = new ComboBox<>(); // End Minute Menu
+    @FXML public TextArea descriptionTextArea; // Description Text Area
+    @FXML public TableView<Appointments> viewAppointments; // Appointments Table
+    @FXML public RadioButton radioWeek, radioMonth; // Radio Buttons
     @FXML public TableColumn<?, ?> appIDColumn, titleColumn, descriptionColumn, locationColumn, typeColumn, customerIDAppointmentsColumn, userIDColumn, contactColumn, startColumn, endColumn;
     @FXML public Button addAppointmentButton, modifyAppointmentButton, deleteAppointmentButton, clearSelectionButton;
-    @FXML public ObservableList<Appointments> appointmentsList = FXCollections.observableArrayList(AppointmentAccess.allAppointments());
-    @FXML public Appointments selectedAppointment;
+    @FXML public ObservableList<Appointments> appointmentsList = FXCollections.observableArrayList(AppointmentAccess.allAppointments()); // Observable List of Appointments
+    @FXML public Appointments selectedAppointment; // Selected Appointment
 
     // Customer Variables ///////////////////////////////////////////////////////////////////////////////////////////////
     @FXML public TextField customerRecordsIDField, customerNameField, addressField, postalField, phoneField;
-    @FXML public ComboBox<String> countryMenu;
-    @FXML public ComboBox<String> divisionMenu;
+    @FXML public ComboBox<String> countryMenu; // Country Menu
+    @FXML public ComboBox<String> divisionMenu; // Division Menu
     @FXML public ObservableList<String> countryObservableList = FXCollections.observableArrayList();
     @FXML public ObservableList<String> divisionObservableList = FXCollections.observableArrayList();
-    @FXML public TableView<Customers> viewCustomers;
+    @FXML public TableView<Customers> viewCustomers; // Customers Table
     @FXML public TableColumn<?, ?> customerIDRecordsColumn, nameColumn, phoneColumn, addressColumn, postalColumn, divisionColumn;
     @FXML public Button addCustomerButton;
     @FXML public Button modifyCustomerButton;
@@ -75,7 +75,6 @@ public class aioController implements Initializable {
     @FXML public ObservableList<String> countryNames = FXCollections.observableArrayList();
     @FXML public ObservableList<String> divisionNames = FXCollections.observableArrayList();
     @FXML public Customers selectedCustomer;
-
 
     // Appointments Tab Methods ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -100,7 +99,7 @@ public class aioController implements Initializable {
             ExceptionHandler.eAlert(e);
         }
         finally {
-            trackActivity(); // track activity
+            AgentFord.gatherIntel(nightVisionGoggles);
         }
     }
 
@@ -125,88 +124,7 @@ public class aioController implements Initializable {
             ExceptionHandler.eAlert(e);
         }
         finally {
-            trackActivity(); // track activity
-        }
-    }
-
-    // timeConversion methods
-    // militaryTime
-    @FXML public String militaryTime(String time) {
-        String[] timeArray = time.split(":"); // split time string into array
-        int hour = Integer.parseInt(timeArray[0]); // parse hour
-        int minute = Integer.parseInt(timeArray[1]); // parse minute
-        String ampm = timeArray[2].substring(2); // parse am/pm
-
-        if (ampm.equals("PM") && hour != 12) {  // if PM and not 12
-            hour += 12; // add 12 to hour
-        } else if (ampm.equals("AM") && hour == 12) { // if AM and 12
-            hour = 0; // set hour to 0
-        }
-        return String.format("%02d:%02d:00", hour, minute); // return formatted time
-    }
-
-    // converting users localdatetime to UTC
-    @FXML public LocalDateTime convertToUTC(LocalDateTime localDateTime) {
-        try {
-            ZoneId localZone = ZoneId.systemDefault(); // Local Time Zone
-            ZonedDateTime localZonedDateTime = localDateTime.atZone(localZone); // Local Date and Time in Local Time Zone
-            Instant instant = localZonedDateTime.toInstant(); // Instant in UTC
-            return instant.atZone(ZoneOffset.UTC).toLocalDateTime(); // Instant in UTC converted to LocalDateTime
-        }
-        catch (Exception e) {
-            ExceptionHandler.eAlert(e); // eAlert method
-            throw e;
-        }
-        finally {
-            trackActivity(); // trackActivity method
-        }
-    }
-
-    @FXML public LocalDateTime convertFromUTC(LocalDateTime utcDateTime) {
-        try {
-            ZoneId localZone = ZoneId.systemDefault(); // Local Time Zone
-            ZonedDateTime utcZonedDateTime = utcDateTime.atZone(ZoneOffset.UTC); // UTC Date and Time in UTC Time Zone
-            Instant instant = utcZonedDateTime.toInstant(); // Instant in UTC
-            return instant.atZone(localZone).toLocalDateTime(); // Instant in UTC converted to LocalDateTime
-        }
-        catch (Exception e) {
-            ExceptionHandler.eAlert(e); // eAlert method
-            throw e;
-        }
-        finally {
-            trackActivity(); // trackActivity method
-        }
-    }
-
-    /**
-     * isWithinBusinessHours checks if the appointment is within business hours
-     * @param localStartDate - the start date of the appointment
-     * @param localStartTime - the start time of the appointment
-     * @param localEndDate - the end date of the appointment
-     * @param localEndTime - the end time of the appointment
-     * @return - true if the appointment is within business hours, false if not
-     * */
-    @FXML public boolean isWithinBusinessHours(LocalDate localStartDate,
-                                               LocalTime localStartTime,
-                                               LocalDate localEndDate,
-                                               LocalTime localEndTime) {
-        try {
-            ZoneId easternZoneId = ZoneId.of("America/New_York"); // Eastern Time Zone
-            LocalDateTime startDateTime = LocalDateTime.of(localStartDate, localStartTime); // Start Date and Time
-            LocalDateTime endDateTime = LocalDateTime.of(localEndDate, localEndTime); // End Date and Time
-            ZonedDateTime easternStartDateTime = startDateTime.atZone(easternZoneId); // Start Date and Time in Eastern Time Zone
-            ZonedDateTime easternEndDateTime = endDateTime.atZone(easternZoneId); // End Date and Time in Eastern Time Zone
-            LocalTime startTime = easternStartDateTime.toLocalTime(); // Start Time in Eastern Time Zone
-            LocalTime endTime = easternEndDateTime.toLocalTime(); // End Time in Eastern Time Zone
-            LocalTime openTime = LocalTime.of(7, 59); // Business Hours Start Time
-            LocalTime closeTime = LocalTime.of(22, 1); // Business Hours End Time
-            return startTime.isAfter(openTime) && endTime.isBefore(closeTime); // Returns true if appointment is within business hours
-        } catch (Exception e) {
-            ExceptionHandler.eAlert(e); // eAlert method
-            throw e;
-        }
-        finally {
-            trackActivity(); // trackActivity method
+            AgentFord.gatherIntel(nightVisionGoggles); // Gather Intel
         }
     }
 
@@ -245,7 +163,7 @@ public class aioController implements Initializable {
             ExceptionHandler.eAlert(e); // eAlert method
         }
         finally {
-            trackActivity(); // trackActivity method
+            AgentFord.gatherIntel(nightVisionGoggles); // Gather Intel
         }
     }
 
@@ -270,61 +188,7 @@ public class aioController implements Initializable {
             throw e;
         }
         finally {
-            trackActivity(); // trackActivity method
-        }
-    }
-
-    /**
-     * generateAppointmentID generates a new appointment ID
-     * @return newID
-     * */
-    @FXML public int generateAppointmentID() throws RuntimeException {
-        try {
-            Random randy = new Random();
-            int maxID = 9999; // max appointment ID is 9999
-            int newID = randy.nextInt(maxID); // generate new ID
-            // check if the new ID is already in use
-            for (Appointments appointment : appointmentsList) {
-                // if the new ID is already in use, generate a new ID
-                if (appointment.getAppointmentID() == newID) {
-                    return generateAppointmentID();
-                }
-            }
-            return newID; // return the new ID
-        }
-        catch (Exception e) {
-            ExceptionHandler.eAlert(e); // eAlert method
-            throw e;
-        }
-        finally {
-            trackActivity(); // trackActivity method
-        }
-    }
-
-    /**
-     * generateCustomerID generates a new customer ID
-     * @return newID
-     * */
-    @FXML public int generateCustomerID() throws RuntimeException {
-        try {
-            Random randy = new Random();
-            int maxID = 9999; // max customer ID is 9999
-            int newID = randy.nextInt(maxID); // generate new ID
-            // check if the new ID is already in use
-            for (Customers customer : customersList) {
-                // if the new ID is already in use, generate a new ID
-                if (customer.getCustomerID() == newID) {
-                    return generateCustomerID();
-                }
-            }
-            return newID; // return the new ID
-        }
-        catch (Exception e) {
-            ExceptionHandler.eAlert(e); // eAlert method
-            throw e;
-        }
-        finally {
-            trackActivity(); // trackActivity method
+            AgentFord.gatherIntel(nightVisionGoggles); // Gather Intel
         }
     }
 
@@ -342,7 +206,7 @@ public class aioController implements Initializable {
             String password = passwordPrompt(); // passwordPrompt method
             if (result.get() == ButtonType.OK) { // if the user clicks OK
                 // generating new appointment ID and getting the values from the text fields
-                int newAppointmentID = generateAppointmentID(); // generate new appointment ID
+                int newAppointmentID = NumberGenie.magicAppointment(); // generate new appointment ID
                 String newTitle = titleField.getText();  // get title
                 String newDescriptionText = descriptionTextArea.getText(); // get description
                 String newLocation = locationField.getText(); // get location
@@ -370,10 +234,12 @@ public class aioController implements Initializable {
                 String startUTCString = startUTC.toString();
                 String endUTCString = endUTC.toString();
 
-                int newCustomerID = CustomerAccess.getCustomerIDByName(customersMenu.getValue()); // find customer ID
-                String userName = usersMenu.getValue(); // get username
-                int userID = UserAccess.getUserID(userName, password); // get user ID
-                String contactName = contactsMenu.getValue(); // get contact
+                int newCustomerID = CustomerAccess.getCustomerIDByName(customersMenu.getValue()); // find customer ID by name in the database
+
+                String userName = usersMenu.getValue(); // get username from the users menu box
+                int userID = UserAccess.getUserID(userName, password); // get user ID from the database using the username and password
+
+                String contactName = contactsMenu.getValue(); // get contact name from the contacts menu box
                 int contactID = ContactAccess.findContactID(contactName); // find contact ID
 
                 // adding the new appointment to the database
@@ -400,7 +266,7 @@ public class aioController implements Initializable {
         } finally {
             connection = JDBC.closeConnection(); // close the connection
             updateAppointments(); // update the appointments table
-            trackActivity(); // trackActivity method
+            AgentFord.gatherIntel(nightVisionGoggles); // Gather Intel
         }
     }
 
@@ -471,7 +337,7 @@ public class aioController implements Initializable {
         finally {
             connection = JDBC.closeConnection(); // close the connection
             updateAppointments(); // update the appointments table
-            trackActivity(); // track activity
+            AgentFord.gatherIntel(nightVisionGoggles); // Gather Intel
         } throw new RuntimeException("Error: Appointment could not be modified.");
     }
 
@@ -502,7 +368,7 @@ public class aioController implements Initializable {
         finally {
             connection = JDBC.closeConnection(); // close the connection
             updateAppointments(); // update the appointments table
-            trackActivity(); // track activity
+            AgentFord.gatherIntel(nightVisionGoggles); // Gather Intel
         }
     }
 
@@ -586,7 +452,7 @@ public class aioController implements Initializable {
             if (connection != null) {
                 connection = JDBC.closeConnection(); // close the connection
             }
-            trackActivity(); // track activity
+            AgentFord.gatherIntel(nightVisionGoggles); // Gather Intel
         }
     }
 
@@ -611,7 +477,7 @@ public class aioController implements Initializable {
             ExceptionHandler.eAlert(e); // eAlert method
         }
         finally {
-            trackActivity(); // track activity
+            AgentFord.gatherIntel(nightVisionGoggles); // Gather Intel
         }
     }
 
@@ -626,7 +492,7 @@ public class aioController implements Initializable {
             result = alert.showAndWait();
             if (result.isPresent() && result.get() == ButtonType.OK) {
                 connection = JDBC.openConnection(); // establish connection
-                int customerID = generateCustomerID(); // get customer id
+                int customerID = NumberGenie.magicCustomer(); // get customer id
                 String customerName = customerNameField.getText(); // get customer name
                 String address = addressField.getText(); // get customer address
                 String postalCode = postalField.getText(); // get customer postal code
@@ -664,7 +530,7 @@ public class aioController implements Initializable {
                 connection = JDBC.closeConnection(); // close the connection
             }
             updateCustomers(); // update customers tableview
-            trackActivity(); // track activity
+            AgentFord.gatherIntel(nightVisionGoggles); // Gather Intel
         }
     }
 
@@ -717,7 +583,7 @@ public class aioController implements Initializable {
         }
         finally {
             updateCustomers(); // update customers tableview
-            trackActivity(); // track activity
+            AgentFord.gatherIntel(nightVisionGoggles); // Gather Intel
         }
 
     }
@@ -753,7 +619,7 @@ public class aioController implements Initializable {
         }
         finally {
             updateCustomers(); // update customers tableview
-            trackActivity(); // track activity
+            AgentFord.gatherIntel(nightVisionGoggles); // Gather Intel
         }
     }
 
@@ -787,7 +653,7 @@ public class aioController implements Initializable {
             if (connection != null) {
                 connection = JDBC.closeConnection(); // close the connection
             }
-            trackActivity(); // track activity
+            AgentFord.gatherIntel(nightVisionGoggles); // Gather Intel
         }
     }
 
@@ -892,7 +758,7 @@ public class aioController implements Initializable {
             throw e;
         }
         finally {
-            trackActivity();
+            AgentFord.gatherIntel(nightVisionGoggles); // Gather Intel
         }
         return null;
     }
@@ -929,66 +795,15 @@ public class aioController implements Initializable {
             if (connection != null) {
                 connection = JDBC.closeConnection(); // close the connection
             }
-            trackActivity(); // track activity
+            AgentFord.gatherIntel(nightVisionGoggles); // Gather Intel
         }
     }
 
     /**
-     * trackActivity tracks the activity of the user and logs it to the activity log
-     * viewable in the activity log tab
+     * reportBack gathers intel, reports back to HQ when espionageButton is triggered
      * */
-    @FXML public void trackActivity() {
-        try {
-            StackTraceElement trace = Thread.currentThread().getStackTrace()[2]; // get the stack trace
-            String codeLog = trace.getFileName() + " . Line" + trace.getLineNumber() + ". " + trace.getMethodName() + "()"; // get the file name, line number, and method name
-            String userLog = Instant.now() + " User: " + JDBC.getUsername() + ". Session ID: " + JDBC.getConnection() + ". "; // get the username, connection, and time
-            logTextArea.appendText(userLog + codeLog + "\n"); // append the log to the text area
-        }
-        catch (Exception e) {
-            ExceptionHandler.eAlert(e);
-            throw e;
-        }
-    }
-
-    /**
-     * exportActivity exports the activity log to a text file in the ActivityLog folder
-     * when the export button is clicked
-     * */
-    @FXML public void exportActivity() {
-        try {
-            String time = String.valueOf(LocalDateTime.now()).replace(":", "-"); // replace : with -
-            String userName = JDBC.getUsername(); // get username
-            String fileName = time + "_" + userName + ".txt"; // create file name
-            String filePath = "ActivityLog/"; // create file path
-            FileWriter fileWriter = new FileWriter(filePath + fileName); // create file writer
-            fileWriter.write(logTextArea.getText()); // write to file
-            fileWriter.close(); // close file writer
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
-        }
-        finally {
-            trackActivity(); // track activity
-        }
-    }
-
-    /**
-     * trackLogins tracks the logins and displays them in the dbActivityTextArea
-     * */
-    @FXML public void trackLogins() {
-        try (BufferedReader eyeSpy = new BufferedReader(new FileReader("ActivityLog/loginActivity.txt"))) {
-            StringBuilder agentZero = new StringBuilder(); // create a string builder
-            String spyLine = eyeSpy.readLine(); // read the first line
-            while (spyLine != null) {
-                spyLine = eyeSpy.readLine(); // read the next line
-                if (spyLine != null) {
-                    agentZero.append(spyLine).append("\n"); // append the line to the string builder
-                }
-            }
-            dbActivityTextArea.appendText(agentZero.toString()); // append the string builder to the text area
-        }
-        catch (Exception e) {
-            ExceptionHandler.eAlert(e);
-        }
+    @FXML public void reportBack() {
+        AgentFord.deBriefing(nightVisionGoggles); // deBriefing method
     }
 
     /**
@@ -1044,7 +859,7 @@ public class aioController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         try {
             // TODO
-            trackLogins(); // track logins
+            AgentFord.frontDoorSurveillance(infraredGoggles); // Front Door Surveillance, tracks logins
             fifteenMinuteAlert(); // fifteen minute alert
             InetAddress ip = InetAddress.getLocalHost(); // get the local host
             userCreds.setText(JDBC.getUsername() + " from " + ip); // set the user credentials label to the username
@@ -1125,7 +940,7 @@ public class aioController implements Initializable {
             if (connection != null) {
                 connection = JDBC.closeConnection(); // close the connection
             }
-            trackActivity(); // track activity
+            AgentFord.gatherIntel(nightVisionGoggles); // Gather Intel
         }
     }
 }
