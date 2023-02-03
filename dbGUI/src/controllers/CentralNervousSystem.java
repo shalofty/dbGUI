@@ -197,7 +197,7 @@ public class CentralNervousSystem implements Initializable {
             confirm.setContentText("Are you sure you want to add this appointment?"); // set content text
             Optional<ButtonType> result = confirm.showAndWait(); // show alert and wait for user input
             GateKeeper.collectCredentials(); // collect credentials
-            String password = GateKeeper.getPassword(); // get password
+            String password = GateKeeper.getNewPassWord(); // get password
             // if the user clicks OK and enters a password
             // if the user clicks OK
             // generating new appointment ID and getting the values from the text fields
@@ -284,8 +284,8 @@ public class CentralNervousSystem implements Initializable {
             Optional<ButtonType> result = alert.showAndWait(); // show the alert
             if (selectedAppointment != null && result.get() == ButtonType.OK && result.isPresent()) { // if the user clicks OK
                 GateKeeper.collectCredentials(); // collect credentials
-                String collectedUsername = GateKeeper.getUsername();
-                String collectedPassword = GateKeeper.getPassword();
+                String collectedUsername = GateKeeper.getNewUserName();
+                String collectedPassword = GateKeeper.getNewPassWord();
                 int appointmentID = selectedAppointment.getAppointmentID(); // getting the appointment ID
                 String title = selectedAppointment.getAppointmentTitle(); // getting the title
                 String location = selectedAppointment.getAppointmentLocation(); // getting the location

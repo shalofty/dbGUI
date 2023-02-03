@@ -1,5 +1,15 @@
 package models;
 
+import dataAccess.SQLQueries;
+import helper.JDBC;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 public class Users {
     private final String userName, userPassword;
     private int userID;
@@ -50,5 +60,32 @@ public class Users {
      * */
     public int getUserID() {
         return userID;
+    }
+
+    /**
+     * getAllUsers() used to get all users from the database
+     * @return ObservableList<Users><
+     * */
+    public static ObservableList<Users> getAllUsers() throws SQLException {
+        try {
+            ObservableList<Users> users = FXCollections.observableArrayList(); // create an observable list
+            Connection connection = JDBC.openConnection();  // open connection
+            String sql = "SELECT * FROM users";  // sql statement
+            PreparedStatement statement = connection.prepareStatement(SQLQueries.GET_ALL_USERS);  // set the prepared statement
+            ResultSet set = statement.executeQuery();  // execute the query
+            while (set.next()) {
+                int userID = set.getInt("User_ID");
+                String userName = set.getString("User_Name");
+                String userPassword = set.getString("Password");
+                Users user = Users.create(userID, userName, userPassword);
+                users.add(user);
+            }
+            connection.close();  // close the connection
+            return users; // return the observable list
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
 }

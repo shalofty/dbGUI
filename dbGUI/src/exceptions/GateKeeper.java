@@ -2,25 +2,23 @@ package exceptions;
 import dataAccess.SQLQueries;
 import helper.JDBC;
 import javafx.scene.control.Alert;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
-import theAgency.AgentFord;
 
 import java.sql.*;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class GateKeeper {
     static Connection connection = null;
     static PreparedStatement statement = null;
     static ResultSet set = null;
-
     private static String username;
     private static String password;
 
+    /**
+     * collectCredentials() collects the username and password from the user
+     * */
     public static void collectCredentials() {
         try {
             TextInputDialog usernameDialog = new TextInputDialog();
@@ -48,11 +46,16 @@ public class GateKeeper {
         }
     }
 
-    public static String getUsername() {
+    /**
+     * getUsername() gets the username
+     * */
+    public static String getNewUserName() {
         return username;
     }
-
-    public static String getPassword() {
+    /**
+     * getPassword() gets the password
+     * */
+    public static String getNewPassWord() {
         return password;
     }
 

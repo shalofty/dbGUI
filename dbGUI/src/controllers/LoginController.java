@@ -10,6 +10,7 @@
 
 package controllers;
 
+import dataAccess.SQLQueries;
 import exceptions.GateKeeper;
 import helper.JDBC;
 import javafx.fxml.FXML;
@@ -21,11 +22,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
+import numericNexus.NumberGenie;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URL;
+import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ResourceBundle;
@@ -73,6 +76,26 @@ public class LoginController implements Initializable {
     }
 
     /**
+     * Create a new user
+     * */
+
+    @FXML public static void newUser() {
+        try {
+            GateKeeper.collectCredentials(); // collects the username and password from the user
+            String username = GateKeeper.getNewUserName(); // gets the username
+            String password = GateKeeper.getNewPassWord(); // gets the password
+            int userID = NumberGenie.magicUser(); // generates a unique random user ID
+            Connection connection = JDBC.openConnection(); // opens a connection to the database
+            SQLQueries.INSERT_NEW_USER(connection, userID, username, password); // inserts the new user into the database
+            System.out.println("New user created");
+            connection.close(); // closes the connection to the database
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * loginHandler checks the username and password fields to see if they match the
      * throws an exception if the username or password is incorrect
      * */
@@ -88,6 +111,7 @@ public class LoginController implements Initializable {
                 Parent root = loader.load(); // loads the root
                 stage = (Stage) loginButton.getScene().getWindow(); // gets the stage from the login button
                 Scene scene = new Scene(root); // creates a new scene
+//                scene.getStylesheets().add("/views/styles.css"); // adds the styles.css file to the scene
                 stage.setScene(scene); // sets the stage to the scene
 //                AgentFord.undercoverObservation(usernameField.getText(), passwordField.getText()); // calls the loginSpy method
                 stage.show(); // shows the stage

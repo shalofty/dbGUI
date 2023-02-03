@@ -1,8 +1,10 @@
 package dataAccess;
 
 import helper.JDBC;
+import javafx.scene.control.Alert;
 
 import java.sql.*;
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 public class SQLQueries {
@@ -20,6 +22,8 @@ public class SQLQueries {
     public static final String SELECT_USER_PASSWORD_STATEMENT = "SELECT Password FROM users WHERE User_ID = ?"; // select user password by user ID
     public static final String SELECT_USER_NAME_STATEMENT = "SELECT User_Name FROM users WHERE User_ID = ?"; // select user name by user ID
     public static final String GET_USER_ID = "SELECT User_ID FROM users WHERE User_Name = ? AND Password = ?"; // get user ID by user name and password
+    public static final String GET_ALL_USERS = "SELECT * FROM users"; // get all users
+    public static final String NEW_USER_STATEMENT = "INSERT INTO users (User_ID, User_Name, Password, Create_Date, Created_By) VALUES (?,?,?,?,?,?,?)"; // insert new user
     public static final String USER_LOGIN_STATEMENT = "SELECT * FROM users WHERE User_Name = ? AND Password = ?"; // user login
     public static final String CHECK_USER = "SELECT * FROM users WHERE User_Name = ? AND Password = ? AND User_ID = ?"; // check user credentials
     public static final String SELECT_USER_ID_STATEMENT = "SELECT User_ID FROM users WHERE User_Name = ? AND Password = ?"; // select user ID by user name
@@ -114,6 +118,36 @@ public class SQLQueries {
             "FROM countries\n" +
             "JOIN first_level_divisions ON countries.Country_ID = first_level_divisions.Country_ID\n" +
             "WHERE countries.Country = ?"; // select division by country name
+
+    /// New User Method //////////////////////////////////////////////////////////////////////////////
+
+    public static void INSERT_NEW_USER(Connection connection,
+                                       int ID,
+                                       String userName,
+                                       String password) throws Exception, SQLException {
+        try {
+            // set the parameters for the prepared statement
+            // the order of the parameters must match the order of the columns in the database
+            JDBC.setPreparedStatement(connection, SQLQueries.NEW_USER_STATEMENT); // set the prepared statement
+            PreparedStatement statement = JDBC.getPreparedStatement(); // get the prepared statement
+            statement.setInt(1, ID); // user ID
+            statement.setString(2, userName); // username
+            statement.setString(3, password); // password
+            statement.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now())); // create date
+            statement.setString(5, "newUser"); // created by
+            if (userName != null && password != null) statement.execute(); // execute the statement
+            if (statement.getUpdateCount() > 0) {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("New User");
+                alert.setHeaderText("New User Created");
+                alert.setContentText("New user " + userName + " created successfully.");
+                alert.showAndWait();
+                System.out.println("New user " + userName + " created successfully.");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
 
     /// Appointment Methods //////////////////////////////////////////////////////////////////////////
     /**
