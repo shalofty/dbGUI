@@ -1,6 +1,5 @@
 package dataAccess;
 
-import exceptions.ExceptionPolice;
 import helper.JDBC;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -44,7 +43,7 @@ public class UserAccess extends Users {
                 statement = null; // Close statement
             }
             if (connection != null) {
-                connection = JDBC.closeConnection(); // Close connection
+                connection.close(); // Close connection
             }
         }
     }
@@ -63,7 +62,6 @@ public class UserAccess extends Users {
             return usersObservableList; // return observable list
         }
         catch (SQLException e) {
-            ExceptionPolice.illegalActivity(e); // handle exception
             throw e;
         }
         finally {
@@ -93,7 +91,6 @@ public class UserAccess extends Users {
             return usersObservableList; // return observable list
         }
         catch (SQLException e) {
-            ExceptionPolice.illegalActivity(e); // handle exception
             throw e;
         }
         finally {
@@ -127,7 +124,6 @@ public class UserAccess extends Users {
             }
         }
         catch (SQLException e) {
-            ExceptionPolice.illegalActivity(e); // handle exception
             throw e;
         }
         finally {
@@ -158,7 +154,6 @@ public class UserAccess extends Users {
             statement.executeUpdate(); // execute update
         }
         catch (SQLException e) {
-            ExceptionPolice.illegalActivity(e); // handle exception
             throw e;
         }
         finally {
@@ -186,7 +181,6 @@ public class UserAccess extends Users {
             }
         }
         catch (SQLException e) {
-            ExceptionPolice.illegalActivity(e); // handle exception
             throw e;
         }
         finally {
@@ -226,7 +220,6 @@ public static int getUserID(String userName, String password) throws SQLExceptio
             }
         }
         catch (SQLException e) {
-            ExceptionPolice.illegalActivity(e); // handle exception
             throw e;
         }
         finally {

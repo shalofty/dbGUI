@@ -1,6 +1,5 @@
 package dataAccess;
 
-import exceptions.ExceptionPolice;
 import helper.JDBC;
 
 import javafx.collections.FXCollections;
@@ -43,7 +42,6 @@ public class CustomerAccess {
                 customersObservableList.add(customer);}
             return customersObservableList; // return the observable list
         } catch (SQLException e) {
-            ExceptionPolice.illegalActivity(e);
             throw new RuntimeException(e);
         }
         finally {
@@ -76,7 +74,6 @@ public class CustomerAccess {
             }
             return customerNames; // return the observable list
         } catch (SQLException e) {
-            ExceptionPolice.illegalActivity(e);
             throw new RuntimeException(e);
         } finally {
             if (set != null) {
@@ -107,7 +104,6 @@ public class CustomerAccess {
             }
             return null;
         } catch (SQLException e) {
-            ExceptionPolice.illegalActivity(e);
             throw new RuntimeException(e);
         }
         finally {
@@ -135,7 +131,6 @@ public class CustomerAccess {
             }
             return 0;
         } catch (SQLException e) {
-            ExceptionPolice.illegalActivity(e);
             throw new RuntimeException(e);
         }
         finally {

@@ -1,7 +1,6 @@
 package models;
 
 import dataAccess.ContactAccess;
-import exceptions.ExceptionPolice;
 import dataAccess.CustomerAccess;
 import dataAccess.UserAccess;
 import javafx.collections.FXCollections;
@@ -104,7 +103,6 @@ public final class Appointments {
             return CustomerAccess.getCustomerNameByID(customerID);
         }
         catch (Exception e) {
-            ExceptionPolice.illegalActivity(e);
             throw e;
         }
     }
@@ -127,7 +125,7 @@ public final class Appointments {
             return ContactAccess.getContactName(contactID);
         }
         catch (Exception e) {
-            ExceptionPolice.illegalActivity(e);
+            e.printStackTrace();
             throw e;
         }
     }
@@ -146,7 +144,7 @@ public final class Appointments {
             return UserAccess.getUserName(userID);
         }
         catch (Exception e) {
-            ExceptionPolice.illegalActivity(e);
+            e.printStackTrace();
             throw e;
         }
     }

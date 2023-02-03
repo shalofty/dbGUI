@@ -5,8 +5,6 @@ import helper.JDBC;
 import java.sql.*;
 import java.time.LocalDateTime;
 
-import exceptions.ExceptionPolice;
-
 public class SQLQueries {
     /**
      * I thought it would be easier to have all of my SQL queries in one place.
@@ -21,7 +19,8 @@ public class SQLQueries {
     public static final String SELECT_ALL_USER_NAMES_STATEMENT = "SELECT User_Name FROM users"; // select all user names
     public static final String SELECT_USER_PASSWORD_STATEMENT = "SELECT Password FROM users WHERE User_ID = ?"; // select user password by user ID
     public static final String SELECT_USER_NAME_STATEMENT = "SELECT User_Name FROM users WHERE User_ID = ?"; // select user name by user ID
-    public static final String GET_USER_ID = "SELECT User_ID, Password FROM users WHERE User_Name = ?"; // get user ID by user name
+    public static final String GET_USER_ID = "SELECT User_ID FROM users WHERE User_Name = ? AND Password = ?"; // get user ID by user name and password
+    public static final String USER_LOGIN_STATEMENT = "SELECT * FROM users WHERE User_Name = ? AND Password = ?"; // user login
     public static final String CHECK_USER = "SELECT * FROM users WHERE User_Name = ? AND Password = ? AND User_ID = ?"; // check user credentials
     public static final String SELECT_USER_ID_STATEMENT = "SELECT User_ID FROM users WHERE User_Name = ? AND Password = ?"; // select user ID by user name
     /// Appointment Statements
@@ -47,7 +46,8 @@ public class SQLQueries {
             "User_ID, " +
             "Contact_ID) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)"; // insert appointment
     public static final String UPDATE_APPOINTMENT_STATEMENT =
-            "UPDATE appointments SET Title = ?, " +
+            "UPDATE appointments " +
+            "SET Title = ?, " +
             "Description = ?, " +
             "Location = ?, " +
             "Type = ?, " +
@@ -55,6 +55,9 @@ public class SQLQueries {
             "End = ?, " +
             "Last_Update = ?, " +
             "Last_Updated_By = ? " +
+            "Customer_ID = ?" +
+            "User_ID = ?" +
+            "Contact_ID = ?" +
             "WHERE Appointment_ID = ?"; // update appointment
     /// Contacts Statements
     public static final String SELECT_ALL_CONTACTS_STATEMENT = "SELECT * from contacts"; // select all contacts
@@ -126,8 +129,7 @@ public class SQLQueries {
                                                        String end,
                                                        int customerID,
                                                        int userID,
-                                                       int contactID)
-        throws Exception, SQLException {
+                                                       int contactID) throws Exception, SQLException {
         try {
             // set the parameters for the prepared statement
             // the order of the parameters must match the order of the columns in the database
@@ -155,7 +157,7 @@ public class SQLQueries {
             statement.execute();
         }
         catch (Exception e) {
-            ExceptionPolice.illegalActivity(e); // eAlert method
+            e.printStackTrace(); // print the stack trace
         }
     }
 
@@ -163,17 +165,17 @@ public class SQLQueries {
      * updateAppointment updates an existing appointment in the database
      * */
     public static void UPDATE_APPOINTMENT_METHOD(Connection connection,
-                                                 int ID,
+                                                 int appointmentID,
                                                  String title,
                                                  String description,
                                                  String location,
                                                  String type,
                                                  LocalDateTime start,
                                                  LocalDateTime end,
+                                                 String userName,
                                                  int customerID,
                                                  int userID,
-                                                 int contactID)
-        throws Exception {
+                                                 int contactID) throws SQLException {
         try {
             // set the parameters for the prepared statement
             // the order of the parameters must match the order of the columns in the database
@@ -183,20 +185,24 @@ public class SQLQueries {
             statement.setString(2, description); // description
             statement.setString(3, location); // location
             statement.setString(4, type); // type
+
             statement.setTimestamp(5, Timestamp.valueOf(start)); // start
             statement.setTimestamp(6, Timestamp.valueOf(end)); // end
-            statement.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now())); // last update
-            statement.setInt(8, userID); // last updated by
-            statement.setInt(9, ID); // appointment ID
 
-//            statement.setInt(12, customerID); // customer ID
-//            statement.setInt(13, userID); // user ID
-//            statement.setInt(14, contactID); // contact ID
+            statement.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now())); // last update
+            statement.setString(8, userName); // last updated by
+
+            statement.setInt(9, customerID); // customer ID
+            statement.setInt(10, userID); // user ID
+            statement.setInt(11, contactID); // contact ID
+            statement.setInt(12, appointmentID); // appointment ID LAST
             statement.execute();
         }
-        catch (Exception e) {
-            ExceptionPolice.illegalActivity(e); // eAlert method
+        catch (SQLException e) {
+            e.printStackTrace(); // print the stack trace
             throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -212,7 +218,7 @@ public class SQLQueries {
             statement.execute();
         }
         catch (Exception e) {
-            ExceptionPolice.illegalActivity(e); // eAlert method
+            e.printStackTrace(); // print the stack trace
         }
     }
 
@@ -246,7 +252,7 @@ public class SQLQueries {
             statement.execute();
         }
         catch (Exception e) {
-            ExceptionPolice.illegalActivity(e); // eAlert method
+            e.printStackTrace(); // print the stack trace
             throw e;
         }
     }
@@ -254,14 +260,13 @@ public class SQLQueries {
     /**
      * updateCustomer updates an existing customer in the database
      * */
-    public static void UPDATE_CUSTOMER_METHOD
-    (Connection connection,
-      int customerID,
-      String customerName,
-      String address,
-      String postalCode,
-      String phone,
-      int division)
+    public static void UPDATE_CUSTOMER_METHOD(Connection connection,
+                                              int customerID,
+                                              String customerName,
+                                              String address,
+                                              String postalCode,
+                                              String phone,
+                                              int division)
         throws Exception
     {
         try{
@@ -278,7 +283,7 @@ public class SQLQueries {
             statement.execute();
         }
         catch (Exception e) {
-            ExceptionPolice.illegalActivity(e); // eAlert method
+            e.printStackTrace(); // print the stack trace
             throw e;
         }
     }
@@ -293,7 +298,7 @@ public class SQLQueries {
             statement.execute(); // execute the statement
         }
         catch (Exception e) {
-            ExceptionPolice.illegalActivity(e); // eAlert method
+            e.printStackTrace(); // print the stack trace
         }
     }
 }

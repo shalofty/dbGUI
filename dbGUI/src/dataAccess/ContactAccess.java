@@ -1,6 +1,5 @@
 package dataAccess;
 
-import exceptions.ExceptionPolice;
 import helper.JDBC;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -34,7 +33,7 @@ public class ContactAccess {
             return contactsObservableList; // return observable list
         }
         catch (SQLException e) {
-            ExceptionPolice.illegalActivity(e); // handle exception
+            e.printStackTrace(); // print stack trace
             throw e;
         }
         finally {
@@ -55,7 +54,7 @@ public class ContactAccess {
      * @return contactID
      * TESTED ✓
      */
-    public static int findContactID(String contactName) throws SQLException {
+    public static int findContactID(String contactName) throws SQLException, Exception {
         try {
             connection = JDBC.openConnection(); // open connection
             statement = connection.prepareStatement(SQLQueries.SELECT_CONTACTS_BY_NAME_STATEMENT); // prepare statement
@@ -73,7 +72,7 @@ public class ContactAccess {
             }
         }
         catch (SQLException e) {
-            ExceptionPolice.illegalActivity(e); // handle exception
+            e.printStackTrace(); // print stack trace
             throw e; // throw exception
         }
         finally {
@@ -86,7 +85,8 @@ public class ContactAccess {
             if (connection != null) {
                 connection.close(); // close connection
             }
-        } return -1; // return -1 if contact not found
+        }
+        return 0;
     }
 
     /**
@@ -102,7 +102,7 @@ public class ContactAccess {
             return new Contacts(contactID, contactName, contactEmail); // return contact
         }
         catch (SQLException e) {
-            ExceptionPolice.illegalActivity(e); // handle exception
+            e.printStackTrace(); // print stack trace
             throw e;
         }
     }
@@ -126,7 +126,7 @@ public class ContactAccess {
             return contactsObservableList; // return observable list
         }
         catch (SQLException e) {
-            ExceptionPolice.illegalActivity(e); // handle exception
+            e.printStackTrace(); // print stack trace
             throw e;
         }
         finally {
@@ -161,7 +161,7 @@ public class ContactAccess {
             return contactName; // return contact name
         }
         catch (SQLException e) {
-            ExceptionPolice.illegalActivity(e); // handle exception
+            e.printStackTrace(); // print stack trace
             throw e;
         }
         finally {

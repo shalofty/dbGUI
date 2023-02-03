@@ -11,4 +11,9 @@ module dbGUI {
     opens helper;
     opens models;
     opens views;
+    opens bundles;
+    opens exceptions;
+    opens merlin;
+    opens numericNexus;
+    opens theAgency;
 }

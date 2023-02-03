@@ -1,6 +1,5 @@
 package dataAccess;
 
-import exceptions.ExceptionPolice;
 import helper.JDBC;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -44,7 +43,6 @@ public class CountryAccess extends Country {
             }
             return countriesObservableList; // return observable list
         } catch (Exception e) {
-            ExceptionPolice.illegalActivity(e);
             throw e;
         } finally {
             if (set != null) set.close(); // close result set

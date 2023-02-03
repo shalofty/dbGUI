@@ -2,7 +2,7 @@ package models;
 
 public final class Contacts {
     public final String contactName, contactEmail;
-    public static int contactID;
+    public int contactID;
 
     public Contacts(int contactID, String contactName, String contactEmail) {
         if (contactID <= 0) {
@@ -14,7 +14,7 @@ public final class Contacts {
         if (contactEmail == null || contactEmail.isEmpty()) {
             throw new IllegalArgumentException("Invalid contact email");
         }
-        Contacts.contactID = contactID;
+        this.contactID = contactID;
         this.contactName = contactName;
         this.contactEmail = contactEmail;
     }
@@ -36,7 +36,7 @@ public final class Contacts {
     /**
      * @return contactID
      * */
-    public static int getContactID() {
+    public int getContactID() {
         return contactID;
     }
 

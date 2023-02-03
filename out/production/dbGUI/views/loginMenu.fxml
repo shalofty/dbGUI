@@ -9,14 +9,14 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="416.0" prefWidth="622.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.LoginController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="416.0" prefWidth="622.0" xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.LoginController">
    <children>
       <ImageView fx:id="imageView" fitHeight="751.0" fitWidth="427.0" layoutX="97.0" layoutY="-112.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
          <image>
             <Image url="@images/background.jpg" />
          </image>
       </ImageView>
-      <Label fx:id="schedulizerLabe" layoutX="189.0" layoutY="20.0" prefHeight="71.0" prefWidth="263.0" text="Schedulizer" textFill="WHITE">
+      <Label fx:id="schedulizerLabel" layoutX="189.0" layoutY="20.0" prefHeight="71.0" prefWidth="263.0" text="Schedulizer" textFill="WHITE">
          <font>
             <Font name="Book Antiqua" size="48.0" />
          </font>

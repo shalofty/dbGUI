@@ -5,8 +5,6 @@ import java.sql.*;
 import java.time.LocalTime;
 import java.time.ZoneId;
 
-import exceptions.ExceptionPolice;
-
 /**
  * JDBC class establishes a connection to the database
  * per the instructions in the class video
@@ -53,7 +51,7 @@ public abstract class JDBC {
         }
         catch (Exception e)
         {
-            ExceptionPolice.illegalActivity(e); // eAlert method
+            e.printStackTrace();
         }
         return connection;
     }
@@ -89,7 +87,7 @@ public abstract class JDBC {
         }
         catch(Exception e)
         {
-            ExceptionPolice.illegalActivity(e); // eAlert method
+            e.printStackTrace();
         }
         return connection;
     }

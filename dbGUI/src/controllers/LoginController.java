@@ -10,7 +10,7 @@
 
 package controllers;
 
-import exceptions.ExceptionPolice;
+import exceptions.GateKeeper;
 import helper.JDBC;
 import javafx.fxml.FXML;
 
@@ -31,22 +31,45 @@ import java.time.ZoneId;
 import java.util.ResourceBundle;
 
 public class LoginController implements Initializable {
-    @FXML public Label schedulizerLabel, zoneLabel;
+    @FXML public Label schedulizerLabel;
+    @FXML public Label zoneLabel;
+    @FXML public static Label newUserLabel;
     @FXML public TextField usernameField;
     @FXML public PasswordField passwordField;
+
+    @FXML public static String username, password;
     @FXML private ImageView backgroundView;
     @FXML private Button loginButton;
-    @FXML public String userName, passWord;
-    Stage stage;
+    @FXML Stage stage;
 
     /**
-     * initializes the login form scene
-     * sets the zone label to the current zone the user is in
+     * setUsername() sets the username by getting input from the usernameField
+     * This will be cross-referenced later while performing database operations
      * */
-    @FXML public void initialize(URL url, ResourceBundle bundle) {
-        zoneLabel.setText(ZoneId.systemDefault().toString()); // sets the zone label to the current zone the user is in
-        usernameField.setText(JDBC.getUsername()); // sets the username field to the username in the JDBC class
-        passwordField.setText(JDBC.getPassword()); // sets the password field to the password in the JDBC class
+    public String setUsername(String username) {
+        return LoginController.username = usernameField.getText();
+    }
+
+    /**
+     * getUsername() gets the username
+     * */
+    public static String getUsername() {
+        return username;
+    }
+
+    /**
+     * setPassword() sets the password by getting input from the passwordField
+     * This will be cross-referenced later while performing database operations
+     * */
+    public String setPassword(String password) {
+        return LoginController.password = passwordField.getText();
+    }
+
+    /**
+     * getPassword() gets the password
+     * */
+    public static String getPassword() {
+        return password;
     }
 
     /**
@@ -54,35 +77,35 @@ public class LoginController implements Initializable {
      * throws an exception if the username or password is incorrect
      * */
     @FXML public void loginHandler() throws Exception {
+        String username = setUsername(usernameField.getText());
+        String passWord = passwordField.getText();
         try {
             // retrieve username and password from text fields
-            if (usernameField.getText().equals(JDBC.getUsername()) && passwordField.getText().equals(JDBC.getPassword())) {
+            // usernameField.getText().equals(JDBC.getUsername()) && passwordField.getText().equals(JDBC.getPassword())
+            if (GateKeeper.allowEntry(username, passWord)) {
                 FXMLLoader loader = new FXMLLoader(); // creates a new FXMLLoader object
                 loader.setLocation(LoginController.class.getResource("/views/aioTabbedMenu.fxml")); // sets the location of the loader to the aioTabbedMenu.fxml file
                 Parent root = loader.load(); // loads the root
                 stage = (Stage) loginButton.getScene().getWindow(); // gets the stage from the login button
                 Scene scene = new Scene(root); // creates a new scene
                 stage.setScene(scene); // sets the stage to the scene
-                loginSpy(); // calls the loginSpy method
+//                AgentFord.undercoverObservation(usernameField.getText(), passwordField.getText()); // calls the loginSpy method
                 stage.show(); // shows the stage
             } else {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Start Failed");
                 alert.setHeaderText("Start Failed");
                 alert.setContentText("The username or password you entered is incorrect.");
-                loginSpy();
+//                AgentFord.undercoverObservation(usernameField.getText(), passwordField.getText());
                 alert.showAndWait();
             }
         }
         catch (Exception e) {
-            ExceptionPolice.illegalActivity(e);
+            e.printStackTrace();
         }
     }
 
-    /**
-     * loginSpy logs the user's login attempt to a text file
-     * */
-    @FXML public void loginSpy() {
+    @FXML public void undercoverObservation(String username, String password) {
         String success; // creates a string variable called success
         // checks to see if the username and password match the username and password in the JDBC class
         if (usernameField.getText().equals(JDBC.getUsername()) && passwordField.getText().equals(JDBC.getPassword())) {
@@ -103,6 +126,19 @@ public class LoginController implements Initializable {
             fileWriter.write(userLog); // writes the userLog string to the file
             fileWriter.close(); // closes the file
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * initializes the login form scene
+     * sets the zone label to the current zone the user is in
+     * */
+    @Override
+    public void initialize(URL url, ResourceBundle bundle) {
+        try{
+            zoneLabel.setText(ZoneId.systemDefault().toString()); // sets the zone label to the current zone the user is in
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

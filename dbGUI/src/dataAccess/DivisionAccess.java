@@ -1,6 +1,5 @@
 package dataAccess;
 
-import exceptions.ExceptionPolice;
 import helper.JDBC;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -47,7 +46,6 @@ public class DivisionAccess extends Division {
             }
             return divisionsObservableList; // return the observable list
         } catch (SQLException e) {
-            ExceptionPolice.illegalActivity(e);
             throw e;
         } finally {
             if (set != null) set.close(); // close connection
@@ -74,7 +72,6 @@ public class DivisionAccess extends Division {
             }
             return divisionID;
         } catch (SQLException e) {
-            ExceptionPolice.illegalActivity(e);
             throw e;
         } finally {
             if (set != null) set.close(); // close set

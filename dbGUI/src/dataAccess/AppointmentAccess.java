@@ -9,7 +9,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import exceptions.ExceptionPolice;
 
 public class AppointmentAccess {
     public static Connection connection = null;
@@ -20,7 +19,7 @@ public class AppointmentAccess {
      * get all appointments from database
      * @return appointmentsObservableList of all appointments
      * */
-    public static ObservableList<Appointments> allAppointments() {
+    public static ObservableList<Appointments> allAppointments() throws SQLException {
         ObservableList<Appointments> appointmentsObservableList = FXCollections.observableArrayList(); // create observable list
         try {
             connection = JDBC.openConnection(); // open connection
@@ -33,17 +32,16 @@ public class AppointmentAccess {
             }
             return appointmentsObservableList; // return observable list
         } catch (SQLException e) {
-            ExceptionPolice.illegalActivity(e); // eAlert method
             throw new RuntimeException(e);
         } finally {
             if (set != null) {
-                set = null; // close result set
+                set.close(); // close result set
             }
             if (statement != null) {
-                statement = null; // close statement
+                statement.close(); // close statement
             }
             if (connection != null) {
-                connection = JDBC.closeConnection(); // close connection
+                connection.close(); // close connection
             }
         }
     }
@@ -52,7 +50,7 @@ public class AppointmentAccess {
      * allAppointmentsByCustomerID gets all appointments for a customer
      * @param customerID
      * */
-    public static ObservableList<Appointments> allAppointmentsByCustomerID(int customerID) {
+    public static ObservableList<Appointments> allAppointmentsByCustomerID(int customerID) throws SQLException {
         ObservableList<Appointments> appointmentsObservableList = FXCollections.observableArrayList(); // create observable list
         try {
             connection = JDBC.openConnection(); // open connection
@@ -66,17 +64,17 @@ public class AppointmentAccess {
             }
             return appointmentsObservableList; // return observable list
         } catch (SQLException e) {
-            ExceptionPolice.illegalActivity(e); // eAlert method
+            e.printStackTrace();
             throw new RuntimeException(e);
         } finally {
             if (set != null) {
-                set = null; // close result set
+                set.close(); // close result set
             }
             if (statement != null) {
-                statement = null; // close statement
+                statement.close(); // close statement
             }
             if (connection != null) {
-                connection = JDBC.closeConnection(); // close connection
+                connection.close(); // close connection
             }
         }
     }
@@ -85,7 +83,7 @@ public class AppointmentAccess {
      * noAppointments checks if a customer has any appointments
      * @param customerID
      * */
-    public static boolean noAppointments(int customerID) {
+    public static boolean noAppointments(int customerID) throws SQLException {
         ObservableList<Appointments> appointmentsObservableList = allAppointmentsByCustomerID(customerID); // get all appointments for customer
         return appointmentsObservableList.isEmpty(); // return true if list is empty
     }
@@ -94,7 +92,7 @@ public class AppointmentAccess {
      * allAppointmentsWithin7Days gets all appointments within the next 7 days
      * @return appointmentsObservableList of all appointments within 7 days
      * */
-    public static ObservableList<Appointments> allAppointmentsWithin7Days() {
+    public static ObservableList<Appointments> allAppointmentsWithin7Days() throws SQLException {
         ObservableList<Appointments> appointmentsObservableList = FXCollections.observableArrayList(); // create observable list
         try {
             connection = JDBC.openConnection(); // open connection
@@ -107,17 +105,17 @@ public class AppointmentAccess {
             }
             return appointmentsObservableList; // return observable list
         } catch (SQLException e) {
-            ExceptionPolice.illegalActivity(e); // eAlert method
+            e.printStackTrace(); // print stack trace
             throw new RuntimeException(e);
         } finally {
             if (set != null) {
-                set = null; // close result set
+                set.close(); // close result set
             }
             if (statement != null) {
-                statement = null; // close statement
+                statement.close(); // close statement
             }
             if (connection != null) {
-                connection = JDBC.closeConnection(); // close connection
+                connection.close(); // close connection
             }
         }
     }
@@ -126,7 +124,7 @@ public class AppointmentAccess {
      * allAppointmentsWithin30Days gets all appointments within the next 30 days
      * @return appointmentsObservableList of all appointments within 30 days
      * */
-    public static ObservableList<Appointments> allAppointmentsWithin30Days() {
+    public static ObservableList<Appointments> allAppointmentsWithin30Days() throws SQLException {
         ObservableList<Appointments> appointmentsObservableList = FXCollections.observableArrayList(); // create observable list
         try {
             connection = JDBC.openConnection(); // open connection
@@ -139,17 +137,17 @@ public class AppointmentAccess {
             }
             return appointmentsObservableList; // return observable list
         } catch (SQLException e) {
-            ExceptionPolice.illegalActivity(e); // eAlert method
+            e.printStackTrace(); // print stack trace
             throw new RuntimeException(e);
         } finally {
             if (set != null) {
-                set = null; // close result set
+                set.close(); // close result set
             }
             if (statement != null) {
-                statement = null; // close statement
+                statement.close(); // close statement
             }
             if (connection != null) {
-                connection = JDBC.closeConnection(); // close connection
+                connection.close(); // close connection
             }
         }
     }

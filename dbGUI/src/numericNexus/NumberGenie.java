@@ -1,10 +1,12 @@
 package numericNexus;
 
-import exceptions.ExceptionPolice;
 import models.Appointments;
 import models.Customers;
+import theAgency.AgentFord;
 
 import java.util.Random;
+
+import static controllers.CentralNervousSystem.theCrimeScene;
 
 public class NumberGenie {
     /**
@@ -26,7 +28,7 @@ public class NumberGenie {
             return newID;
         }
         catch (Exception e) {
-            ExceptionPolice.illegalActivity(e); // eAlert method
+            AgentFord.apprehendException(e, theCrimeScene); // if an exception is thrown, display the exception in the crime scene text area
             throw e;
         }
     }
@@ -50,7 +52,7 @@ public class NumberGenie {
             return newID;
         }
         catch (Exception e) {
-            ExceptionPolice.illegalActivity(e); // eAlert method
+            AgentFord.apprehendException(e, theCrimeScene); // if an exception is thrown, display the exception in the crime scene text area
             throw e;
         }
     }
