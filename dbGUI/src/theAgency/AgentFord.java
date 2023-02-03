@@ -1,7 +1,7 @@
-package TheAgency;
+package theAgency;
 
-import Exceptions.ExceptionHandler;
-import Helper.JDBC;
+import exceptions.ExceptionPolice;
+import helper.JDBC;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 
@@ -26,7 +26,7 @@ public class AgentFord {
             textArea.appendText(userLog + codeLog + "\n"); // append the log to the text area
         }
         catch (Exception e) {
-            ExceptionHandler.eAlert(e);
+            ExceptionPolice.illegalActivity(e);
             throw e;
         }
     }
@@ -65,7 +65,7 @@ public class AgentFord {
             textArea.appendText(agentZero.toString()); // append the string builder to the text area
         }
         catch (Exception e) {
-            ExceptionHandler.eAlert(e);
+            ExceptionPolice.illegalActivity(e);
         }
     }
 }

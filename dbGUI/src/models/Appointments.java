@@ -1,9 +1,9 @@
-package Models;
+package models;
 
-import DataAccess.ContactAccess;
-import Exceptions.ExceptionHandler;
-import DataAccess.CustomerAccess;
-import DataAccess.UserAccess;
+import dataAccess.ContactAccess;
+import exceptions.ExceptionPolice;
+import dataAccess.CustomerAccess;
+import dataAccess.UserAccess;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -104,7 +104,7 @@ public final class Appointments {
             return CustomerAccess.getCustomerNameByID(customerID);
         }
         catch (Exception e) {
-            ExceptionHandler.eAlert(e);
+            ExceptionPolice.illegalActivity(e);
             throw e;
         }
     }
@@ -127,7 +127,7 @@ public final class Appointments {
             return ContactAccess.getContactName(contactID);
         }
         catch (Exception e) {
-            ExceptionHandler.eAlert(e);
+            ExceptionPolice.illegalActivity(e);
             throw e;
         }
     }
@@ -146,7 +146,7 @@ public final class Appointments {
             return UserAccess.getUserName(userID);
         }
         catch (Exception e) {
-            ExceptionHandler.eAlert(e);
+            ExceptionPolice.illegalActivity(e);
             throw e;
         }
     }

@@ -1,4 +1,4 @@
-package Merlin;
+package merlin;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -7,7 +7,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
-import Exceptions.ExceptionHandler;
+import exceptions.ExceptionPolice;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ComboBox;
@@ -65,7 +65,7 @@ public class HotTubTimeMachine {
                     && end.toLocalTime().isBefore(LocalTime.of(END_HOUR, 0))
                     && start.toLocalDate().equals(end.toLocalDate());
         } catch (Exception e) {
-            ExceptionHandler.eAlert(e);
+            ExceptionPolice.illegalActivity(e);
             throw e;
         }
     }

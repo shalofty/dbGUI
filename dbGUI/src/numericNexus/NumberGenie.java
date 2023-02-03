@@ -1,8 +1,8 @@
-package NumericNexus;
+package numericNexus;
 
-import Exceptions.ExceptionHandler;
-import Models.Appointments;
-import Models.Customers;
+import exceptions.ExceptionPolice;
+import models.Appointments;
+import models.Customers;
 
 import java.util.Random;
 
@@ -26,7 +26,7 @@ public class NumberGenie {
             return newID;
         }
         catch (Exception e) {
-            ExceptionHandler.eAlert(e); // eAlert method
+            ExceptionPolice.illegalActivity(e); // eAlert method
             throw e;
         }
     }
@@ -50,7 +50,7 @@ public class NumberGenie {
             return newID;
         }
         catch (Exception e) {
-            ExceptionHandler.eAlert(e); // eAlert method
+            ExceptionPolice.illegalActivity(e); // eAlert method
             throw e;
         }
     }

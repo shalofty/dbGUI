@@ -1,10 +1,10 @@
-package DataAccess;
+package dataAccess;
 
-import Exceptions.ExceptionHandler;
-import Helper.JDBC;
+import exceptions.ExceptionPolice;
+import helper.JDBC;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import Models.Country;
+import models.Country;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -44,7 +44,7 @@ public class CountryAccess extends Country {
             }
             return countriesObservableList; // return observable list
         } catch (Exception e) {
-            ExceptionHandler.eAlert(e);
+            ExceptionPolice.illegalActivity(e);
             throw e;
         } finally {
             if (set != null) set.close(); // close result set

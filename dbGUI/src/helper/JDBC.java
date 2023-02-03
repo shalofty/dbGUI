@@ -1,11 +1,11 @@
-package Helper;
+package helper;
 
 import java.net.InetAddress;
 import java.sql.*;
 import java.time.LocalTime;
 import java.time.ZoneId;
 
-import Exceptions.ExceptionHandler;
+import exceptions.ExceptionPolice;
 
 /**
  * JDBC class establishes a connection to the database
@@ -53,7 +53,7 @@ public abstract class JDBC {
         }
         catch (Exception e)
         {
-            ExceptionHandler.eAlert(e); // eAlert method
+            ExceptionPolice.illegalActivity(e); // eAlert method
         }
         return connection;
     }
@@ -89,7 +89,7 @@ public abstract class JDBC {
         }
         catch(Exception e)
         {
-            ExceptionHandler.eAlert(e); // eAlert method
+            ExceptionPolice.illegalActivity(e); // eAlert method
         }
         return connection;
     }

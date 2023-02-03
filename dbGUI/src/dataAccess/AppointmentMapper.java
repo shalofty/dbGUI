@@ -1,6 +1,6 @@
-package DataAccess;
+package dataAccess;
 
-import Models.Appointments;
+import models.Appointments;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

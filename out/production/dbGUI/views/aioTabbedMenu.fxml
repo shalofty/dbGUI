@@ -17,7 +17,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="757.0" prefWidth="908.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.aioController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="757.0" prefWidth="908.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.CentralNervousSystem">
    <children>
       <TabPane prefHeight="757.0" prefWidth="908.0" tabClosingPolicy="UNAVAILABLE">
         <tabs>
@@ -32,8 +32,8 @@
                               <TableColumn fx:id="descriptionColumn" prefWidth="136.0" text="Description" />
                               <TableColumn fx:id="typeColumn" prefWidth="90.0" text="Type" />
                               <TableColumn fx:id="locationColumn" prefWidth="97.0" text="Location" />
-                              <TableColumn fx:id="startColumn" prefWidth="91.0" text="Start Time" />
-                              <TableColumn fx:id="endColumn" prefWidth="87.0" text="End Time" />
+                              <TableColumn fx:id="startColumn" prefWidth="91.0" text="Start merlin" />
+                              <TableColumn fx:id="endColumn" prefWidth="87.0" text="End merlin" />
                               <TableColumn fx:id="customerIDAppointmentsColumn" prefWidth="92.0" text="Customer ID" />
                               <TableColumn fx:id="userIDColumn" prefWidth="75.0" text="User ID" />
                            </columns>
@@ -149,9 +149,9 @@
                <content>
                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <TextArea fx:id="logTextArea" editable="false" layoutX="14.0" layoutY="30.0" prefHeight="348.0" prefWidth="880.0" />
-                        <Button fx:id="exportButton" layoutX="14.0" layoutY="385.0" mnemonicParsing="false" onAction="#exportActivity" prefHeight="25.0" prefWidth="109.0" text="Export" />
-                        <TextArea fx:id="dbActivityTextArea" layoutX="14.0" layoutY="457.0" prefHeight="257.0" prefWidth="586.0" />
+                        <TextArea fx:id="nightVisionGoggles" editable="false" layoutX="14.0" layoutY="30.0" prefHeight="348.0" prefWidth="880.0" />
+                        <Button fx:id="espionageButton" layoutX="14.0" layoutY="385.0" mnemonicParsing="false" onAction="#reportBack" prefHeight="25.0" prefWidth="109.0" text="Export" />
+                        <TextArea fx:id="infraredGoggles" layoutX="14.0" layoutY="457.0" prefHeight="257.0" prefWidth="586.0" />
                         <Separator layoutY="419.0" prefHeight="6.0" prefWidth="908.0" />
                         <Label layoutX="14.0" layoutY="6.0" prefHeight="17.0" prefWidth="119.0" text="Session Activity" />
                         <Label layoutX="14.0" layoutY="432.0" text="User Activity" />

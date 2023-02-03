@@ -7,8 +7,8 @@ module dbGUI {
     requires mysql.connector.java;
     opens company;
     opens controllers;
-    opens DataAccess;
-    opens Helper;
-    opens Models;
+    opens dataAccess;
+    opens helper;
+    opens models;
     opens views;
 }

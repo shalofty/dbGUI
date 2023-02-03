@@ -1,10 +1,10 @@
-package DataAccess;
+package dataAccess;
 
-import Exceptions.ExceptionHandler;
-import Helper.JDBC;
+import exceptions.ExceptionPolice;
+import helper.JDBC;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import Models.Division;
+import models.Division;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -47,7 +47,7 @@ public class DivisionAccess extends Division {
             }
             return divisionsObservableList; // return the observable list
         } catch (SQLException e) {
-            ExceptionHandler.eAlert(e);
+            ExceptionPolice.illegalActivity(e);
             throw e;
         } finally {
             if (set != null) set.close(); // close connection
@@ -74,7 +74,7 @@ public class DivisionAccess extends Division {
             }
             return divisionID;
         } catch (SQLException e) {
-            ExceptionHandler.eAlert(e);
+            ExceptionPolice.illegalActivity(e);
             throw e;
         } finally {
             if (set != null) set.close(); // close set

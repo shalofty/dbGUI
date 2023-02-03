@@ -1,11 +1,11 @@
-package DataAccess;
+package dataAccess;
 
-import Exceptions.ExceptionHandler;
-import Helper.JDBC;
+import exceptions.ExceptionPolice;
+import helper.JDBC;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import Models.Customers;
+import models.Customers;
 
 import java.sql.Connection;
 
@@ -43,7 +43,7 @@ public class CustomerAccess {
                 customersObservableList.add(customer);}
             return customersObservableList; // return the observable list
         } catch (SQLException e) {
-            ExceptionHandler.eAlert(e);
+            ExceptionPolice.illegalActivity(e);
             throw new RuntimeException(e);
         }
         finally {
@@ -76,7 +76,7 @@ public class CustomerAccess {
             }
             return customerNames; // return the observable list
         } catch (SQLException e) {
-            ExceptionHandler.eAlert(e);
+            ExceptionPolice.illegalActivity(e);
             throw new RuntimeException(e);
         } finally {
             if (set != null) {
@@ -107,7 +107,7 @@ public class CustomerAccess {
             }
             return null;
         } catch (SQLException e) {
-            ExceptionHandler.eAlert(e);
+            ExceptionPolice.illegalActivity(e);
             throw new RuntimeException(e);
         }
         finally {
@@ -135,7 +135,7 @@ public class CustomerAccess {
             }
             return 0;
         } catch (SQLException e) {
-            ExceptionHandler.eAlert(e);
+            ExceptionPolice.illegalActivity(e);
             throw new RuntimeException(e);
         }
         finally {

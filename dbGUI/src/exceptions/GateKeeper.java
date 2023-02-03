@@ -1,6 +1,6 @@
-package Exceptions;
-import DataAccess.SQLQueries;
-import Helper.JDBC;
+package exceptions;
+import dataAccess.SQLQueries;
+import helper.JDBC;
 
 import java.sql.*;
 

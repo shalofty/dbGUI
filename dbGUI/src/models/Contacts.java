@@ -1,4 +1,4 @@
-package Models;
+package models;
 
 public final class Contacts {
     public final String contactName, contactEmail;

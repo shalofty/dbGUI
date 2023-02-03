@@ -10,8 +10,8 @@
 
 package controllers;
 
-import Exceptions.ExceptionHandler;
-import Helper.JDBC;
+import exceptions.ExceptionPolice;
+import helper.JDBC;
 import javafx.fxml.FXML;
 
 import javafx.fxml.FXMLLoader;
@@ -75,7 +75,7 @@ public class LoginController implements Initializable {
             }
         }
         catch (Exception e) {
-            ExceptionHandler.eAlert(e);
+            ExceptionPolice.illegalActivity(e);
         }
     }
 

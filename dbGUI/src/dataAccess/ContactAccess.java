@@ -1,11 +1,11 @@
-package DataAccess;
+package dataAccess;
 
-import Exceptions.ExceptionHandler;
-import Helper.JDBC;
+import exceptions.ExceptionPolice;
+import helper.JDBC;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
-import Models.Contacts;
+import models.Contacts;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -34,7 +34,7 @@ public class ContactAccess {
             return contactsObservableList; // return observable list
         }
         catch (SQLException e) {
-            ExceptionHandler.eAlert(e); // handle exception
+            ExceptionPolice.illegalActivity(e); // handle exception
             throw e;
         }
         finally {
@@ -73,7 +73,7 @@ public class ContactAccess {
             }
         }
         catch (SQLException e) {
-            ExceptionHandler.eAlert(e); // handle exception
+            ExceptionPolice.illegalActivity(e); // handle exception
             throw e; // throw exception
         }
         finally {
@@ -102,7 +102,7 @@ public class ContactAccess {
             return new Contacts(contactID, contactName, contactEmail); // return contact
         }
         catch (SQLException e) {
-            ExceptionHandler.eAlert(e); // handle exception
+            ExceptionPolice.illegalActivity(e); // handle exception
             throw e;
         }
     }
@@ -126,7 +126,7 @@ public class ContactAccess {
             return contactsObservableList; // return observable list
         }
         catch (SQLException e) {
-            ExceptionHandler.eAlert(e); // handle exception
+            ExceptionPolice.illegalActivity(e); // handle exception
             throw e;
         }
         finally {
@@ -161,7 +161,7 @@ public class ContactAccess {
             return contactName; // return contact name
         }
         catch (SQLException e) {
-            ExceptionHandler.eAlert(e); // handle exception
+            ExceptionPolice.illegalActivity(e); // handle exception
             throw e;
         }
         finally {

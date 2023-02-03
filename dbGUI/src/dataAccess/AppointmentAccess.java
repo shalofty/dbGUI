@@ -1,15 +1,15 @@
-package DataAccess;
+package dataAccess;
 
-import Helper.JDBC;
+import helper.JDBC;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import Models.Appointments;
+import models.Appointments;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import Exceptions.ExceptionHandler;
+import exceptions.ExceptionPolice;
 
 public class AppointmentAccess {
     public static Connection connection = null;
@@ -33,7 +33,7 @@ public class AppointmentAccess {
             }
             return appointmentsObservableList; // return observable list
         } catch (SQLException e) {
-            ExceptionHandler.eAlert(e); // eAlert method
+            ExceptionPolice.illegalActivity(e); // eAlert method
             throw new RuntimeException(e);
         } finally {
             if (set != null) {
@@ -66,7 +66,7 @@ public class AppointmentAccess {
             }
             return appointmentsObservableList; // return observable list
         } catch (SQLException e) {
-            ExceptionHandler.eAlert(e); // eAlert method
+            ExceptionPolice.illegalActivity(e); // eAlert method
             throw new RuntimeException(e);
         } finally {
             if (set != null) {
@@ -107,7 +107,7 @@ public class AppointmentAccess {
             }
             return appointmentsObservableList; // return observable list
         } catch (SQLException e) {
-            ExceptionHandler.eAlert(e); // eAlert method
+            ExceptionPolice.illegalActivity(e); // eAlert method
             throw new RuntimeException(e);
         } finally {
             if (set != null) {
@@ -139,7 +139,7 @@ public class AppointmentAccess {
             }
             return appointmentsObservableList; // return observable list
         } catch (SQLException e) {
-            ExceptionHandler.eAlert(e); // eAlert method
+            ExceptionPolice.illegalActivity(e); // eAlert method
             throw new RuntimeException(e);
         } finally {
             if (set != null) {

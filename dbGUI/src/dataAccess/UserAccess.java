@@ -1,11 +1,11 @@
-package DataAccess;
+package dataAccess;
 
-import Exceptions.ExceptionHandler;
-import Helper.JDBC;
+import exceptions.ExceptionPolice;
+import helper.JDBC;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
-import Models.Users;
+import models.Users;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -63,7 +63,7 @@ public class UserAccess extends Users {
             return usersObservableList; // return observable list
         }
         catch (SQLException e) {
-            ExceptionHandler.eAlert(e); // handle exception
+            ExceptionPolice.illegalActivity(e); // handle exception
             throw e;
         }
         finally {
@@ -93,7 +93,7 @@ public class UserAccess extends Users {
             return usersObservableList; // return observable list
         }
         catch (SQLException e) {
-            ExceptionHandler.eAlert(e); // handle exception
+            ExceptionPolice.illegalActivity(e); // handle exception
             throw e;
         }
         finally {
@@ -127,7 +127,7 @@ public class UserAccess extends Users {
             }
         }
         catch (SQLException e) {
-            ExceptionHandler.eAlert(e); // handle exception
+            ExceptionPolice.illegalActivity(e); // handle exception
             throw e;
         }
         finally {
@@ -158,7 +158,7 @@ public class UserAccess extends Users {
             statement.executeUpdate(); // execute update
         }
         catch (SQLException e) {
-            ExceptionHandler.eAlert(e); // handle exception
+            ExceptionPolice.illegalActivity(e); // handle exception
             throw e;
         }
         finally {
@@ -186,7 +186,7 @@ public class UserAccess extends Users {
             }
         }
         catch (SQLException e) {
-            ExceptionHandler.eAlert(e); // handle exception
+            ExceptionPolice.illegalActivity(e); // handle exception
             throw e;
         }
         finally {
@@ -226,7 +226,7 @@ public static int getUserID(String userName, String password) throws SQLExceptio
             }
         }
         catch (SQLException e) {
-            ExceptionHandler.eAlert(e); // handle exception
+            ExceptionPolice.illegalActivity(e); // handle exception
             throw e;
         }
         finally {

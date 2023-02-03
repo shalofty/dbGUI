@@ -1,11 +1,11 @@
-package DataAccess;
+package dataAccess;
 
-import Helper.JDBC;
+import helper.JDBC;
 
 import java.sql.*;
 import java.time.LocalDateTime;
 
-import Exceptions.ExceptionHandler;
+import exceptions.ExceptionPolice;
 
 public class SQLQueries {
     /**
@@ -155,7 +155,7 @@ public class SQLQueries {
             statement.execute();
         }
         catch (Exception e) {
-            ExceptionHandler.eAlert(e); // eAlert method
+            ExceptionPolice.illegalActivity(e); // eAlert method
         }
     }
 
@@ -195,7 +195,7 @@ public class SQLQueries {
             statement.execute();
         }
         catch (Exception e) {
-            ExceptionHandler.eAlert(e); // eAlert method
+            ExceptionPolice.illegalActivity(e); // eAlert method
             throw e;
         }
     }
@@ -212,7 +212,7 @@ public class SQLQueries {
             statement.execute();
         }
         catch (Exception e) {
-            ExceptionHandler.eAlert(e); // eAlert method
+            ExceptionPolice.illegalActivity(e); // eAlert method
         }
     }
 
@@ -246,7 +246,7 @@ public class SQLQueries {
             statement.execute();
         }
         catch (Exception e) {
-            ExceptionHandler.eAlert(e); // eAlert method
+            ExceptionPolice.illegalActivity(e); // eAlert method
             throw e;
         }
     }
@@ -278,7 +278,7 @@ public class SQLQueries {
             statement.execute();
         }
         catch (Exception e) {
-            ExceptionHandler.eAlert(e); // eAlert method
+            ExceptionPolice.illegalActivity(e); // eAlert method
             throw e;
         }
     }
@@ -293,7 +293,7 @@ public class SQLQueries {
             statement.execute(); // execute the statement
         }
         catch (Exception e) {
-            ExceptionHandler.eAlert(e); // eAlert method
+            ExceptionPolice.illegalActivity(e); // eAlert method
         }
     }
 }

@@ -1,6 +1,6 @@
 package company;
 
-import Exceptions.ExceptionHandler;
+import exceptions.ExceptionPolice;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -23,7 +23,7 @@ public class Start extends Application {
             launch(args); // launches the application
         }
         catch (Exception e) {
-            ExceptionHandler.eAlert(e);
+            ExceptionPolice.illegalActivity(e);
         }
     }
 }

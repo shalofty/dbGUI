@@ -1,12 +1,12 @@
-package Exceptions;
+package exceptions;
 
 import javafx.scene.control.Alert;
 
-public class ExceptionHandler {
+public class ExceptionPolice {
     /**
      * exception handling method
      * */
-    public static void eAlert(Exception e) {
+    public static void illegalActivity(Exception e) {
         StackTraceElement trace = Thread.currentThread().getStackTrace()[2];
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("eAlert Error");
