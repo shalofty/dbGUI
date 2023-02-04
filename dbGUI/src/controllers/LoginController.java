@@ -31,6 +31,8 @@ import java.net.URL;
 import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 public class LoginController implements Initializable {
@@ -42,7 +44,8 @@ public class LoginController implements Initializable {
 
     @FXML public static String username, password;
     @FXML private ImageView backgroundView;
-    @FXML private Button loginButton;
+    @FXML private Button loginButton, newUserButton;
+    @FXML public ResourceBundle languageBundles;
     @FXML Stage stage;
 
     /**
@@ -82,11 +85,8 @@ public class LoginController implements Initializable {
         try {
             GateKeeper.collectCredentials(); // collects the username and password from the user
             String username = GateKeeper.getNewUserName(); // gets the username
-            System.out.println("Username: " + username);
             String password = GateKeeper.getNewPassWord(); // gets the password
-            System.out.println("Password: " + password);
             int userID = NumberGenie.magicUser(); // generates a unique random user ID
-            System.out.println("User ID: " + userID);
             Connection connection = JDBC.openConnection(); // opens a connection to the database
             QueryChronicles.INSERT_NEW_USER(connection, userID, username, password); // inserts the new user into the database
             System.out.println("New user created");
@@ -105,8 +105,6 @@ public class LoginController implements Initializable {
         String username = setUsername(usernameField.getText());
         String passWord = passwordField.getText();
         try {
-            // retrieve username and password from text fields
-            // usernameField.getText().equals(JDBC.getUsername()) && passwordField.getText().equals(JDBC.getPassword())
             if (GateKeeper.allowEntry(username, passWord)) {
                 FXMLLoader loader = new FXMLLoader(); // creates a new FXMLLoader object
                 loader.setLocation(LoginController.class.getResource("/views/aioTabbedMenu.fxml")); // sets the location of the loader to the aioTabbedMenu.fxml file
@@ -115,15 +113,25 @@ public class LoginController implements Initializable {
                 Scene scene = new Scene(root); // creates a new scene
 //                scene.getStylesheets().add("/views/styles.css"); // adds the styles.css file to the scene
                 stage.setScene(scene); // sets the stage to the scene
-//                AgentFord.undercoverObservation(usernameField.getText(), passwordField.getText()); // calls the loginSpy method
                 stage.show(); // shows the stage
             } else {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Start Failed");
-                alert.setHeaderText("Start Failed");
-                alert.setContentText("The username or password you entered is incorrect.");
-//                AgentFord.undercoverObservation(usernameField.getText(), passwordField.getText());
-                alert.showAndWait();
+                String currentLocale = Locale.getDefault().getLanguage(); // gets the current locale
+                if (currentLocale.equals("fr")) {
+                    ResourceBundle languageBundles = ResourceBundle.getBundle("bundles/fr_lang", Locale.FRANCE); // gets the login resource bundle
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle(languageBundles.getString("errorTitle.text"));
+                    alert.setHeaderText(languageBundles.getString("errorHeader.text"));
+                    alert.setContentText(languageBundles.getString("errorText.text"));
+                    alert.showAndWait();
+                }
+                else if (currentLocale.equals("en")) {
+                    ResourceBundle languageBundles = ResourceBundle.getBundle("bundles/en_lang", Locale.US); // gets the login resource bundle
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle(languageBundles.getString("errorTitle.text"));
+                    alert.setHeaderText(languageBundles.getString("errorHeader.text"));
+                    alert.setContentText(languageBundles.getString("errorContent.text"));
+                    alert.showAndWait();
+                }
             }
         }
         catch (Exception e) {
@@ -163,7 +171,24 @@ public class LoginController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle bundle) {
         try{
+            String currentLocale = Locale.getDefault().getLanguage(); // gets the current locale
+            String frenchLocale = Locale.FRENCH.toString(); // gets the french locale
+            String englishLocale = Locale.ENGLISH.toString(); // gets the english locale
+            ResourceBundle englishLanguageBundle = ResourceBundle.getBundle("bundles/en_lang", Locale.forLanguageTag(englishLocale)); // gets the language bundles
+            ResourceBundle frenchLanguageBundle = ResourceBundle.getBundle("bundles/fr_lang", Locale.forLanguageTag(frenchLocale)); // gets the language bundles
             zoneLabel.setText(ZoneId.systemDefault().toString()); // sets the zone label to the current zone the user is in
+            if (frenchLocale.equals(currentLocale)) {
+                loginButton.setText(frenchLanguageBundle.getString("loginButton.text")); // sets the login button text to the text in the language bundle
+                newUserButton.setText(frenchLanguageBundle.getString("newUserButton.text")); // sets the new user button text to the text in the language bundle
+                usernameField.setPromptText(frenchLanguageBundle.getString("usernameField.PromptText")); // sets the username field prompt text to the text in the language bundle
+                passwordField.setPromptText(frenchLanguageBundle.getString("passwordField.PromptText")); // sets the password field prompt text to the text in the language bundle
+            }
+            else if (englishLocale.equals(currentLocale)) {
+                loginButton.setText(englishLanguageBundle.getString("loginButton.text")); // sets the login button text to the text in the language bundle
+                newUserButton.setText(englishLanguageBundle.getString("newUserButton.text")); // sets the new user button text to the text in the language bundle
+                usernameField.setPromptText(englishLanguageBundle.getString("usernameField.PromptText")); // sets the username field prompt text to the text in the language bundle
+                passwordField.setPromptText(englishLanguageBundle.getString("passwordField.PromptText")); // sets the password field prompt text to the text in the language bundle
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

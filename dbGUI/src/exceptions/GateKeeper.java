@@ -6,6 +6,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 
 import java.sql.*;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -35,24 +36,48 @@ public class GateKeeper {
      * */
     public static void collectCredentials() {
         try {
-            TextInputDialog usernameDialog = new TextInputDialog();
-            usernameDialog.setTitle("Username");
-            usernameDialog.setHeaderText("Enter your username");
-            usernameDialog.showAndWait();
-            username = usernameDialog.getResult();
+            String currentLocale = Locale.getDefault().getCountry(); // get the current locale
+            if (currentLocale.equals("US")) {
+                TextInputDialog usernameDialog = new TextInputDialog();
+                usernameDialog.setTitle("Username");
+                usernameDialog.setHeaderText("Enter your username");
+                usernameDialog.showAndWait();
+                username = usernameDialog.getResult(); // get the username
 
-            TextInputDialog passwordDialog = new TextInputDialog();
-            passwordDialog.setTitle("Password");
-            passwordDialog.setHeaderText("Enter your password");
-            passwordDialog.showAndWait();
-            password = passwordDialog.getResult();
+                TextInputDialog passwordDialog = new TextInputDialog();
+                passwordDialog.setTitle("Password");
+                passwordDialog.setHeaderText("Enter your password");
+                passwordDialog.showAndWait();
+                password = passwordDialog.getResult(); // get the password
 
-            if (username == null || password == null) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Error");
-                alert.setHeaderText("Username or password missing");
-                alert.setContentText("Please enter your username and password");
-                alert.showAndWait();
+                if (username == null || password == null) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error");
+                    alert.setHeaderText("Username or password missing");
+                    alert.setContentText("Please enter your username and password");
+                    alert.showAndWait();
+                }
+            }
+            else if (currentLocale.equals("FR")) {
+                TextInputDialog usernameDialog = new TextInputDialog();
+                usernameDialog.setTitle("Nom d'utilisateur");
+                usernameDialog.setHeaderText("Entrez votre nom d'utilisateur");
+                usernameDialog.showAndWait();
+                username = usernameDialog.getResult(); // get the username
+
+                TextInputDialog passwordDialog = new TextInputDialog();
+                passwordDialog.setTitle("Mot de passe");
+                passwordDialog.setHeaderText("Entrez votre mot de passe");
+                passwordDialog.showAndWait();
+                password = passwordDialog.getResult(); // get the password
+
+                if (username == null || password == null) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Erreur");
+                    alert.setHeaderText("Nom d'utilisateur ou mot de passe manquant");
+                    alert.setContentText("Veuillez entrer votre nom d'utilisateur et votre mot de passe");
+                    alert.showAndWait();
+                }
             }
         }
         catch (Exception e) {
