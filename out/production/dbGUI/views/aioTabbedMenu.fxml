@@ -17,7 +17,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="757.0" prefWidth="908.0" xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.CentralNervousSystem">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="757.0" prefWidth="908.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.CentralNervousSystem">
    <children>
       <TabPane prefHeight="757.0" prefWidth="908.0" tabClosingPolicy="UNAVAILABLE">
         <tabs>
@@ -32,8 +32,8 @@
                               <TableColumn fx:id="descriptionColumn" prefWidth="136.0" text="Description" />
                               <TableColumn fx:id="typeColumn" prefWidth="90.0" text="Type" />
                               <TableColumn fx:id="locationColumn" prefWidth="97.0" text="Location" />
-                              <TableColumn fx:id="startColumn" prefWidth="91.0" text="Start merlin" />
-                              <TableColumn fx:id="endColumn" prefWidth="87.0" text="End merlin" />
+                              <TableColumn fx:id="startColumn" prefWidth="91.0" text="Start" />
+                              <TableColumn fx:id="endColumn" prefWidth="87.0" text="End" />
                               <TableColumn fx:id="customerIDAppointmentsColumn" prefWidth="92.0" text="Customer ID" />
                               <TableColumn fx:id="userIDColumn" prefWidth="75.0" text="User ID" />
                            </columns>

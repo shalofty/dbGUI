@@ -10,6 +10,12 @@ import java.util.Random;
 
 import static controllers.CentralNervousSystem.theCrimeScene;
 
+/**
+ * NumberGenie is a class that generates random numbers
+ * @method magicAppointment generates a new appointment ID
+ * @method magicCustomer generates a new customer ID
+ * @method magicUser generates a new user ID
+ * */
 public class NumberGenie {
     /**
      * generateAppointmentID generates a new appointment ID

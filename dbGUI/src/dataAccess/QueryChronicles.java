@@ -1,17 +1,18 @@
 package dataAccess;
 
+import controllers.LoginController;
 import helper.JDBC;
 import javafx.scene.control.Alert;
 
 import java.sql.*;
-import java.time.Instant;
 import java.time.LocalDateTime;
 
-public class SQLQueries {
-    /**
-     * I thought it would be easier to have all of my SQL queries in one place.
-     * To make the code look a bit cleaner
-     * */
+/**
+ * QueryChronicles is a class that contains all the SQL queries that I use in my program.
+ * I thought it would be easier to have all (well, most) of my SQL queries in one place.
+ * This is rather extensive, but I wanted to have all of my queries in one place.
+ * */
+public class QueryChronicles {
     /// User Statement
     public static final String INSERT_NEW_USER_STATEMENT = "INSERT INTO client_schedule.users " +
             "(USER_ID, User_Name, Password, Create_Date, Created_By, Last_Update, Last_Updated_By)\n" + "VALUES " +
@@ -23,10 +24,10 @@ public class SQLQueries {
     public static final String SELECT_USER_NAME_STATEMENT = "SELECT User_Name FROM users WHERE User_ID = ?"; // select user name by user ID
     public static final String GET_USER_ID = "SELECT User_ID FROM users WHERE User_Name = ? AND Password = ?"; // get user ID by user name and password
     public static final String GET_ALL_USERS = "SELECT * FROM users"; // get all users
-    public static final String NEW_USER_STATEMENT = "INSERT INTO users (User_ID, User_Name, Password, Create_Date, Created_By) VALUES (?,?,?,?,?,?,?)"; // insert new user
+    public static final String NEW_USER_STATEMENT = "INSERT INTO users (User_ID, User_Name, Password) VALUES (?,?,?)"; // insert new user
     public static final String USER_LOGIN_STATEMENT = "SELECT * FROM users WHERE User_Name = ? AND Password = ?"; // user login
     public static final String CHECK_USER = "SELECT * FROM users WHERE User_Name = ? AND Password = ? AND User_ID = ?"; // check user credentials
-    public static final String SELECT_USER_ID_STATEMENT = "SELECT User_ID FROM users WHERE User_Name = ? AND Password = ?"; // select user ID by user name
+    public static final String SELECT_USER_ID_STATEMENT = "SELECT User_ID FROM users WHERE User_Name = ?"; // select user ID by username
     /// Appointment Statements
     public static final String GET_ALL_APPOINTMENTS_STATEMENT = "SELECT * from appointments"; // select all appointments
     public static final String GET_ALL_APPOINTMENTS_WITHIN_7_DAYS_STATEMENT = "SELECT * FROM appointments WHERE Start BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 7 DAY);"; // select all appointments within 7 days
@@ -58,10 +59,10 @@ public class SQLQueries {
             "Start = ?, " +
             "End = ?, " +
             "Last_Update = ?, " +
-            "Last_Updated_By = ? " +
-            "Customer_ID = ?" +
-            "User_ID = ?" +
-            "Contact_ID = ?" +
+            "Last_Updated_By = ?, " +
+            "Customer_ID = ?, " +
+            "User_ID = ?, " +
+            "Contact_ID = ? " +
             "WHERE Appointment_ID = ?"; // update appointment
     /// Contacts Statements
     public static final String SELECT_ALL_CONTACTS_STATEMENT = "SELECT * from contacts"; // select all contacts
@@ -128,13 +129,11 @@ public class SQLQueries {
         try {
             // set the parameters for the prepared statement
             // the order of the parameters must match the order of the columns in the database
-            JDBC.setPreparedStatement(connection, SQLQueries.NEW_USER_STATEMENT); // set the prepared statement
+            JDBC.setPreparedStatement(connection, QueryChronicles.NEW_USER_STATEMENT); // set the prepared statement
             PreparedStatement statement = JDBC.getPreparedStatement(); // get the prepared statement
             statement.setInt(1, ID); // user ID
             statement.setString(2, userName); // username
             statement.setString(3, password); // password
-            statement.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now())); // create date
-            statement.setString(5, "newUser"); // created by
             if (userName != null && password != null) statement.execute(); // execute the statement
             if (statement.getUpdateCount() > 0) {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -167,7 +166,7 @@ public class SQLQueries {
         try {
             // set the parameters for the prepared statement
             // the order of the parameters must match the order of the columns in the database
-            JDBC.setPreparedStatement(connection, SQLQueries.APPOINTMENT_INSERT_STATEMENT);
+            JDBC.setPreparedStatement(connection, QueryChronicles.APPOINTMENT_INSERT_STATEMENT);
             PreparedStatement statement = JDBC.getPreparedStatement();
             statement.setInt(1, ID); // appointment ID
             statement.setString(2, title); // title
@@ -176,15 +175,10 @@ public class SQLQueries {
             statement.setString(5, type); // type
             statement.setString(6, start); // start
             statement.setString(7, end); // end
-
-            // This might work
-//            String[] columns = new String[]{title, description, location, type, start, end}; // array of columns
-//            IntStream.range(0,columns.length).forEach(i-> {try {statement.setString(i+2, columns[i]);} catch (SQLException e) {throw new RuntimeException(e);}}); // set the parameters for the prepared statement
-
             statement.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now())); // create date
-            statement.setString(9, JDBC.getUsername()); // created by
+            statement.setString(9, LoginController.getUsername()); // created by
             statement.setTimestamp(10, Timestamp.valueOf(LocalDateTime.now())); // last update
-            statement.setString(11, JDBC.getUsername()); // last updated by
+            statement.setString(11, LoginController.getUsername()); // last updated by
             statement.setInt(12, customerID); // customer ID
             statement.setInt(13, userID); // user ID
             statement.setInt(14, contactID); // contact ID
@@ -206,37 +200,33 @@ public class SQLQueries {
                                                  String type,
                                                  LocalDateTime start,
                                                  LocalDateTime end,
-                                                 String userName,
                                                  int customerID,
                                                  int userID,
-                                                 int contactID) throws SQLException {
+                                                 int contactID) throws Exception {
         try {
             // set the parameters for the prepared statement
             // the order of the parameters must match the order of the columns in the database
-            JDBC.setPreparedStatement(connection, SQLQueries.UPDATE_APPOINTMENT_STATEMENT);
+            JDBC.setPreparedStatement(connection, QueryChronicles.UPDATE_APPOINTMENT_STATEMENT);
             PreparedStatement statement = JDBC.getPreparedStatement();
             statement.setString(1, title); // title
             statement.setString(2, description); // description
             statement.setString(3, location); // location
             statement.setString(4, type); // type
-
             statement.setTimestamp(5, Timestamp.valueOf(start)); // start
             statement.setTimestamp(6, Timestamp.valueOf(end)); // end
-
             statement.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now())); // last update
-            statement.setString(8, userName); // last updated by
-
+            statement.setString(8, LoginController.getUsername()); // last updated by
             statement.setInt(9, customerID); // customer ID
             statement.setInt(10, userID); // user ID
             statement.setInt(11, contactID); // contact ID
             statement.setInt(12, appointmentID); // appointment ID LAST
+            System.out.println(statement);
             statement.execute();
+            System.out.println(statement.execute());
         }
         catch (SQLException e) {
             e.printStackTrace(); // print the stack trace
             throw e;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -246,7 +236,7 @@ public class SQLQueries {
     public static void DELETE_APPOINTMENT_METHOD(Connection connection, int customerID)
     {
         try {
-            JDBC.setPreparedStatement(connection, SQLQueries.DELETE_FROM_APPOINTMENTS_STATEMENT); // set the prepared statement
+            JDBC.setPreparedStatement(connection, QueryChronicles.DELETE_FROM_APPOINTMENTS_STATEMENT); // set the prepared statement
             PreparedStatement statement = JDBC.getPreparedStatement(); // get the prepared statement
             statement.setInt(1, customerID); // set the customer ID
             statement.execute();
@@ -271,7 +261,7 @@ public class SQLQueries {
     throws Exception
     {
         try{
-            JDBC.setPreparedStatement(connection, SQLQueries.INSERT_CUSTOMER_STATEMENT); // set the prepared statement
+            JDBC.setPreparedStatement(connection, QueryChronicles.INSERT_CUSTOMER_STATEMENT); // set the prepared statement
             PreparedStatement statement = JDBC.getPreparedStatement(); // get the prepared statement
             statement.setInt(1, customerID); // set the customer ID
             statement.setString(2, customerName); // set the customer name
@@ -304,7 +294,7 @@ public class SQLQueries {
         throws Exception
     {
         try{
-            JDBC.setPreparedStatement(connection, SQLQueries.UPDATE_CUSTOMER_STATEMENT); // set the prepared statement
+            JDBC.setPreparedStatement(connection, QueryChronicles.UPDATE_CUSTOMER_STATEMENT); // set the prepared statement
             PreparedStatement statement = JDBC.getPreparedStatement(); // get the prepared statement
             statement.setString(1, customerName); // set the customer name
             statement.setString(2, address); // set the address
@@ -326,7 +316,7 @@ public class SQLQueries {
     public static void DELETE_CUSTOMER_METHOD(Connection connection, int customerID)
     {
         try {
-            JDBC.setPreparedStatement(connection, SQLQueries.DELETE_FROM_CUSTOMERS_STATEMENT); // set the prepared statement
+            JDBC.setPreparedStatement(connection, QueryChronicles.DELETE_FROM_CUSTOMERS_STATEMENT); // set the prepared statement
             PreparedStatement statement = JDBC.getPreparedStatement(); // get the prepared statement
             statement.setInt(1, customerID); // set the customer ID
             statement.execute(); // execute the statement

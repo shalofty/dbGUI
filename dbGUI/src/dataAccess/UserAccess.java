@@ -3,12 +3,9 @@ package dataAccess;
 import helper.JDBC;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.Alert;
 import models.Users;
 
 import java.sql.*;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 
 public class UserAccess extends Users {
     public static Connection connection = null;
@@ -26,7 +23,7 @@ public class UserAccess extends Users {
     public static boolean checkUser(String userName, String password) throws SQLException {
         try {
             connection = JDBC.openConnection(); // Open connection
-            statement = connection.prepareStatement(SQLQueries.CHECK_USER); // Prepare statement
+            statement = connection.prepareStatement(QueryChronicles.CHECK_USER); // Prepare statement
             statement.setString(1, userName); // Set parameters
             statement.setString(2, password); // Set parameters
             set = statement.executeQuery(); // Execute query
@@ -51,9 +48,9 @@ public class UserAccess extends Users {
     // a method that returns an observable list of all the user_id's in the database
     public static ObservableList<Integer> getAllUserIDs() throws SQLException {
         ObservableList<Integer> usersObservableList = FXCollections.observableArrayList(); // create observable list
-        try {
-            connection = JDBC.openConnection(); // open connection
-            statement = connection.prepareStatement(SQLQueries.SELECT_ALL_USER_IDS_STATEMENT); // prepare statement
+        try (Connection connection = JDBC.openConnection(); // open connection
+             PreparedStatement statement = connection.prepareStatement(QueryChronicles.SELECT_ALL_USER_IDS_STATEMENT)) // prepare statement
+        {
             set = statement.executeQuery(); // execute query
             // loop through result set
             while (set.next()) {
@@ -80,9 +77,9 @@ public class UserAccess extends Users {
     // a method that returns an observablelist of all the user names in the database
     public static ObservableList<String> getAllUserNames() throws SQLException {
         ObservableList<String> usersObservableList = FXCollections.observableArrayList(); // create observable list
-        try {
-            connection = JDBC.openConnection(); // open connection
-            statement = connection.prepareStatement(SQLQueries.SELECT_ALL_USER_NAMES_STATEMENT); // prepare statement
+        try (Connection connection = JDBC.openConnection(); // open connection
+             PreparedStatement statement = connection.prepareStatement(QueryChronicles.SELECT_ALL_USER_NAMES_STATEMENT)) // prepare statement)
+        {
             set = statement.executeQuery(); // execute query
             // loop through result set
             while (set.next()) {
@@ -108,19 +105,20 @@ public class UserAccess extends Users {
 
     /**
      * getUserName method returns the user name for a given user ID from the database
-     * @param userID
+     * @param userID the user ID to search for
      * */
     public static String getUserName(int userID) throws SQLException {
-        try {
-            connection = JDBC.openConnection(); // open connection
-            statement = connection.prepareStatement(SQLQueries.SELECT_USER_NAME_STATEMENT); // prepare statement
+        try (Connection connection = JDBC.openConnection();
+             PreparedStatement statement = connection.prepareStatement(QueryChronicles.SELECT_USER_NAME_STATEMENT))
+        {
             statement.setInt(1, userID); // set parameters
             set = statement.executeQuery(); // execute query
             if (!set.isBeforeFirst()) {
+                connection.close(); // close connection
                 return "No Users"; // return no user if no user is found
             }
             if (set.next()) {
-                return set.getString("User_Name"); // return the user name
+                return set.getString("User_Name"); // return the username
             }
         }
         catch (SQLException e) {
@@ -140,81 +138,17 @@ public class UserAccess extends Users {
         return "No Users"; // return no user if no user is found
     }
 
-    // a method that creates a new user in the database
-    public static void createUser(String userName, String password) throws SQLException {
-        try {
-            connection = JDBC.openConnection(); // open connection
-            statement = connection.prepareStatement(SQLQueries.INSERT_NEW_USER_STATEMENT); // prepare statement
-            statement.setString(2, userName); // set parameters
-            statement.setString(3, password); // set parameters
-            statement.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now(ZoneId.systemDefault()))); // set parameters
-            statement.setString(5, JDBC.getUsername()); // set parameters
-            statement.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now(ZoneId.systemDefault()))); // set parameters
-            statement.setString(7, JDBC.getUsername()); // set parameters
-            statement.executeUpdate(); // execute update
-        }
-        catch (SQLException e) {
-            throw e;
-        }
-        finally {
-            if (statement != null) {
-                statement.close();
-            }
-            if (connection != null) {
-                connection.close();
-            }
-        }
-    }
-
-    // a method that verifies a user password for a given user ID from the database
-    public static boolean verifyUserPassword(int userID, String password) throws SQLException {
-        try {
-            connection = JDBC.openConnection(); // open connection
-            statement = connection.prepareStatement(SQLQueries.SELECT_USER_PASSWORD_STATEMENT); // prepare statement
-            statement.setInt(1, userID); // set parameters
-            set = statement.executeQuery(); // execute query
-            if (!set.isBeforeFirst()) {
-                return false; // return false if no user is found
-            }
-            if (set.next()) {
-                return set.getString("Password").equals(password); // return true if the password matches
-            }
-        }
-        catch (SQLException e) {
-            throw e;
-        }
-        finally {
-            if (set != null) {
-                set.close();
-            }
-            if (statement != null) {
-                statement.close();
-            }
-            if (connection != null) {
-                connection.close();
-            }
-        }
-        return false; // return false if no user is found
-    }
-
-    // SELECT_USER_PASSWORD_STATEMENT SQL
-    public static final String SELECT_USER_PASSWORD_STATEMENT = "SELECT Password FROM users WHERE User_ID = ?";
-
-    // a method that returns a user_id based on username and password
-public static int getUserID(String userName, String password) throws SQLException {
-        try {
-            connection = JDBC.openConnection(); // open connection
-            statement = connection.prepareStatement(SQLQueries.SELECT_USER_ID_STATEMENT); // prepare statement
+    /**
+     * getUserID method returns the user ID for a given username from the database
+     * @param userName the username to search for
+     * @return the user ID
+     * */
+    public static int getUserID(String userName) throws SQLException {
+        try (Connection connection = JDBC.openConnection();
+             PreparedStatement statement = connection.prepareStatement(QueryChronicles.SELECT_USER_ID_STATEMENT))
+        {
             statement.setString(1, userName); // set parameters
-            statement.setString(2, password); // set parameters
             set = statement.executeQuery(); // execute query
-            if (!set.isBeforeFirst()) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Error");
-                alert.setHeaderText("Invalid Username or Password");
-                alert.setContentText("Please enter a valid username and password.");
-                alert.showAndWait();
-            }
             if (set.next()) {
                 return set.getInt("User_ID"); // return the user id
             }
@@ -233,6 +167,6 @@ public static int getUserID(String userName, String password) throws SQLExceptio
                 connection.close();
             }
         }
-        return -1; // return 0 if no user is found
+        return 0; // return 0 if no user is found
     }
 }

@@ -21,9 +21,9 @@ public class AppointmentAccess {
      * */
     public static ObservableList<Appointments> allAppointments() throws SQLException {
         ObservableList<Appointments> appointmentsObservableList = FXCollections.observableArrayList(); // create observable list
-        try {
-            connection = JDBC.openConnection(); // open connection
-            statement = connection.prepareStatement(SQLQueries.GET_ALL_APPOINTMENTS_STATEMENT); // prepare statement
+        try (Connection connection = JDBC.openConnection(); // open connection
+             PreparedStatement statement = connection.prepareStatement(QueryChronicles.GET_ALL_APPOINTMENTS_STATEMENT))  // prepare statement
+        {
             set = statement.executeQuery(); // execute query
             // loop through result set
             while (set.next()) {
@@ -48,13 +48,13 @@ public class AppointmentAccess {
 
     /**
      * allAppointmentsByCustomerID gets all appointments for a customer
-     * @param customerID
+     * @param customerID customer ID to get appointments
      * */
     public static ObservableList<Appointments> allAppointmentsByCustomerID(int customerID) throws SQLException {
         ObservableList<Appointments> appointmentsObservableList = FXCollections.observableArrayList(); // create observable list
-        try {
-            connection = JDBC.openConnection(); // open connection
-            statement = connection.prepareStatement(SQLQueries.GET_ALL_APPOINTMENTS_BY_CUSTOMER_ID_STATEMENT); // prepare statement
+        try (Connection connection = JDBC.openConnection(); // open connection
+             PreparedStatement statement = connection.prepareStatement(QueryChronicles.GET_ALL_APPOINTMENTS_BY_CUSTOMER_ID_STATEMENT)) // prepare statement
+        {
             statement.setInt(1, customerID); // set customerID
             set = statement.executeQuery(); // execute query
             // loop through result set
@@ -81,7 +81,7 @@ public class AppointmentAccess {
 
     /**
      * noAppointments checks if a customer has any appointments
-     * @param customerID
+     * @param customerID customer ID to check appointments
      * */
     public static boolean noAppointments(int customerID) throws SQLException {
         ObservableList<Appointments> appointmentsObservableList = allAppointmentsByCustomerID(customerID); // get all appointments for customer
@@ -94,9 +94,9 @@ public class AppointmentAccess {
      * */
     public static ObservableList<Appointments> allAppointmentsWithin7Days() throws SQLException {
         ObservableList<Appointments> appointmentsObservableList = FXCollections.observableArrayList(); // create observable list
-        try {
-            connection = JDBC.openConnection(); // open connection
-            statement = connection.prepareStatement(SQLQueries.GET_ALL_APPOINTMENTS_WITHIN_7_DAYS_STATEMENT); // prepare statement
+        try (Connection connection = JDBC.openConnection(); // open connection
+             PreparedStatement statement = connection.prepareStatement(QueryChronicles.GET_ALL_APPOINTMENTS_WITHIN_7_DAYS_STATEMENT)) // prepare statement
+        {
             set = statement.executeQuery(); // execute query
             // loop through result set
             while (set.next()) {
@@ -126,9 +126,8 @@ public class AppointmentAccess {
      * */
     public static ObservableList<Appointments> allAppointmentsWithin30Days() throws SQLException {
         ObservableList<Appointments> appointmentsObservableList = FXCollections.observableArrayList(); // create observable list
-        try {
-            connection = JDBC.openConnection(); // open connection
-            statement = connection.prepareStatement(SQLQueries.GET_ALL_APPOINTMENTS_WITHIN_30_DAYS_STATEMENT); // prepare statement
+        try (Connection connection = JDBC.openConnection(); PreparedStatement statement = connection.prepareStatement(QueryChronicles.GET_ALL_APPOINTMENTS_WITHIN_30_DAYS_STATEMENT)) // prepare statement
+        {
             set = statement.executeQuery(); // execute query
             // loop through result set
             while (set.next()) {

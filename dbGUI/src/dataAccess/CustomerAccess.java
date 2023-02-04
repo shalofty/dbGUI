@@ -21,38 +21,29 @@ public class CustomerAccess {
     /**
      * Observablelist that takes all customer data from the database.
      * */
-    public static ObservableList<Customers> getAllCustomers() {
-        try {
-            ObservableList<Customers> customersObservableList = FXCollections.observableArrayList();
-            connection = JDBC.openConnection();
-            statement = connection.prepareStatement(SQLQueries.SELECT_CUSTOMERS_STATEMENT);
-            set = statement.executeQuery();
-            while (set.next()) {
-                int customerID = set.getInt("Customer_ID");
-                String customerName = set.getString("Customer_Name");
-                String customerAddress = set.getString("Address");
-                String customerPostalCode = set.getString("Postal_Code");
-                String customerPhone = set.getString("Phone");
-                int divisionID = set.getInt("Division_ID");
-                String divisionName = set.getString("Division");
-                // param ordering must match the constructor in the Customers model
-                Customers customer = new Customers(customerName, customerAddress, customerPostalCode,
-                        customerPhone, divisionName, customerID, divisionID);
-                // add each customer to the observable list of
-                customersObservableList.add(customer);}
+    public static ObservableList<Customers> getAllCustomers() throws SQLException {
+        try (Connection connection = JDBC.openConnection(); // open the connection
+             PreparedStatement statement = connection.prepareStatement(QueryChronicles.SELECT_CUSTOMERS_STATEMENT)) // prepare the statement
+        {
+            ObservableList<Customers> customersObservableList = FXCollections.observableArrayList(); // create an observable list of customers
+            set = statement.executeQuery(); // execute the statement
+            while (set.next()) { // while there is a next result
+                Customers customer = CustomerMapper.map(set); // map the result set to a customer object
+                customersObservableList.add(customer); // add the customer to the observable list
+            }
             return customersObservableList; // return the observable list
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         finally {
             if (set != null) {
-                set = null; // nullify set
+                set.close(); // close the set
             }
             if (statement != null) {
-                statement = null; // nullify statement
+                statement.close(); // close the statement
             }
             if (connection != null) {
-                connection = JDBC.closeConnection(); // close the connection
+                connection.close() ; // close the connection
             }
         }
     }
@@ -62,11 +53,11 @@ public class CustomerAccess {
      * used to populate the customer name combo box
      * @return an observable list of strings
      * */
-    public static ObservableList<String> getAllCustomerNameStrings() {
-        try {
+    public static ObservableList<String> getAllCustomerNameStrings() throws SQLException {
+        try (Connection connection = JDBC.openConnection(); // open the connection
+             PreparedStatement statement = connection.prepareStatement(QueryChronicles.SELECT_CUSTOMERS_STATEMENT)) // prepare the statement
+        {
             ObservableList<String> customerNames = FXCollections.observableArrayList(); // create an observable list of strings
-            connection = JDBC.openConnection(); // open the connection
-            statement = connection.prepareStatement(SQLQueries.SELECT_CUSTOMERS_STATEMENT); // prepare the statement
             set = statement.executeQuery(); // execute the statement
             while (set.next()) { // while there is a next result
                 String customerName = set.getString("Customer_Name"); // get the customer name
@@ -77,13 +68,13 @@ public class CustomerAccess {
             throw new RuntimeException(e);
         } finally {
             if (set != null) {
-                set = null;
+                set.close(); // close the set
             }
             if (statement != null) {
-                statement = null;
+                statement.close(); // close the statement
             }
             if (connection != null) {
-                connection = JDBC.closeConnection();
+                connection.close(); // close the connection
             }
         }
     }
@@ -93,55 +84,64 @@ public class CustomerAccess {
      * @param customerID the customer ID
      * @return the customer name
      * */
-    public static String getCustomerNameByID(int customerID) {
-        try {
-            connection = JDBC.openConnection(); // open the connection
-            statement = connection.prepareStatement(SQLQueries.SELECT_CUSTOMER_NAME_BY_ID_STATEMENT); // prepare the statement
+    public static String getCustomerNameByID(int customerID) throws SQLException {
+        try (Connection connection = JDBC.openConnection(); // open the connection
+             PreparedStatement statement = connection.prepareStatement(QueryChronicles.SELECT_CUSTOMER_NAME_BY_ID_STATEMENT)) // prepare the statement
+        {
             statement.setInt(1, customerID); // set the customer ID
             set = statement.executeQuery(); // execute the statement
             if (set.next()) { // if there is a next result
                 return set.getString("Customer_Name"); // return the customer name
             }
-            return null;
+            else {
+                return null; // return null if there is no customer name
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         finally {
             if (set != null) {
-                set = null; // nullify set
+                set.close(); // nullify set
             }
             if (statement != null) {
-                statement = null; // nullify statement
+                statement.close(); // nullify statement
             }
             if (connection != null) {
-                connection = JDBC.closeConnection(); // close the connection
+                connection.close(); // close the connection
             }
         }
     }
 
     // a method to find the customer ID by their name
-    public static int getCustomerIDByName(String customerName) {
-        try {
-            connection = JDBC.openConnection(); // open the connection
-            statement = connection.prepareStatement(SQLQueries.SELECT_CUSTOMER_ID_BY_NAME_STATEMENT); // prepare the statement
+    /**
+     * getCustomerIDByName method to get a customer ID by name
+     * @param customerName the customer name
+     * @return the customer ID
+     * */
+    public static int getCustomerID(String customerName) throws SQLException {
+        try (Connection connection = JDBC.openConnection(); // open the connection
+             PreparedStatement statement = connection.prepareStatement(QueryChronicles.SELECT_CUSTOMER_ID_BY_NAME_STATEMENT))  // prepare the statement
+        {
             statement.setString(1, customerName); // set the customer name
             set = statement.executeQuery(); // execute the statement
             if (set.next()) { // if there is a next result
                 return set.getInt("Customer_ID"); // return the customer ID
             }
-            return 0;
+            else {
+                return 0; // return 0 if there is no customer ID
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         finally {
             if (set != null) {
-                set = null; // nullify set
+                set.close(); // nullify set
             }
             if (statement != null) {
-                statement = null; // nullify statement
+                statement.close(); // nullify statement
             }
             if (connection != null) {
-                connection = JDBC.closeConnection(); // close the connection
+                connection.close(); // close the connection
             }
         }
     }

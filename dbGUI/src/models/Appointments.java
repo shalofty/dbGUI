@@ -7,6 +7,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public final class Appointments {
@@ -17,17 +18,28 @@ public final class Appointments {
     private final int appointmentID;
     public final int customerID, userID, contactID;
     private final LocalDateTime startTime, endTime;
+    private final LocalDate appointmentDate;
 
     /**
      * Appointments constructor
      * */
-    public Appointments(int appointmentID, String appointmentTitle, String appointmentDescription, String appointmentLocation,
-                        String appointmentType, LocalDateTime startTime, LocalDateTime endTime, int customerID, int contactID, int userID) {
+    public Appointments(int appointmentID,
+                        String appointmentTitle,
+                        String appointmentDescription,
+                        String appointmentLocation,
+                        String appointmentType,
+                        LocalDate appointmentDate,
+                        LocalDateTime startTime,
+                        LocalDateTime endTime,
+                        int customerID,
+                        int contactID,
+                        int userID) {
         this.appointmentID = appointmentID;
         this.appointmentTitle = appointmentTitle;
         this.appointmentDescription = appointmentDescription;
         this.appointmentLocation = appointmentLocation;
         this.appointmentType = appointmentType;
+        this.appointmentDate = appointmentDate;
         this.startTime = startTime;
         this.endTime = endTime;
         this.customerID = customerID;
@@ -73,6 +85,14 @@ public final class Appointments {
      * */
     public String getAppointmentType() {
         return appointmentType;
+    }
+
+    /**
+     * getAppointmentDate method to
+     * @return appointmentDate
+     * */
+    public LocalDate getAppointmentDate() {
+        return appointmentDate;
     }
 
     /**

@@ -17,47 +17,13 @@ public class ContactAccess {
     public static ResultSet set = null;
 
     /**
-     * Create observablelist from all contacts.
-     * @return contactsObservableList
-     */
-    public static ObservableList<Contacts> getAllContacts() throws SQLException {
-        ObservableList<Contacts> contactsObservableList = FXCollections.observableArrayList(); // create observable list
-        try {
-            connection = JDBC.openConnection(); // open connection
-            statement = connection.prepareStatement(SQLQueries.SELECT_ALL_CONTACTS_STATEMENT); // prepare statement
-            set = statement.executeQuery(); // execute query
-            // loop through result set
-            while (set.next()) {
-                contactsObservableList.add(createContact(set)); // add contact to observable list
-            }
-            return contactsObservableList; // return observable list
-        }
-        catch (SQLException e) {
-            e.printStackTrace(); // print stack trace
-            throw e;
-        }
-        finally {
-            if (set != null) {
-                set.close();
-            }
-            if (statement != null) {
-                statement.close();
-            }
-            if (connection != null) {
-                connection.close();
-            }
-        }
-    }
-
-    /**
      * Find contact ID given contact name.
      * @return contactID
      * TESTED ✓
      */
-    public static int findContactID(String contactName) throws SQLException, Exception {
-        try {
-            connection = JDBC.openConnection(); // open connection
-            statement = connection.prepareStatement(SQLQueries.SELECT_CONTACTS_BY_NAME_STATEMENT); // prepare statement
+    public static int findContactID(String contactName) throws SQLException {
+        try (Connection connection = JDBC.openConnection(); // open connection
+             PreparedStatement statement = connection.prepareStatement(QueryChronicles.SELECT_CONTACTS_BY_NAME_STATEMENT)) { // create statement
             statement.setString(1, contactName); // set contact name
             set = statement.executeQuery(); // execute query
             if (set.next()) {
@@ -73,7 +39,7 @@ public class ContactAccess {
         }
         catch (SQLException e) {
             e.printStackTrace(); // print stack trace
-            throw e; // throw exception
+            throw e;
         }
         finally {
             if (set != null) {
@@ -86,7 +52,7 @@ public class ContactAccess {
                 connection.close(); // close connection
             }
         }
-        return 0;
+        return 0; // return 0 if contact not found
     }
 
     /**
@@ -115,9 +81,9 @@ public class ContactAccess {
      */
     public static ObservableList<String> getContactNames() throws SQLException {
         ObservableList<String> contactsObservableList = FXCollections.observableArrayList(); // create observable list
-        try {
-            connection = JDBC.openConnection(); // open connection
-            statement = connection.prepareStatement(SQLQueries.SELECT_ALL_CONTACTS_STATEMENT); // prepare statement
+        try (Connection connection = JDBC.openConnection(); // open connection
+             PreparedStatement statement = connection.prepareStatement(QueryChronicles.SELECT_ALL_CONTACTS_STATEMENT))  // create statement
+        {
             set = statement.executeQuery(); // execute query
             // loop through result set
             while (set.next()) {
@@ -149,9 +115,9 @@ public class ContactAccess {
      * TESTED ✓
      */
     public static String getContactName(int contactID) throws SQLException {
-        try {
-            connection = JDBC.openConnection(); // open connection
-            statement = connection.prepareStatement(SQLQueries.SELECT_CONTACTS_BY_ID_STATEMENT); // prepare statement
+        try (Connection connection = JDBC.openConnection();
+             PreparedStatement statement = connection.prepareStatement(QueryChronicles.SELECT_CONTACTS_BY_ID_STATEMENT))
+        {
             statement.setInt(1, contactID); // set contact ID
             set = statement.executeQuery(); // execute query
             String contactName = "";

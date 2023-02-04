@@ -32,7 +32,8 @@ public class CountryAccess extends Country {
         try {
             ObservableList<CountryAccess> countriesObservableList = FXCollections.observableArrayList();
             connection = JDBC.openConnection(); // open connection
-            statement = connection.prepareStatement(SQLQueries.SELECT_COUNTRIES); // create statement
+            statement = connection.prepareStatement(QueryChronicles.SELECT_COUNTRIES); // create statement
+
             set = statement.executeQuery(); // execute statement
             // loop through result set
             while (set.next()) {

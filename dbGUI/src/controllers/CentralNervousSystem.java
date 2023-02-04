@@ -2,8 +2,6 @@ package controllers;
 
 import dataAccess.*;
 import exceptions.Confundo;
-import exceptions.GateKeeper;
-import exceptions.Verificatus;
 import numericNexus.NumberGenie;
 import helper.JDBC;
 import theAgency.AgentFord;
@@ -24,7 +22,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.*;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -68,7 +65,7 @@ public class CentralNervousSystem implements Initializable {
     @FXML public Button modifyCustomerButton;
     @FXML public Button deleteCustomerButton;
     @FXML public Button clearSelectedCustomerButton;
-    @FXML public ObservableList<Customers> customersList = FXCollections.observableArrayList(CustomerAccess.getAllCustomers());
+    @FXML public ObservableList<Customers> customersList; // Observable List of Customers
     @FXML public ObservableList<DivisionAccess> divisionsList = FXCollections.observableArrayList();
     @FXML public ObservableList<String> countryNames = FXCollections.observableArrayList();
     @FXML public ObservableList<String> divisionNames = FXCollections.observableArrayList();
@@ -142,12 +139,11 @@ public class CentralNervousSystem implements Initializable {
                 locationField.setText(String.valueOf(selectedAppointment.getAppointmentLocation())); // Sets the appointment location text field
                 typeField.setText(String.valueOf(selectedAppointment.getAppointmentType())); // Sets the appointment type text field
                 descriptionTextArea.setText(String.valueOf(selectedAppointment.getAppointmentDescription())); // Sets the appointment description text field
-                datePicker.setValue(selectedAppointment.getStartTime().toLocalDate()); // Sets the start date picker
+                datePicker.setValue(selectedAppointment.getAppointmentDate()); // Sets the date picker
                 startHourBox.setValue(String.valueOf(selectedAppointment.getStartTime().getHour())); // Sets the start hour combo box
                 endHourBox.setValue(String.valueOf(selectedAppointment.getEndTime().getHour())); // Sets the end hour combo box
                 startMinBox.setValue(String.valueOf(selectedAppointment.getStartTime().getMinute())); // Sets the start minute combo box
                 endMinBox.setValue(String.valueOf(selectedAppointment.getEndTime().getMinute())); // Sets the end minute combo box
-
                 addAppointmentButton.setDisable(true); // Disables the add appointment button
                 modifyAppointmentButton.setDisable(false); // Enables the modify appointment button
                 deleteAppointmentButton.setDisable(false); // Enables the delete appointment button
@@ -196,10 +192,6 @@ public class CentralNervousSystem implements Initializable {
             confirm.setHeaderText("You are about to add an appointment."); // set header text
             confirm.setContentText("Are you sure you want to add this appointment?"); // set content text
             Optional<ButtonType> result = confirm.showAndWait(); // show alert and wait for user input
-            GateKeeper.collectCredentials(); // collect credentials
-            String password = GateKeeper.getNewPassWord(); // get password
-            // if the user clicks OK and enters a password
-            // if the user clicks OK
             // generating new appointment ID and getting the values from the text fields
             int newAppointmentID = NumberGenie.magicAppointment(); // generate new appointment ID
             String newTitle = titleField.getText();  // get title
@@ -207,47 +199,51 @@ public class CentralNervousSystem implements Initializable {
             String newLocation = locationField.getText(); // get location
             String newType = typeField.getText(); // get type
 
+            String userName = usersMenu.getValue(); // get username
+            int userID = UserAccess.getUserID(userName); // get user ID
+
+            String customerName = customersMenu.getValue(); // get customer name
+            int customerID = CustomerAccess.getCustomerID(customerName); // get customer ID
+
+            String contactName = contactsMenu.getValue(); // get contact name from the contacts menu box
+            int contactID = ContactAccess.findContactID(contactName); // find contact ID
+
             LocalDate localDate = datePicker.getValue(); // get date
             LocalTime localStartTime = LocalTime.of(Integer.parseInt(startHourBox.getValue()), Integer.parseInt(startMinBox.getValue())); // get start time
             LocalTime localEndTime = LocalTime.of(Integer.parseInt(endHourBox.getValue()), Integer.parseInt(endMinBox.getValue())); // get end time
+            System.out.println(localDate + " " + localStartTime + " " + localEndTime);
 
             if (!HotTubTimeMachine.isWithinBusinessHours(localDate, localStartTime, localEndTime)) {
                 Confundo.businessHours(); // Alert the user that the appointment is not within business hours
             }
 
             LocalDateTime startDT = HotTubTimeMachine.getDateTimeFromPickers(datePicker, startHourBox, endMinBox); // get start date and time
-            LocalDateTime endDT = HotTubTimeMachine.getDateTimeFromPickers(datePicker, startHourBox, endMinBox); // get end date and time
+            LocalDateTime endDT = HotTubTimeMachine.getDateTimeFromPickers(datePicker, endHourBox, endMinBox); // get end date and time
+            System.out.println(startDT + " " + endDT);
 
             LocalDateTime startUTC = HotTubTimeMachine.convertToUTC(startDT); // convert start date and time to UTC
             LocalDateTime endUTC = HotTubTimeMachine.convertToUTC(endDT); // convert end date and time to UTC
+            System.out.println(startUTC + " " + endUTC);
 
             // convert startUTC and endUTC to strings
-            String startUTCString = startUTC.toString();
-            String endUTCString = endUTC.toString();
+            String startUTCString = startUTC.toString().replace("T", " "); // replace T with a space
+            String endUTCString = endUTC.toString().replace("T", " "); // replace T with a space
+            System.out.println(startUTCString + " " + endUTCString);
 
-            int newCustomerID = CustomerAccess.getCustomerIDByName(customersMenu.getValue()); // find customer ID by name in the database
-
-            String userName = usersMenu.getValue(); // get username from the users menu box
-            int userID = UserAccess.getUserID(userName, password); // get user ID from the database using the username and password
-
-            String contactName = contactsMenu.getValue(); // get contact name from the contacts menu box
-            int contactID = ContactAccess.findContactID(contactName); // find contact ID
-
+            System.out.println("contact id: " + contactID);
             // adding the new appointment to the database
-            if (GateKeeper.verifyTraveler(userName, userID, password)) { // verifying the user
-                SQLQueries.INSERT_INTO_APPOINTMENTS_METHOD(connection,
-                                                            newAppointmentID,
-                                                            newTitle,
-                                                            newDescriptionText,
-                                                            newLocation,
-                                                            newType,
-                                                            startUTCString,
-                                                            endUTCString,
-                                                            newCustomerID,
-                                                            userID,
-                                                            contactID); // insertIntoAppointment method
-                successAlert(); // successAlert method
-            }
+            QueryChronicles.INSERT_INTO_APPOINTMENTS_METHOD(connection,
+                                                        newAppointmentID,
+                                                        newTitle,
+                                                        newDescriptionText,
+                                                        newLocation,
+                                                        newType,
+                                                        startUTCString,
+                                                        endUTCString,
+                                                        customerID,
+                                                        userID,
+                                                        contactID); // insertIntoAppointment method
+            successAlert(); // successAlert method
             connection.close(); // close the connection
             clearSelectedAppointment(); // clear the selected appointment
         }
@@ -275,83 +271,65 @@ public class CentralNervousSystem implements Initializable {
      * modifyAppointment modifies an appointment in the database
      * */
     @FXML public void modifyAppointment() throws Exception {
-        try {
-            connection = JDBC.openConnection(); // establish connection, passing into insertIntoAppointment()
+        try (Connection connection = JDBC.openConnection()) {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION); // confirmation alert
             alert.setTitle("Confirmation");
             alert.setHeaderText("You are about to modify an appointment.");
             alert.setContentText("Are you sure you want to modify this appointment?");
             Optional<ButtonType> result = alert.showAndWait(); // show the alert
             if (selectedAppointment != null && result.get() == ButtonType.OK && result.isPresent()) { // if the user clicks OK
-                GateKeeper.collectCredentials(); // collect credentials
-                String collectedUsername = GateKeeper.getNewUserName();
-                String collectedPassword = GateKeeper.getNewPassWord();
                 int appointmentID = selectedAppointment.getAppointmentID(); // getting the appointment ID
-                String title = selectedAppointment.getAppointmentTitle(); // getting the title
-                String location = selectedAppointment.getAppointmentLocation(); // getting the location
-                String type = selectedAppointment.getAppointmentType(); // getting the type
-                String descriptionText = selectedAppointment.getAppointmentDescription(); // getting the description
-                int customerID = selectedAppointment.getCustomerID(); // getting the customer ID
-                int userID = selectedAppointment.getUserID(); // getting the user ID
-//                String userName = selectedAppointment.getUserName(userID); // getting the username for verification purposes
-                int contactID = selectedAppointment.getContactID(); // get contact
+                String title = titleField.getText(); // getting the title
+                String location = locationField.getText(); // getting the location
+                String type = typeField.getText(); // getting the type
+                String descriptionText = descriptionTextArea.getText(); // getting the description
+
+                String customerName = customersMenu.getValue(); // getting the customer name
+                int customerID = CustomerAccess.getCustomerID(customerName); // getting the customer ID
+
+                String userName = usersMenu.getValue(); // getting the username
+                int userID = UserAccess.getUserID(userName); // getting the user ID
+
+                String contactName = contactsMenu.getValue(); // getting the contact name
+                int contactID = ContactAccess.findContactID(contactName); // getting the contact ID
 
                 LocalDate localDate = datePicker.getValue(); // get date
-                int startHour = Integer.parseInt(startHourBox.getValue()); // get start hour
-                int startMin = Integer.parseInt(startMinBox.getValue()); // get start minute
-                int endHour = Integer.parseInt(endHourBox.getValue()); // get end hour
-                int endMin = Integer.parseInt(endMinBox.getValue()); // get end minute
+                LocalTime localStartTime = LocalTime.of(Integer.parseInt(startHourBox.getValue()), Integer.parseInt(startMinBox.getValue())); // get start time
+                LocalTime localEndTime = LocalTime.of(Integer.parseInt(endHourBox.getValue()), Integer.parseInt(endMinBox.getValue())); // get end time
 
-                LocalTime localStartTime = LocalTime.of(startHour, startMin); // get start time
-                LocalTime localEndTime = LocalTime.of(endHour, endMin); // get end time
-
-                if (!HotTubTimeMachine.isWithinBusinessHours(localDate, localStartTime, localEndTime)) { // check if the appointment is within business hours
+                if (!HotTubTimeMachine.isWithinBusinessHours(localDate, localStartTime, localEndTime)) {
                     Confundo.businessHours(); // Alert the user that the appointment is not within business hours
                 }
 
-                LocalDateTime localStartDateTime = LocalDateTime.of(localDate, localStartTime); // get start date and time
-                LocalDateTime localEndDateTime = LocalDateTime.of(localDate, localEndTime); // get end date and time
+                LocalDateTime startDT = HotTubTimeMachine.getDateTimeFromPickers(datePicker, startHourBox, endMinBox); // get start date and time
+                LocalDateTime endDT = HotTubTimeMachine.getDateTimeFromPickers(datePicker, endHourBox, endMinBox); // get end date and time
 
-                LocalDateTime startUTC = HotTubTimeMachine.convertToUTC(LocalDateTime.from(localStartDateTime)); // convert start date and time to UTC
-                LocalDateTime endUTC = HotTubTimeMachine.convertToUTC(LocalDateTime.from(localEndDateTime)); // convert end date and time to UTC
+                LocalDateTime startUTC = HotTubTimeMachine.convertToUTC(startDT); // convert start date and time to UTC
+                LocalDateTime endUTC = HotTubTimeMachine.convertToUTC(endDT); // convert end date and time to UTC
 
                 // convert startUTC and endUTC to strings
-                String startUTCString = startUTC.toString().replace("T", " ");
-                String endUTCString = endUTC.toString().replace("T", " ");
+                String startUTCString = startUTC.toString(); //.replace("T", " ");
+                String endUTCString = endUTC.toString(); //.replace("T", " ");
 
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"); // format the date and time
-                LocalDateTime startDT = LocalDateTime.parse(startUTCString, formatter); // parse the start date and time
-                LocalDateTime endDT = LocalDateTime.parse(endUTCString, formatter); // parse the end date and time
+                System.out.println(startUTCString + " " + endUTCString);
 
                 // data verification and validation
                 String[] strings = {title, location, type, descriptionText}; // array of strings
                 int[] numbers = {customerID, userID, contactID}; // array of numbers
                 TextField[] fields = {titleField, locationField, typeField}; // array of text fields
 
-                boolean isTested = GateKeeper.dataCheck(strings, numbers, fields); // dataCheck method checks for empty fields
-                boolean isVerified = GateKeeper.verifyTraveler(collectedUsername, userID, collectedPassword); // verifyTraveler method checks credentials
-
-                if (isTested && isVerified) {
-                    SQLQueries.UPDATE_APPOINTMENT_METHOD(connection,
-                                                        appointmentID,
-                                                        title,
-                                                        descriptionText,
-                                                        location,
-                                                        type,
-                                                        startDT,
-                                                        endDT,
-                                                        collectedUsername,
-                                                        customerID,
-                                                        userID,
-                                                        contactID); // update the appointment
-                    successAlert(); // successAlert method
-                }
-                else if (!isTested) {
-                    System.out.println("Data is not tested.");
-                }
-                else {
-                    System.out.println("An unknown error has occurred.");
-                }
+//                boolean isTested = GateKeeper.dataCheck(strings, numbers, fields); // dataCheck method checks for empty fields
+                QueryChronicles.UPDATE_APPOINTMENT_METHOD(connection,
+                                                    appointmentID,
+                                                    title,
+                                                    descriptionText,
+                                                    location,
+                                                    type,
+                                                    startUTC,
+                                                    endUTC,
+                                                    customerID,
+                                                    userID,
+                                                    contactID); // update the appointment
                 clearSelectedAppointment(); // clear the text fields
             }
         }
@@ -382,7 +360,7 @@ public class CentralNervousSystem implements Initializable {
             result = alert.showAndWait();
             // if the user clicks OK, delete the appointment
             if (result.isPresent() && result.get() == ButtonType.OK) {
-                SQLQueries.DELETE_APPOINTMENT_METHOD(connection, appointmentID); // delete the appointment
+                QueryChronicles.DELETE_APPOINTMENT_METHOD(connection, appointmentID); // delete the appointment
                 clearSelectedAppointment(); // clear the selected appointment
             } else {
                 alert.close();
@@ -527,23 +505,15 @@ public class CentralNervousSystem implements Initializable {
                 String country = countryMenu.getValue(); // get customer country
                 String division = divisionMenu.getValue(); // get customer division
                 int divisionID = DivisionAccess.getDivisionID(division); // get division ID
-                // if the fields are not empty, insert into customers table
-                if (Verificatus.stringCheck(customerName, address, postalCode, phone, country, division)) {
-                    SQLQueries.INSERT_INTO_CUSTOMERS_METHOD(connection,
-                                                            customerID,
-                                                            customerName,
-                                                            address,
-                                                            postalCode,
-                                                            phone,
-                                                            divisionID);
-                }
-                else {
-                    Alert emptyFieldsAlert = new Alert(Alert.AlertType.ERROR);
-                    emptyFieldsAlert.setTitle("Error");
-                    emptyFieldsAlert.setHeaderText("Error Adding Customer");
-                    emptyFieldsAlert.setContentText("Please fill out all fields.");
-                    emptyFieldsAlert.showAndWait();
-                }
+
+                QueryChronicles.INSERT_INTO_CUSTOMERS_METHOD(connection,
+                                                        customerID,
+                                                        customerName,
+                                                        address,
+                                                        postalCode,
+                                                        phone,
+                                                        divisionID);
+
                 clearSelectedCustomer(); // clear selected customer
             } else {
                 alert.close();
@@ -566,7 +536,7 @@ public class CentralNervousSystem implements Initializable {
      * modifyCustomer modifies the selected customer
      * */
     @FXML public void modifyCustomer() throws SQLException {
-        try {
+        try (Connection connection = JDBC.openConnection()) {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Modify Customer");
             alert.setHeaderText("Modifying Customer in Database");
@@ -574,7 +544,6 @@ public class CentralNervousSystem implements Initializable {
             Optional<ButtonType> result;
             result = alert.showAndWait();
             if (result.isPresent() && result.get() == ButtonType.OK) {
-                connection = JDBC.openConnection(); // establish connection
                 int customerID = selectedCustomer.getCustomerID(); // get customer id
                 System.out.println(customerID);
                 String customerName = customerNameField.getText(); // get customer name
@@ -584,23 +553,15 @@ public class CentralNervousSystem implements Initializable {
                 String country = countryMenu.getValue(); // get customer country
                 String division = divisionMenu.getValue(); // get customer division
                 int divisionID = DivisionAccess.getDivisionID(division); // get division ID
-                // if the customer fields are not empty, update the customer
-                if (Verificatus.stringCheck(customerName, address, postalCode, phone, country, division)) {
-                    SQLQueries.UPDATE_CUSTOMER_METHOD(connection,
-                                                        customerID,
-                                                        customerName,
-                                                        address,
-                                                        postalCode,
-                                                        phone,
-                                                        divisionID); // update customers
-                }
-                else {
-                    Alert emptyFieldsAlert = new Alert(Alert.AlertType.ERROR);
-                    emptyFieldsAlert.setTitle("Error");
-                    emptyFieldsAlert.setHeaderText("Error Adding Customer");
-                    emptyFieldsAlert.setContentText("Please fill out all fields.");
-                    emptyFieldsAlert.showAndWait();
-                }
+
+                QueryChronicles.UPDATE_CUSTOMER_METHOD(connection,
+                                                    customerID,
+                                                    customerName,
+                                                    address,
+                                                    postalCode,
+                                                    phone,
+                                                    divisionID); // update customers
+
                 clearSelectedCustomer(); // clear selected customer
             } else {
                 alert.close();
@@ -624,7 +585,7 @@ public class CentralNervousSystem implements Initializable {
      * checks if the customer has any appointments
      * if the customer has appointments, an error message is displayed
      * */
-    public void deleteCustomer() throws SQLException {
+    @FXML public void deleteCustomer() throws SQLException {
         try {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Delete Customer");
@@ -635,7 +596,7 @@ public class CentralNervousSystem implements Initializable {
             if (result.isPresent() && result.get() == ButtonType.OK && AppointmentAccess.noAppointments(selectedCustomer.getCustomerID())) {
                 connection = JDBC.openConnection(); // establish connection
                 int customerID = selectedCustomer.getCustomerID(); // get customer id
-                SQLQueries.DELETE_CUSTOMER_METHOD(connection, customerID); // delete customer
+                QueryChronicles.DELETE_CUSTOMER_METHOD(connection, customerID); // delete customer
                 clearSelectedCustomer(); // clear selected customer
             } else {
                 Alert hasAppointments = new Alert(Alert.AlertType.ERROR);
@@ -668,7 +629,7 @@ public class CentralNervousSystem implements Initializable {
             // if the country is not null
             if (country != null) {
                 connection = JDBC.openConnection(); // establish connection
-                JDBC.setPreparedStatement(connection, SQLQueries.GET_DIVISION_FOR_COUNTRY); // set the prepared statement
+                JDBC.setPreparedStatement(connection, QueryChronicles.GET_DIVISION_FOR_COUNTRY); // set the prepared statement
                 PreparedStatement statement = JDBC.getPreparedStatement(); // get the prepared statement
                 statement.setString(1, country); // set the country
                 ResultSet resultSet = statement.executeQuery(); // execute the query
@@ -702,15 +663,6 @@ public class CentralNervousSystem implements Initializable {
         }
     }
 
-    // a method that alerts the user asking for a password
-    public void passwordAlert() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION); // create an alert
-        alert.setTitle("Password"); // set the title
-        alert.setHeaderText("Oops! The password you entered was incorrect."); // set the header text
-        alert.setContentText("Please enter the correct password."); // set the content text
-        alert.showAndWait(); // show the alert
-    }
-
     // Initialize and Support  /////////////////////////////////////////////////////////////////////////////////////////
 
     /**
@@ -720,7 +672,7 @@ public class CentralNervousSystem implements Initializable {
     public void fifteenMinuteAlert() {
         try {
             connection = JDBC.openConnection(); // establish connection
-            JDBC.setPreparedStatement(connection, SQLQueries.GET_ALL_APPOINTMENTS_STATEMENT); // set the prepared statement
+            JDBC.setPreparedStatement(connection, QueryChronicles.GET_ALL_APPOINTMENTS_STATEMENT); // set the prepared statement
             PreparedStatement statement = JDBC.getPreparedStatement(); // get the prepared statement
             ResultSet resultSet = statement.executeQuery(); // execute the query
             // loop through the result set
@@ -773,6 +725,7 @@ public class CentralNervousSystem implements Initializable {
             ObservableList<Appointments> newAppointments = FXCollections.observableArrayList(AppointmentAccess.allAppointments()); // create a new observable list
             connection = JDBC.openConnection(); // establish connection
             viewAppointments.setItems(newAppointments); // set the items in the table to the appointments list
+            connection.close(); // close the connection
         }
         catch (Exception e) {
             AgentFord.apprehendException(e, theCrimeScene); // if an exception is thrown, display the exception in the crime scene text area
@@ -795,6 +748,7 @@ public class CentralNervousSystem implements Initializable {
             ObservableList<Customers> newCustomers = FXCollections.observableArrayList(CustomerAccess.getAllCustomers()); // create a new observable list
             connection = JDBC.openConnection(); // establish connection
             viewCustomers.setItems(newCustomers); // set the items in the table to the customers list
+            connection.close(); // close the connection
         }
         catch (Exception e) {
             AgentFord.apprehendException(e, theCrimeScene); // if an exception is thrown, display the exception in the crime scene text area
@@ -823,8 +777,10 @@ public class CentralNervousSystem implements Initializable {
             InetAddress ip = InetAddress.getLocalHost(); // get the local host
             String username = LoginController.getUsername(); // get the username
             userCreds.setText(username + " from " + ip); // set the user credentials label to the username
+
             usersMenu.setItems(UserAccess.getAllUserNames()); // set the user combo box to the usernames
             usersMenu.setValue("Users"); // set the user combo box to the usernames
+
             customersMenu.setItems(CustomerAccess.getAllCustomerNameStrings()); // Sets the customer combo box
             customersMenu.setValue("Customers"); // Sets the customer combo box
 
@@ -841,7 +797,9 @@ public class CentralNervousSystem implements Initializable {
             });
 
             // observable list of all appointments
-            ObservableList<Appointments> appointmentsObservableList = FXCollections.observableArrayList(AppointmentAccess.allAppointments());
+            ObservableList<Appointments> appointmentsList = FXCollections.observableArrayList(AppointmentAccess.allAppointments());
+            // observable list of all customers
+            ObservableList<Customers> customersList = FXCollections.observableArrayList(CustomerAccess.getAllCustomers());
 
             // lambda expression to set the cell value factory for the contact column// create an observable list of appointments
             TableColumn<Appointments, String> contactColumn = new TableColumn<>("Contact"); // create a new table column for the contact
@@ -890,7 +848,7 @@ public class CentralNervousSystem implements Initializable {
             ObservableList<String> contactsList = FXCollections.observableArrayList(ContactAccess.getContactNames()); // get the list of contact names from the db
             contactsMenu.setItems(contactsList); // set the items in the contact menu to the observable list
 
-            viewAppointments.setItems(appointmentsObservableList); // set the items in the table to the appointments list made above
+            viewAppointments.setItems(appointmentsList); // set the items in the table to the appointments list made above
             viewCustomers.setItems(customersList); // set the items in the table to the customers list
             connection.close(); // close the connection
         }

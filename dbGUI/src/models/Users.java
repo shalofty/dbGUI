@@ -1,6 +1,6 @@
 package models;
 
-import dataAccess.SQLQueries;
+import dataAccess.QueryChronicles;
 import helper.JDBC;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -71,7 +71,7 @@ public class Users {
             ObservableList<Users> users = FXCollections.observableArrayList(); // create an observable list
             Connection connection = JDBC.openConnection();  // open connection
             String sql = "SELECT * FROM users";  // sql statement
-            PreparedStatement statement = connection.prepareStatement(SQLQueries.GET_ALL_USERS);  // set the prepared statement
+            PreparedStatement statement = connection.prepareStatement(QueryChronicles.GET_ALL_USERS);  // set the prepared statement
             ResultSet set = statement.executeQuery();  // execute the query
             while (set.next()) {
                 int userID = set.getInt("User_ID");

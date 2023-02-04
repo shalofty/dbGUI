@@ -12,6 +12,14 @@ import java.sql.Connection;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
+/**
+ * AgentFord is the class that tracks the activity of the user and logs it to the activity log viewable in the activity log tab in the GUI
+ * @method gatherIntel tracks the activity of the user and logs it to the activity log viewable in the activity log tab
+ * @method apprehendException appends the exception to the text area in the activity log
+ * @method deBriefing exports the activity log to a text file in the ActivityLog folder when the export button is clicked
+ * @method frontDoorSurveillance tracks the logins
+ * Some of these methods are not used in the GUI but are used in the tests
+ * */
 public class AgentFord {
     /**
      * trackActivity tracks the activity of the user and logs it to the activity log

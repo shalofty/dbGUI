@@ -12,6 +12,16 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 
+/**
+ * HotTubTimeMachine is a utility class that provides methods for getting hours and minutes, and manipulating dates and times.
+ * @method getHours() returns an ObservableList of Strings representing the hours of the day.
+ * @method getMinutes() returns an ObservableList of Strings representing the minutes of the hour.
+ * @method isWithinBusinessHours() returns true if the appointment is within business hours.
+ * @method convertToUTC() converts a LocalDateTime to UTC.
+ * @method convertFromUTC() converts a LocalDateTime from UTC.
+ * @method getDateTimeFromPickers() returns a LocalDateTime from the DatePicker and ComboBoxes.
+ * Some of these aren't currently used, but I'm keeping them in case I need them later. Essentially scratch code
+ * */
 public class HotTubTimeMachine {
 
     private static final int START_HOUR = 8; // 8am

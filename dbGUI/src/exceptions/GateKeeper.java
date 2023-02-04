@@ -1,5 +1,5 @@
 package exceptions;
-import dataAccess.SQLQueries;
+import dataAccess.QueryChronicles;
 import helper.JDBC;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
@@ -9,6 +9,20 @@ import java.sql.*;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+/**
+ * GateKeeper class has two main jobs, aid in creating new users and checking data going to server
+ * @method collectCredentials() collects the username and password from the user
+ * @method getNewUserName() gets the username
+ * @method getNewPassWord() gets the password
+ * @method allowEntry() used to verify credentials for the login screen. -- scratch method for now
+ * @method verifyTraveler() returns true if the credentials are verified. -- another scratch method
+ *
+ * @method stringCheck() returns true if all fields are not empty.
+ * @method numberCheck() returns true if any of the values are null.
+ * @method fieldCheck() returns true if any of the fields are empty.
+ * @method dataCheck() returns true if any of the functions return true.
+ *
+ * */
 public class GateKeeper {
     static Connection connection = null;
     static PreparedStatement statement = null;
@@ -65,7 +79,7 @@ public class GateKeeper {
      * */
     public static boolean allowEntry(String username, String password) throws SQLException {
         connection = JDBC.openConnection(); // Open a connection to the database
-        statement = connection.prepareStatement(SQLQueries.USER_LOGIN_STATEMENT); // Set the prepared statement
+        statement = connection.prepareStatement(QueryChronicles.USER_LOGIN_STATEMENT); // Set the prepared statement
         statement.setString(1, username); // Set the username
         statement.setString(2, password); // Set the password
         set = statement.executeQuery(); // Execute the query
@@ -85,7 +99,7 @@ public class GateKeeper {
         set = null; // Initialize the result set
         try {
             connection = JDBC.openConnection(); // Open a connection to the database
-            JDBC.setPreparedStatement(connection, SQLQueries.CHECK_USER); // Set the prepared statement
+            JDBC.setPreparedStatement(connection, QueryChronicles.CHECK_USER); // Set the prepared statement
             statement = JDBC.getPreparedStatement(); // Get the prepared statement
             statement.setString(1, username); // Set the username
             statement.setInt(2, user_id); // Set the user_id

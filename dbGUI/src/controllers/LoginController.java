@@ -10,7 +10,7 @@
 
 package controllers;
 
-import dataAccess.SQLQueries;
+import dataAccess.QueryChronicles;
 import exceptions.GateKeeper;
 import helper.JDBC;
 import javafx.fxml.FXML;
@@ -78,15 +78,17 @@ public class LoginController implements Initializable {
     /**
      * Create a new user
      * */
-
-    @FXML public static void newUser() {
+    @FXML public void newUser() {
         try {
             GateKeeper.collectCredentials(); // collects the username and password from the user
             String username = GateKeeper.getNewUserName(); // gets the username
+            System.out.println("Username: " + username);
             String password = GateKeeper.getNewPassWord(); // gets the password
+            System.out.println("Password: " + password);
             int userID = NumberGenie.magicUser(); // generates a unique random user ID
+            System.out.println("User ID: " + userID);
             Connection connection = JDBC.openConnection(); // opens a connection to the database
-            SQLQueries.INSERT_NEW_USER(connection, userID, username, password); // inserts the new user into the database
+            QueryChronicles.INSERT_NEW_USER(connection, userID, username, password); // inserts the new user into the database
             System.out.println("New user created");
             connection.close(); // closes the connection to the database
         }
