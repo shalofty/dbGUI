@@ -134,7 +134,7 @@
                         <TextField fx:id="phoneField" layoutX="683.0" layoutY="131.0" prefHeight="25.0" prefWidth="150.0" promptText="Phone Number" />
                         <TextField fx:id="postalField" layoutX="682.0" layoutY="168.0" prefHeight="25.0" prefWidth="150.0" promptText="Postal Code" />
                         <Button fx:id="clearSelectedCustomerButton" layoutX="681.0" layoutY="18.0" mnemonicParsing="false" onAction="#clearSelectedCustomer" prefHeight="25.0" prefWidth="152.0" text="Clear Selection" />
-                        <ComboBox fx:id="countryMenu" layoutX="683.0" layoutY="246.0" onAction="#enableDivisions" prefWidth="150.0" promptText="Country" />
+                        <ComboBox fx:id="countryMenu" layoutX="683.0" layoutY="246.0" onAction="#updateDivisionsMenu" prefWidth="150.0" promptText="Country" />
                         <ComboBox fx:id="divisionMenu" disable="true" layoutX="683.0" layoutY="284.0" prefWidth="150.0" promptText="Division" />
                      </children>
                   </AnchorPane>

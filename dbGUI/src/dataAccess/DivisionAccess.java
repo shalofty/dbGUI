@@ -25,30 +25,26 @@ public class DivisionAccess extends Division {
     }
 
     /**
-     * @return ObservableList<DivisionAccess>
-     * @throws SQLException if there is an error with the SQL query
+     * getDivisions method gets the divisions from the database
+     * @return ObservableList<DivisionAccess> as a list of divisions
      * */
-    public static ObservableList<DivisionAccess> getDivisions() throws SQLException {
-        try (Connection connection = JDBC.openConnection(); // open the connection
-             PreparedStatement statement = JDBC.openConnection().prepareStatement(QueryChronicles.SELECT_DIVISIONS))  // prepare the statement
+    public static ObservableList<String> getDivisions(int countryID) throws SQLException {
+        try (Connection connection = JDBC.openConnection();  // open the connection
+             PreparedStatement statement = connection.prepareStatement(QueryChronicles.SELECT_DIVISION_BY_COUNTRY_ID_STATEMENT))  // prepare the statement
         {
-            ObservableList<DivisionAccess> divisionsObservableList = FXCollections.observableArrayList(); // create an observable list
+            statement.setInt(1, countryID);
             set = statement.executeQuery(); // execute the statement
+            ObservableList<String> divisionNames = FXCollections.observableArrayList(); // create an observable list
             // loop through the result set
             while (set.next()) {
-                int divisionID = set.getInt("Division_ID"); // get the division ID
                 String divisionName = set.getString("Division"); // get the division name
-                int countryID = set.getInt("Country_ID"); // get the country ID
-                // param ordering must match the constructor in the Customers model
-                DivisionAccess division = new DivisionAccess(divisionID, divisionName, countryID);
-                // add each customer to the observable list of
-                divisionsObservableList.add(division);
+                divisionNames.add(divisionName); // add the division name to the observable list
             }
-            return divisionsObservableList; // return the observable list
+            return divisionNames; // return the observable list
         } catch (SQLException e) {
             throw e;
         } finally {
-            if (set != null) set.close(); // close connection
+            if (set != null) set.close(); // close set
             if (statement != null) statement.close(); // close statement
             if (connection != null) connection.close(); // close connection
         }
@@ -61,7 +57,7 @@ public class DivisionAccess extends Division {
      * */
     public static int getDivisionID(String divisionName) throws SQLException {
         try (Connection connection = JDBC.openConnection();  // open the connection
-             PreparedStatement statement = connection.prepareStatement(QueryChronicles.SELECT_ID_BY_DIVISION))  // prepare the statement
+             PreparedStatement statement = connection.prepareStatement(QueryChronicles.SELECT_DIVISION_ID_BY_DIVISION_NAME))  // prepare the statement
         {
             statement.setString(1, divisionName); // set the division name
             set = statement.executeQuery(); // execute the statement
@@ -71,6 +67,32 @@ public class DivisionAccess extends Division {
                 divisionID = set.getInt("Division_ID"); // get the division ID
             }
             return divisionID; // return the division ID
+        } catch (SQLException e) {
+            throw e;
+        } finally {
+            if (set != null) set.close(); // close set
+            if (statement != null) statement.close(); // close statement
+            if (connection != null) connection.close(); // close connection
+        }
+    }
+
+    /**
+     * getDivisionName method gets the division name
+     * @param divisionID as an int
+     * @return divisionName as a String
+     * */
+    public static String getDivisionName(int divisionID) throws SQLException {
+        try (Connection connection = JDBC.openConnection();  // open the connection
+             PreparedStatement statement = connection.prepareStatement(QueryChronicles.SELECT_DIVISION_NAME_BY_DIVISION_ID_STATEMENT))  // prepare the statement
+        {
+            statement.setInt(1, divisionID); // set the division ID
+            set = statement.executeQuery(); // execute the statement
+            String divisionName = ""; // initialize the division name
+            // loop through the result set
+            while (set.next()) {
+                divisionName = set.getString("Division"); // get the division name
+            }
+            return divisionName; // return the division name
         } catch (SQLException e) {
             throw e;
         } finally {

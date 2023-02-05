@@ -1,8 +1,8 @@
 package models;
 
 public class Division {
-    private final String divisionName;
-    private final int divisionID;
+    private String divisionName;
+    private int divisionID;
     public int countryID;
 
     /**

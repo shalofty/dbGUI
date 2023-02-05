@@ -57,18 +57,14 @@ public class CentralNervousSystem implements Initializable {
     @FXML public TextField customerRecordsIDField, customerNameField, addressField, postalField, phoneField;
     @FXML public ComboBox<String> countryMenu; // Country Menu
     @FXML public ComboBox<String> divisionMenu; // Division Menu
-    @FXML public ObservableList<String> countryObservableList = FXCollections.observableArrayList();
-    @FXML public ObservableList<String> divisionObservableList = FXCollections.observableArrayList();
+    @FXML public ObservableList<String> countryList = FXCollections.observableArrayList();
+    @FXML public ObservableList<String> divisionList = FXCollections.observableArrayList();
     @FXML public TableView<Customers> viewCustomers; // Customers Table
     @FXML public TableColumn<?, ?> customerIDRecordsColumn, nameColumn, phoneColumn, addressColumn, postalColumn, divisionColumn;
     @FXML public Button addCustomerButton;
     @FXML public Button modifyCustomerButton;
     @FXML public Button deleteCustomerButton;
     @FXML public Button clearSelectedCustomerButton;
-    @FXML public ObservableList<Customers> customersList; // Observable List of Customers
-    @FXML public ObservableList<DivisionAccess> divisionsList = FXCollections.observableArrayList();
-    @FXML public ObservableList<String> countryNames = FXCollections.observableArrayList();
-    @FXML public ObservableList<String> divisionNames = FXCollections.observableArrayList();
     @FXML public Customers selectedCustomer;
 
     // Appointments Tab Methods ////////////////////////////////////////////////////////////////////////////////////////
@@ -263,7 +259,7 @@ public class CentralNervousSystem implements Initializable {
         Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
         successAlert.setTitle("Success");
         successAlert.setHeaderText("Success");
-        successAlert.setContentText("Appointment successfully modified.");
+        successAlert.setContentText("Operation successful.");
         successAlert.showAndWait();
     }
 
@@ -362,6 +358,7 @@ public class CentralNervousSystem implements Initializable {
             if (result.isPresent() && result.get() == ButtonType.OK) {
                 QueryChronicles.DELETE_APPOINTMENT_METHOD(connection, appointmentID); // delete the appointment
                 clearSelectedAppointment(); // clear the selected appointment
+                successAlert(); // display success alert
             } else {
                 alert.close();
             }
@@ -381,85 +378,37 @@ public class CentralNervousSystem implements Initializable {
     // Customers Tab Methods ///////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * selectCustomer selects a customer from the tableview
+     * selectCustomer selects a customer from the tableview and displays the customer's information in the text fields
      * disables add button, enables modify and delete buttons to prevent pointer exceptions
+     * uses addListener to listen for a change in the selected item, which helps with bugginess
      * */
-    public void selectCustomer() throws Exception {
-        try {
-            connection = JDBC.openConnection(); // establish connection
-            selectedCustomer = viewCustomers.getSelectionModel().getSelectedItem(); // get the selected customer
-            System.out.println(selectedCustomer);
-            if (selectedCustomer != null) {
-                customerRecordsIDField.setText(String.valueOf(selectedCustomer.getCustomerID())); // set the customer ID field
-                customerNameField.setText(selectedCustomer.getCustomerName()); // set the customer name field
-                addressField.setText(selectedCustomer.getCustomerAddress()); // set the address field
-                postalField.setText(selectedCustomer.getPostalCode()); // set the postal code field
-                phoneField.setText(selectedCustomer.getCustomerPhone()); // set the phone field
 
-                // Brace yourselves, code is coming
-                // set the division menu
-                countryMenu.valueProperty().addListener((observable, oldValue, newValue) -> {
-                    int selectedCountryID = 0;  // create a variable to hold the country ID
-                    try { // try to get the selected country ID
-                        // loop through the countries
-                        for (Country country : CountryAccess.getCountries()) {
-                            // if the country name equals the new value, set the country ID
-                            if (country.getCountryName().equals(newValue)) {
-                                selectedCountryID = country.getCountryID(); // set the country ID
-                                break;
-                            }
-                        }
-                    } catch (SQLException e) {
-                        AgentFord.apprehendException(e, theCrimeScene); // if an exception is thrown, display the exception in the crime scene text area
-                    }
-
-                    ObservableList<String> relatedDivisionsList = FXCollections.observableArrayList(); // create a new observable list
-                    try { // try to get the selected country division using the country ID
-                        // loop through the divisions
-                        for (DivisionAccess division : DivisionAccess.getDivisions()) {
-                            // if the country ID matches the selected country ID, add the division name to the list
-                            if (division.getCountryID() == selectedCountryID) {
-                                relatedDivisionsList.add(String.valueOf(division.getDivisionName())); // add the division name to the list
-                            }
-                        }
-                    } catch (SQLException e) {
-                        AgentFord.apprehendException(e, theCrimeScene); // if an exception is thrown, display the exception in the crime scene text area
-                    }
-
-                    divisionMenu.setItems(relatedDivisionsList); // set the division menu
-                });
-
-                // set the country menu
-                for (Division division : DivisionAccess.getDivisions()) {
-                    // if the division ID matches the selected customer's division ID, set the division name
-                    if (division.getDivisionID() == selectedCustomer.getDivisionID()) {
-                        divisionMenu.setValue(division.getDivisionName()); // set the division name
-                        // loop through the countries
-                        for (Country country : CountryAccess.getCountries()) {
-                            // if the country ID matches the division's country ID, set the country name
-                            if (country.getCountryID() == division.getCountryID()) {
-                                countryMenu.setValue(country.getCountryName()); // set the country name
-                            }
-                        }
-                    }
+    public void selectCustomer() {
+        // add listener to the tableview
+        viewCustomers.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            try {
+                selectedCustomer = newValue; // set the selected customer
+                if (selectedCustomer != null) {
+                    customerRecordsIDField.setText(String.valueOf(selectedCustomer.getCustomerID())); // set the customer ID field
+                    customerNameField.setText(selectedCustomer.getCustomerName()); // set the customer name field
+                    addressField.setText(selectedCustomer.getCustomerAddress()); // set the address field
+                    postalField.setText(selectedCustomer.getPostalCode()); // set the postal code field
+                    phoneField.setText(selectedCustomer.getCustomerPhone()); // set the phone field
+                    divisionMenu.setValue(selectedCustomer.getCountryDivision()); // set the division menu
+                    int divisionID = selectedCustomer.getDivisionID(); // get the division ID from the selected customer
+                    String countryName = CountryAccess.innerJoin(divisionID); // get the country name based on divisionID using a join
+                    countryMenu.setValue(countryName); // set the country menu
+                    addCustomerButton.setDisable(true); // disable add button, enable modify and delete buttons to prevent pointer exceptions
+                    modifyCustomerButton.setDisable(false); // disable add button, enable modify and delete buttons to prevent pointer exceptions
+                    deleteCustomerButton.setDisable(false); // disable add button, enable modify and delete buttons to prevent pointer exceptions
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
 
-                // disable add button, enable modify and delete buttons to prevent pointer exceptions
-                addCustomerButton.setDisable(true);
-                modifyCustomerButton.setDisable(false);
-                deleteCustomerButton.setDisable(false);
-            }
-        }
-        catch (Exception e) {
-            AgentFord.apprehendException(e, theCrimeScene); // if an exception is thrown, display the exception in the crime scene text area
-        }
-        finally {
-            if (connection != null) {
-                connection.close(); // close the connection
-            }
-            AgentFord.gatherIntel(theSacredScroll); // Gather Intel
-        }
     }
+
 
     /**
      * clearSelectedCustomer clears the selected customer
@@ -498,6 +447,7 @@ public class CentralNervousSystem implements Initializable {
             if (result.isPresent() && result.get() == ButtonType.OK) {
                 connection = JDBC.openConnection(); // establish connection
                 int customerID = NumberGenie.magicCustomer(); // get customer id
+                String id = String.valueOf(customerID); // convert customer id to string
                 String customerName = customerNameField.getText(); // get customer name
                 String address = addressField.getText(); // get customer address
                 String postalCode = postalField.getText(); // get customer postal code
@@ -515,6 +465,7 @@ public class CentralNervousSystem implements Initializable {
                                                         divisionID);
 
                 clearSelectedCustomer(); // clear selected customer
+                updateCustomersMenu(); // update customers menu to show new customer
             } else {
                 alert.close();
             }
@@ -531,9 +482,11 @@ public class CentralNervousSystem implements Initializable {
         }
     }
 
-    // modifyCustomer
     /**
      * modifyCustomer modifies the selected customer
+     * NOTE: slight bug with this method I've noticed, and with the customer tab in general.
+     * Sometimes I have to double click the entries in order for the data to show properly, although not always.
+     * I'm not sure why this is happening, but it's not a huge deal for now.
      * */
     @FXML public void modifyCustomer() throws SQLException {
         try (Connection connection = JDBC.openConnection()) {
@@ -545,7 +498,6 @@ public class CentralNervousSystem implements Initializable {
             result = alert.showAndWait();
             if (result.isPresent() && result.get() == ButtonType.OK) {
                 int customerID = selectedCustomer.getCustomerID(); // get customer id
-                System.out.println(customerID);
                 String customerName = customerNameField.getText(); // get customer name
                 String address = addressField.getText(); // get customer address
                 String postalCode = postalField.getText(); // get customer postal code
@@ -563,6 +515,8 @@ public class CentralNervousSystem implements Initializable {
                                                     divisionID); // update customers
 
                 clearSelectedCustomer(); // clear selected customer
+                updateCustomers(); // update customers tableview
+                updateCustomersMenu(); // update customers menu
             } else {
                 alert.close();
             }
@@ -598,6 +552,8 @@ public class CentralNervousSystem implements Initializable {
                 int customerID = selectedCustomer.getCustomerID(); // get customer id
                 QueryChronicles.DELETE_CUSTOMER_METHOD(connection, customerID); // delete customer
                 clearSelectedCustomer(); // clear selected customer
+                updateCustomersMenu(); // update customers menu in add appointment to prevent null pointer exception
+                successAlert(); // display success alert
             } else {
                 Alert hasAppointments = new Alert(Alert.AlertType.ERROR);
                 hasAppointments.setTitle("Error");
@@ -618,49 +574,27 @@ public class CentralNervousSystem implements Initializable {
         }
     }
 
-    // Data Validation Tools ///////////////////////////////////////////////////////////////////////////////////////////
-
     /**
-     * findDivisions finds the divisions for the selected country
+     * updateCustomersMenu updates the customers divisions menu in the add appointment screen
      * */
-    public void findDivisions() throws SQLException {
-        try {
-            String country = countryMenu.getValue(); // get the country
-            // if the country is not null
-            if (country != null) {
-                connection = JDBC.openConnection(); // establish connection
-                JDBC.setPreparedStatement(connection, QueryChronicles.GET_DIVISION_FOR_COUNTRY); // set the prepared statement
-                PreparedStatement statement = JDBC.getPreparedStatement(); // get the prepared statement
-                statement.setString(1, country); // set the country
-                ResultSet resultSet = statement.executeQuery(); // execute the query
-                // loop through the result set
-                while (resultSet.next()) {
-                    divisionObservableList.add(resultSet.getString("Division")); // add the division to the observable list
-                    divisionMenu.setItems(divisionObservableList); // set the division menu to the observable list
-                }
-
-            }
+    public void updateDivisionsMenu() throws SQLException {
+        String selectedCountry = countryMenu.getValue(); // get selected country
+        if (selectedCountry != null) {
+            divisionMenu.setItems(null); // clear division menu
+        } else return; // if no country is selected, return
+        if (selectedCountry.equals("U.S")) {
+            divisionMenu.setValue("State");
         }
-        catch (Exception e) {
-            AgentFord.apprehendException(e, theCrimeScene); // if an exception is thrown, display the exception in the crime scene text area
+        else if (selectedCountry.equals("Canada")) {
+            divisionMenu.setValue("Province");
         }
-        finally {
-            if (connection != null) {
-                connection.close(); // close the connection
-            }
-            AgentFord.gatherIntel(theSacredScroll); // Gather Intel
+        else if (selectedCountry.equals("UK")) {
+            divisionMenu.setValue("Country");
         }
-    }
-
-    /**
-     * enables the division menu if a country is selected
-     * prevents incorrect data from being entered
-     * */
-    public void enableDivisions() throws SQLException {
-        if (countryMenu.getValue() != null) {
-            findDivisions(); // find divisions for the selected country
-            divisionMenu.setDisable(false); // enable division menu
-        }
+        int countryID = CountryAccess.getCountryNamebyID(selectedCountry); // get country ID
+        ObservableList<String> divisions = DivisionAccess.getDivisions(countryID); // get divisions
+        divisionMenu.setItems(divisions); // set divisions menu
+        divisionMenu.setDisable(false); // enable divisions menu
     }
 
     // Initialize and Support  /////////////////////////////////////////////////////////////////////////////////////////
@@ -761,6 +695,26 @@ public class CentralNervousSystem implements Initializable {
         }
     }
 
+    // update the customers menu after a customer is deleted
+    public void updateCustomersMenu() throws SQLException {
+        try {
+            customersMenu.getItems().clear(); // clear the items in the table
+            ObservableList<String> newCustomers = FXCollections.observableArrayList(CustomerAccess.getAllCustomerNameStrings()); // create a new observable list
+            connection = JDBC.openConnection(); // establish connection
+            customersMenu.setItems(newCustomers); // set the items in the table to the customers list
+            connection.close(); // close the connection
+        }
+        catch (Exception e) {
+            AgentFord.apprehendException(e, theCrimeScene); // if an exception is thrown, display the exception in the crime scene text area
+        }
+        finally {
+            if (connection != null) {
+                connection.close(); // close the connection
+            }
+            AgentFord.gatherIntel(theSacredScroll); // Gather Intel
+        }
+    }
+
     /**
      * initialize initializes the controller class
      * @param url is the url
@@ -835,15 +789,17 @@ public class CentralNervousSystem implements Initializable {
             phoneColumn.setCellValueFactory(new PropertyValueFactory<>("customerPhone")); // set the cell value factory for the customer phone column
             divisionColumn.setCellValueFactory(new PropertyValueFactory<>("divisionID")); // set the cell value factory for the customer division ID column
 
-            // call getCountries method to populate an ObservableList to populate the country menu
-            ObservableList<CountryAccess> countriesList = CountryAccess.getCountries(); // get the list of countries from the db
-            countriesList.stream().map(Country::getCountryName).forEach(countryObservableList::add); // add the country names to the observable list
-            countryMenu.setItems(countryObservableList); // set the items in the country menu to the observable list
+            if (countryMenu.getValue() == null) {
+                // call getCountries method to populate an ObservableList to populate the country menu
+                ObservableList<CountryAccess> countriesList = CountryAccess.getCountries(); // get the list of countries from the db
+                countriesList.stream().map(Country::getCountryName).forEach(countryList::add); // add the country names to the observable list
+                countryMenu.setItems(countryList); // set the items in the country menu to the observable list
+            }
 
             // call getDivisions method to populate an ObservableList to populate the division menu
-            ObservableList<DivisionAccess> divisionsList = DivisionAccess.getDivisions(); // get the list of divisions from the db
-            divisionsList.stream().map(Division::getDivisionName).forEach(divisionObservableList::add); // add the division names to the observable list
-            divisionMenu.setItems(divisionObservableList); // set the items in the division menu to the observable list
+//            ObservableList<DivisionAccess> divisionsList = DivisionAccess.getDivisions(); // get the list of divisions from the db
+//            divisionsList.stream().map(Division::getDivisionName).forEach(divisionObservableList::add); // add the division names to the observable list
+//            divisionMenu.setItems(divisionObservableList); // set the items in the division menu to the observable list
 
             ObservableList<String> contactsList = FXCollections.observableArrayList(ContactAccess.getContactNames()); // get the list of contact names from the db
             contactsMenu.setItems(contactsList); // set the items in the contact menu to the observable list

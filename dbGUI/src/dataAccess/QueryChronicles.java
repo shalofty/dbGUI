@@ -17,12 +17,9 @@ public class QueryChronicles {
     public static final String INSERT_NEW_USER_STATEMENT = "INSERT INTO client_schedule.users " +
             "(USER_ID, User_Name, Password, Create_Date, Created_By, Last_Update, Last_Updated_By)\n" + "VALUES " +
             "(?, ?, ?, ?, ?, ?, ?);\n";
-    public static final String SELECT_ALL_USERS_STATEMENT = "SELECT User_ID, User_Name FROM users"; // select all users
     public static final String SELECT_ALL_USER_IDS_STATEMENT = "SELECT User_ID FROM users"; // select all user IDs
     public static final String SELECT_ALL_USER_NAMES_STATEMENT = "SELECT User_Name FROM users"; // select all user names
-    public static final String SELECT_USER_PASSWORD_STATEMENT = "SELECT Password FROM users WHERE User_ID = ?"; // select user password by user ID
     public static final String SELECT_USER_NAME_STATEMENT = "SELECT User_Name FROM users WHERE User_ID = ?"; // select user name by user ID
-    public static final String GET_USER_ID = "SELECT User_ID FROM users WHERE User_Name = ? AND Password = ?"; // get user ID by user name and password
     public static final String GET_ALL_USERS = "SELECT * FROM users"; // get all users
     public static final String NEW_USER_STATEMENT = "INSERT INTO users (User_ID, User_Name, Password) VALUES (?,?,?)"; // insert new user
     public static final String USER_LOGIN_STATEMENT = "SELECT * FROM users WHERE User_Name = ? AND Password = ?"; // user login
@@ -103,22 +100,22 @@ public class QueryChronicles {
             "WHERE Customer_ID = ?"; // update customer
     public static final String SELECT_CUSTOMER_NAME_BY_ID_STATEMENT = "SELECT Customer_Name FROM customers WHERE Customer_ID = ?"; // select customer name by customer ID
     public static final String SELECT_CUSTOMER_ID_BY_NAME_STATEMENT = "SELECT Customer_ID FROM customers WHERE Customer_Name = ?"; // select customer ID by customer name
-
     public static final String DELETE_FROM_CUSTOMERS_STATEMENT = "DELETE FROM customers WHERE Customer_ID=?"; // delete customer by customer ID
-    public static final String SELECT_DIVISIONS = "SELECT * from first_level_divisions"; // select all divisions
-    public static final String SELECT_ID_BY_DIVISION = "SELECT Division_ID FROM first_level_divisions WHERE Division = ?"; // select division ID by division name
+
+    /// Division & Country Statements
+    public static final String SELECT_DIVISION_ID_BY_DIVISION_NAME = "SELECT Division_ID FROM first_level_divisions WHERE Division = ?"; // select division ID by division name
     public static final String SELECT_COUNTRIES = "SELECT Country_ID, Country FROM countries"; // select all countries
-    public static final String SELECT_COUNTRY_FROM_DIVISION =
-            "SELECT countries.Country\n" +
-            "FROM countries\n" +
-            "JOIN first_level_divisions ON countries.Country_ID = first_level_divisions.Country_ID\n" +
-            "JOIN customers ON first_level_divisions.Division_ID = customers.Division_ID\n" +
-            "WHERE customers.Division_ID = ?"; // select country by division ID
-    public static final String GET_DIVISION_FOR_COUNTRY =
-            "SELECT first_level_divisions.Division_ID, first_level_divisions.Division\n" +
-            "FROM countries\n" +
-            "JOIN first_level_divisions ON countries.Country_ID = first_level_divisions.Country_ID\n" +
-            "WHERE countries.Country = ?"; // select division by country name
+    public static final String SELECT_COUNTRY_ID_BY_COUNTRY_NAME = "SELECT Country_ID FROM countries WHERE Country = ?"; // select country ID by country name
+    public static final String SELECT_COUNTRY_NAME_BY_DIVISION_ID_STATEMENT = "SELECT Country FROM countries WHERE Country_ID = ?"; // select country by division ID
+    public static final String SELECT_DIVISION_BY_COUNTRY_ID_STATEMENT = "SELECT Division FROM first_level_divisions WHERE Country_ID = ?"; // select division by division ID
+    public static final String SELECT_DIVISION_NAME_BY_DIVISION_ID_STATEMENT = "SELECT Division FROM first_level_divisions WHERE Division_ID = ?"; // select division by division ID
+    public static final String SELECT_COUNTRY_NAME_BY_COUNTRY_ID_STATEMENT = "SELECT Country FROM countries WHERE Country_ID = ?"; // select country by country ID
+    public static final String INNER_JOIN_STATEMENT =
+            "SELECT countries.country\n" +
+            "FROM first_level_divisions\n" +
+            "INNER JOIN countries\n" +
+            "ON first_level_divisions.country_id = countries.country_id\n" +
+            "WHERE first_level_divisions.division_id = ?;\n"; // select country by division ID
 
     /// New User Method //////////////////////////////////////////////////////////////////////////////
 
@@ -269,9 +266,9 @@ public class QueryChronicles {
             statement.setString(4, postalCode); // set the postal code
             statement.setString(5, phone); // set the phone number
             statement.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now())); // set the create date
-            statement.setString(7, JDBC.getUsername()); // set the created by
+            statement.setString(7, LoginController.getUsername()); // set the created by
             statement.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now())); // set the last update
-            statement.setString(9, JDBC.getUsername()); // set the last updated by
+            statement.setString(9, LoginController.getUsername()); // set the last updated by
             statement.setInt(10, division); // set the division ID
             statement.execute();
         }
@@ -290,7 +287,7 @@ public class QueryChronicles {
                                               String address,
                                               String postalCode,
                                               String phone,
-                                              int division)
+                                              int divisionID)
         throws Exception
     {
         try{
@@ -301,14 +298,14 @@ public class QueryChronicles {
             statement.setString(3, postalCode); // set the postal code
             statement.setString(4, phone); // set the phone number
             statement.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now())); // set the last update
-            statement.setString(6, JDBC.getUsername()); // set the last updated by
-            statement.setInt(7, division); // set the division ID
+            statement.setString(6, LoginController.getUsername()); // set the last updated by
+            statement.setInt(7, divisionID); // set the division ID
             statement.setInt(8, customerID); // set the customer ID
             statement.execute();
+            System.out.println(statement.execute());
         }
         catch (Exception e) {
             e.printStackTrace(); // print the stack trace
-            throw e;
         }
     }
 

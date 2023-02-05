@@ -1,5 +1,6 @@
 package theAgency;
 
+import controllers.LoginController;
 import helper.JDBC;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
@@ -31,7 +32,7 @@ public class AgentFord {
             Connection connection = JDBC.getConnection(); // get the connection
             StackTraceElement trace = Thread.currentThread().getStackTrace()[2]; // get the stack trace
             String codeLog = trace.getFileName() + " . Line" + trace.getLineNumber() + ". " + trace.getMethodName(); // get the file name, line number, and method name
-            String userLog = Instant.now() + " User: " + JDBC.getUsername() + ". Session ID: " + JDBC.getConnection() + ". "; // get the username, connection, and time
+            String userLog = Instant.now() + " User: " + LoginController.getUsername() + ". Session ID: " + JDBC.getConnection() + ". "; // get the username, connection, and time
             textArea.appendText(userLog + codeLog + "\n"); // append the log to the text area
             connection.close();
         }
@@ -39,6 +40,26 @@ public class AgentFord {
             System.out.println("Error: " + e.getMessage());
         }
     }
+
+    /**
+     * actionDetails tracks the activity of the user and logs it to an activity log
+     * @param strings the strings to be logged
+     * */
+//    public static void actionDetails(TextArea textArea, String... strings) {
+//        try {
+//            StackTraceElement trace = Thread.currentThread().getStackTrace()[2]; // get the stack trace
+//            FileWriter fileWriter = new FileWriter("ActivityLog/userActivity.txt", true); // create file writer
+//            String theDetails = "User: " + LoginController.getUsername() + " called " + trace.getMethodName() + " at " + Instant.now() + " with the following parameters:"; // get the username, method name, and time
+//            fileWriter.write(theDetails + "\n"); // write to file
+//            for (String string : strings) {
+//                fileWriter.write(string + "\n"); // write to file
+//            }
+//            textArea.appendText(theDetails + "\n"); // append to text area
+//            fileWriter.close(); // close file writer
+//        } catch (IOException ioException) {
+//            ioException.printStackTrace();
+//        }
+//    }
 
     /**
      * apprehendException appends the exception to the text area in the activity log

@@ -32,7 +32,6 @@ import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.ResourceBundle;
 
 public class LoginController implements Initializable {
@@ -116,22 +115,7 @@ public class LoginController implements Initializable {
                 stage.show(); // shows the stage
             } else {
                 String currentLocale = Locale.getDefault().getLanguage(); // gets the current locale
-                if (currentLocale.equals("fr")) {
-                    ResourceBundle languageBundles = ResourceBundle.getBundle("bundles/fr_lang", Locale.FRANCE); // gets the login resource bundle
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle(languageBundles.getString("errorTitle.text"));
-                    alert.setHeaderText(languageBundles.getString("errorHeader.text"));
-                    alert.setContentText(languageBundles.getString("errorText.text"));
-                    alert.showAndWait();
-                }
-                else if (currentLocale.equals("en")) {
-                    ResourceBundle languageBundles = ResourceBundle.getBundle("bundles/en_lang", Locale.US); // gets the login resource bundle
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle(languageBundles.getString("errorTitle.text"));
-                    alert.setHeaderText(languageBundles.getString("errorHeader.text"));
-                    alert.setContentText(languageBundles.getString("errorContent.text"));
-                    alert.showAndWait();
-                }
+                GateKeeper.accessDenied(currentLocale); // alert user of invalid credentials
             }
         }
         catch (Exception e) {

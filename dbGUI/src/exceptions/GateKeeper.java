@@ -8,6 +8,7 @@ import javafx.scene.control.TextInputDialog;
 import java.sql.*;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.ResourceBundle;
 import java.util.stream.Stream;
 
 /**
@@ -108,7 +109,30 @@ public class GateKeeper {
         statement.setString(1, username); // Set the username
         statement.setString(2, password); // Set the password
         set = statement.executeQuery(); // Execute the query
-        return set.next();
+        return set.next(); // Return true if the query returns a result
+    }
+
+    /**
+     * invalidCredentials() displays an error message if the credentials are invalid.
+     * @param currentLocale the current locale
+     * */
+    public static void accessDenied(String currentLocale) {
+        if (currentLocale.equals("fr")) {
+            ResourceBundle languageBundles = ResourceBundle.getBundle("bundles/fr_lang", Locale.FRANCE); // gets the login resource bundle
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle(languageBundles.getString("errorTitle.text"));
+            alert.setHeaderText(languageBundles.getString("errorHeader.text"));
+            alert.setContentText(languageBundles.getString("errorText.text"));
+            alert.showAndWait();
+        }
+        else if (currentLocale.equals("en")) {
+            ResourceBundle languageBundles = ResourceBundle.getBundle("bundles/en_lang", Locale.US); // gets the login resource bundle
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle(languageBundles.getString("errorTitle.text"));
+            alert.setHeaderText(languageBundles.getString("errorHeader.text"));
+            alert.setContentText(languageBundles.getString("errorContent.text"));
+            alert.showAndWait();
+        }
     }
 
     /**
