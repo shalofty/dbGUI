@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 /**
  * AgentFord is the class that tracks the activity of the user and logs it to the activity log viewable in the activity log tab in the GUI
@@ -30,10 +31,11 @@ public class AgentFord {
     public static void gatherIntel(TextArea textArea) {
         try {
             StackTraceElement trace = Thread.currentThread().getStackTrace()[2]; // get the stack trace
-            String codeLog = trace.getFileName() + " . Line" + trace.getLineNumber() + ". " + trace.getMethodName(); // get the file name, line number, and method name
-            String userLog = Instant.now() + " User: " + LoginController.getUsername() + ". Session ID: " + JDBC.getConnection() + ". "; // get the username, connection, and time
+            String time = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS).toString().replace("T", " "); // get the time
+            String codeLog = trace.getFileName() + " Line: " + trace.getLineNumber() + ". " + trace.getMethodName(); // get the file name, line number, and method name
+            String userLog = "User: " + LoginController.getUsername() + ". Session ID: " + JDBC.getConnection() + ". "; // get the username, connection, and time
             if (textArea != null) {
-                textArea.appendText(userLog + codeLog + "\n"); // append the log to the text area
+                textArea.appendText(time + "\n\t" + userLog + "\n\t" + codeLog + "\n"); // append the log to the text area
             }
         }
         catch (Exception e) {
@@ -103,7 +105,8 @@ public class AgentFord {
      * @param textArea the text area to append the logins to
      * */
     @FXML public static void frontDoorSurveillance(TextArea textArea) {
-        try (BufferedReader eyeSpy = new BufferedReader(new FileReader("ActivityLog/loginActivity.txt"))) {
+        try (BufferedReader eyeSpy = new BufferedReader(new FileReader("ActivityLog/loginActivity.txt")))
+        {
             StringBuilder agentZero = new StringBuilder(); // create a string builder
             String spyLine = eyeSpy.readLine(); // read the first line
             while (spyLine != null) {

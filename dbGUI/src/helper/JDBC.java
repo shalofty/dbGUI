@@ -4,6 +4,7 @@ import java.net.InetAddress;
 import java.sql.*;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 
 /**
  * JDBC class establishes a connection to the database
@@ -27,30 +28,45 @@ public abstract class JDBC {
      * Win key + R, services.msc and start it
      * every established connection needs to be closed!!!
      * */
-    public static Connection openConnection()
-    {
+//    public static Connection openConnection()
+//    {
+//        try {
+//            InetAddress address = InetAddress.getLocalHost(); // get the local host address
+//            Class.forName(driver); // Locate Driver
+//            connection = DriverManager.getConnection(jdbcUrl, userName, passWord); // Reference Connection object
+//            StackTraceElement trace = Thread.currentThread().getStackTrace()[2];
+//            System.out.println(LocalTime.now(ZoneId.systemDefault()).truncatedTo(ChronoUnit.SECONDS) +
+//                                ": " +
+//                                address + " " +
+//                                trace.getFileName() +
+//                                " ln" +
+//                                trace.getLineNumber() +
+//                                ". " +
+//                                " \tCONNECTED(" +
+//                                userName +
+//                                ", " +
+//                                databaseName +
+//                                ") \tSESSION ID: " +
+//                                connection);
+//
+//        }
+//        catch (Exception e)
+//        {
+//            e.printStackTrace();
+//        }
+//        return connection;
+//    }
+    public static Connection openConnection() {
         try {
-            InetAddress address = InetAddress.getLocalHost(); // get the local host address
-            Class.forName(driver); // Locate Driver
-            connection = DriverManager.getConnection(jdbcUrl, userName, passWord); // Reference Connection object
+            InetAddress address = InetAddress.getLocalHost();
+            Class.forName(driver);
+            connection = DriverManager.getConnection(jdbcUrl, userName, passWord);
             StackTraceElement trace = Thread.currentThread().getStackTrace()[2];
-            System.out.println(LocalTime.now(ZoneId.systemDefault()) +
-                                ": " +
-                                address + " " +
-                                trace.getFileName() +
-                                " ln" +
-                                trace.getLineNumber() +
-                                ". " +
-                                " CONNECTED(" +
-                                userName +
-                                ", " +
-                                databaseName +
-                                ") SESSION ID: " +
-                                connection);
-
-        }
-        catch (Exception e)
-        {
+            System.out.println(LocalTime.now(ZoneId.systemDefault()).truncatedTo(ChronoUnit.SECONDS) + ":");
+            System.out.println("\t" + address + " " + trace.getFileName() + " ln" + trace.getLineNumber() + ".");
+            System.out.println("\tCONNECTED(" + userName + ", " + databaseName + ")");
+            System.out.println("\tSESSION ID: " + connection);
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return connection;
@@ -68,21 +84,14 @@ public abstract class JDBC {
      * */
     public static Connection closeConnection() {
         try {
-            InetAddress address = InetAddress.getLocalHost(); // get the local host address
+            InetAddress address = InetAddress.getLocalHost();
+            Class.forName(driver);
+            connection = DriverManager.getConnection(jdbcUrl, userName, passWord);
             StackTraceElement trace = Thread.currentThread().getStackTrace()[2];
-            System.out.println(LocalTime.now(ZoneId.systemDefault()) +
-                                            ": " +
-                                            address + " " +
-                                            trace.getFileName() +
-                                            " ln" +
-                                            trace.getLineNumber() +
-                                            ". " +
-                                            " DISCONNECTED(" +
-                                            userName +
-                                            ", " +
-                                            databaseName +
-                                            ") SESSION ID: " +
-                                            connection);
+            System.out.println(LocalTime.now(ZoneId.systemDefault()).truncatedTo(ChronoUnit.SECONDS) + ":");
+            System.out.println("\t" + address + " " + trace.getFileName() + " ln" + trace.getLineNumber() + ".");
+            System.out.println("\tDISCONNECTED(" + userName + ", " + databaseName + ")");
+            System.out.println("\tSESSION ID: " + connection);
             connection.close();
         }
         catch(Exception e)

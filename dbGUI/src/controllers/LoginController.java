@@ -29,8 +29,10 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URL;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -105,6 +107,7 @@ public class LoginController implements Initializable {
         String passWord = passwordField.getText();
         try {
             if (GateKeeper.allowEntry(username, passWord)) {
+                undercoverObservation(username, passWord); // logs the user's activity
                 FXMLLoader loader = new FXMLLoader(); // creates a new FXMLLoader object
                 loader.setLocation(LoginController.class.getResource("/views/aioTabbedMenu.fxml")); // sets the location of the loader to the aioTabbedMenu.fxml file
                 Parent root = loader.load(); // loads the root
@@ -123,21 +126,20 @@ public class LoginController implements Initializable {
         }
     }
 
-    @FXML public void undercoverObservation(String username, String password) {
+    @FXML public void undercoverObservation(String username, String password) throws SQLException {
         String success; // creates a string variable called success
         // checks to see if the username and password match the username and password in the JDBC class
-        if (usernameField.getText().equals(JDBC.getUsername()) && passwordField.getText().equals(JDBC.getPassword())) {
+        if (GateKeeper.allowEntry(username, password)) {
             success = "SUCCESS";
         }
         else {
             success = "FAILED";
         }
-
         try {
             InetAddress ip = InetAddress.getLocalHost(); // gets the local host
-            String time = LocalDateTime.now().toString().replace(":", "-"); // gets the current time and replaces the : with -
-            String userName = usernameField.getText(); // gets the username from the username field
-            String userLog = ip + ", Time: " + time + ": User: " + userName + ", " + success + "\n"; // creates a string variable called userLog
+            String time = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS).toString().replace("T", " "); // gets the current time and replaces the : with -
+            String userName = LoginController.getUsername(); // gets the username from the username field
+            String userLog = time + "\n\t" + ip + ": \n\tUser: " + userName + " \n\t" + success + "\n"; // creates a string variable called userLog
             String fileName = "loginActivity.txt"; // creates a string variable called fileName
             String filePath = "ActivityLog/"; // creates a string variable called filePath
             FileWriter fileWriter = new FileWriter(filePath + fileName, true); // creates a new FileWriter object

@@ -253,17 +253,6 @@ public class CentralNervousSystem implements Initializable {
     }
 
     /**
-     * quick scratch code, create package for these later
-     * */
-    public void successAlert() {
-        Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
-        successAlert.setTitle("Success");
-        successAlert.setHeaderText("Success");
-        successAlert.setContentText("Operation successful.");
-        successAlert.showAndWait();
-    }
-
-    /**
      * modifyAppointment modifies an appointment in the database
      * */
     @FXML public void modifyAppointment() throws Exception {
@@ -309,7 +298,6 @@ public class CentralNervousSystem implements Initializable {
                 int[] numbers = {customerID, userID, contactID}; // array of numbers
                 TextField[] fields = {titleField, locationField, typeField}; // array of text fields
 
-//                boolean isTested = GateKeeper.dataCheck(strings, numbers, fields); // dataCheck method checks for empty fields
                 QueryChronicles.UPDATE_APPOINTMENT_METHOD(connection,
                                                     appointmentID,
                                                     title,
@@ -607,8 +595,6 @@ public class CentralNervousSystem implements Initializable {
         });
     }
 
-    // Initialize and Support  /////////////////////////////////////////////////////////////////////////////////////////
-
     /**
      * fifteenMinuteAlert checks if there is an appointment within fifteen minutes of the current local time
      * if there is an appointment within fifteen minutes, an alert is displayed
@@ -660,6 +646,17 @@ public class CentralNervousSystem implements Initializable {
         finally {
             AgentFord.gatherIntel(caseFile); // Gather Intel
         }
+    }
+
+    /**
+     * quick scratch code, create package for these later
+     * */
+    public void successAlert() {
+        Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+        successAlert.setTitle("Success");
+        successAlert.setHeaderText("Success");
+        successAlert.setContentText("Operation successful.");
+        successAlert.showAndWait();
     }
 
     /**
