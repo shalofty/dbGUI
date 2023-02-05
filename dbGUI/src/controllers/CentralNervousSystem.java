@@ -36,7 +36,7 @@ public class CentralNervousSystem implements Initializable {
 
     // Appointments Variables ///////////////////////////////////////////////////////////////////////////////////////////
     @FXML public Label userCreds;
-    @FXML public TextField appIDField, contactIDField, userIDField, locationField, customerIDField, typeField, titleField;
+    @FXML public TextField appIDField, userIDField, locationField, typeField, titleField;
     @FXML public DatePicker datePicker;
     @FXML public ComboBox<String> contactsMenu = new ComboBox<>(); // Contacts Menu
     @FXML public ComboBox<String> customersMenu = new ComboBox<>(); // Customers Menu
@@ -303,13 +303,8 @@ public class CentralNervousSystem implements Initializable {
                 LocalDateTime startUTC = HotTubTimeMachine.convertToUTC(startDT); // convert start date and time to UTC
                 LocalDateTime endUTC = HotTubTimeMachine.convertToUTC(endDT); // convert end date and time to UTC
 
-                // convert startUTC and endUTC to strings
-                String startUTCString = startUTC.toString(); //.replace("T", " ");
-                String endUTCString = endUTC.toString(); //.replace("T", " ");
 
-                System.out.println(startUTCString + " " + endUTCString);
-
-                // data verification and validation
+                // data verification and validation, for use later
                 String[] strings = {title, location, type, descriptionText}; // array of strings
                 int[] numbers = {customerID, userID, contactID}; // array of numbers
                 TextField[] fields = {titleField, locationField, typeField}; // array of text fields
@@ -382,7 +377,6 @@ public class CentralNervousSystem implements Initializable {
      * disables add button, enables modify and delete buttons to prevent pointer exceptions
      * uses addListener to listen for a change in the selected item, which helps with bugginess
      * */
-
     public void selectCustomer() {
         // add listener to the tableview
         viewCustomers.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
@@ -408,7 +402,6 @@ public class CentralNervousSystem implements Initializable {
         });
 
     }
-
 
     /**
      * clearSelectedCustomer clears the selected customer
@@ -576,25 +569,38 @@ public class CentralNervousSystem implements Initializable {
 
     /**
      * updateCustomersMenu updates the customers divisions menu in the add appointment screen
+     * NOTE: I've noticed a sort of buginess with this feature, sometimes a double click is necessary. I'm not sure why this is happening.
      * */
-    public void updateDivisionsMenu() throws SQLException {
-        String selectedCountry = countryMenu.getValue(); // get selected country
-        if (selectedCountry != null) {
-            divisionMenu.setItems(null); // clear division menu
-        } else return; // if no country is selected, return
-        if (selectedCountry.equals("U.S")) {
-            divisionMenu.setValue("State");
-        }
-        else if (selectedCountry.equals("Canada")) {
-            divisionMenu.setValue("Province");
-        }
-        else if (selectedCountry.equals("UK")) {
-            divisionMenu.setValue("Country");
-        }
-        int countryID = CountryAccess.getCountryNamebyID(selectedCountry); // get country ID
-        ObservableList<String> divisions = DivisionAccess.getDivisions(countryID); // get divisions
-        divisionMenu.setItems(divisions); // set divisions menu
-        divisionMenu.setDisable(false); // enable divisions menu
+    @FXML public void updateDivisionsMenu() {
+        countryMenu.valueProperty().addListener((observable, oldValue, newValue) -> {
+            try {
+                String selectedCountry = countryMenu.getValue(); // get selected country
+                if (selectedCountry != null) {
+                    divisionMenu.setItems(null); // clear division menu
+                    int countryID = CountryAccess.getCountryNamebyID(selectedCountry); // get country ID
+                    ObservableList<String> divisions = DivisionAccess.getDivisions(countryID); // get divisions
+                    divisionMenu.setItems(divisions); // set divisions menu
+                    divisionMenu.setDisable(false); // enable divisions menu
+                } else {
+                    divisionMenu.setDisable(true);
+                    return; // if no country is selected, return
+                }
+                // set the division menu to the appropriate value based on the selected country
+                switch (selectedCountry) {
+                    case "U.S": // if the selected country is the U.S, set the division menu to state
+                        divisionMenu.setValue("State");
+                        break;
+                    case "Canada": // if the selected country is Canada, set the division menu to province
+                        divisionMenu.setValue("Province");
+                        break;
+                    case "UK": // if the selected country is the UK, set the division menu to country
+                        divisionMenu.setValue("Country");
+                        break;
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     // Initialize and Support  /////////////////////////////////////////////////////////////////////////////////////////
@@ -603,7 +609,7 @@ public class CentralNervousSystem implements Initializable {
      * fifteenMinuteAlert checks if there is an appointment within fifteen minutes of the current local time
      * if there is an appointment within fifteen minutes, an alert is displayed
      * */
-    public void fifteenMinuteAlert() {
+    @FXML public void fifteenMinuteAlert() {
         try {
             connection = JDBC.openConnection(); // establish connection
             JDBC.setPreparedStatement(connection, QueryChronicles.GET_ALL_APPOINTMENTS_STATEMENT); // set the prepared statement
@@ -653,13 +659,11 @@ public class CentralNervousSystem implements Initializable {
      * updateAppointments updates the appointments tableview
      * clears the tableview, creates a new observable list, establishes connection, sets the items in the tableview to the new observable list
      * */
-    public void updateAppointments() throws SQLException {
+    @FXML public void updateAppointments() throws SQLException {
         try {
             viewAppointments.getItems().clear(); // clear the items in the table
             ObservableList<Appointments> newAppointments = FXCollections.observableArrayList(AppointmentAccess.allAppointments()); // create a new observable list
-            connection = JDBC.openConnection(); // establish connection
             viewAppointments.setItems(newAppointments); // set the items in the table to the appointments list
-            connection.close(); // close the connection
         }
         catch (Exception e) {
             AgentFord.apprehendException(e, theCrimeScene); // if an exception is thrown, display the exception in the crime scene text area
@@ -676,13 +680,11 @@ public class CentralNervousSystem implements Initializable {
      * updateCustomers updates the customers tableview
      * clears the tableview, creates a new observable list, establishes connection, sets the items in the tableview to the new observable list
      * */
-    public void updateCustomers() throws SQLException {
+    @FXML public void updateCustomers() throws SQLException {
         try {
             viewCustomers.getItems().clear(); // clear the items in the table
             ObservableList<Customers> newCustomers = FXCollections.observableArrayList(CustomerAccess.getAllCustomers()); // create a new observable list
-            connection = JDBC.openConnection(); // establish connection
             viewCustomers.setItems(newCustomers); // set the items in the table to the customers list
-            connection.close(); // close the connection
         }
         catch (Exception e) {
             AgentFord.apprehendException(e, theCrimeScene); // if an exception is thrown, display the exception in the crime scene text area
@@ -695,14 +697,15 @@ public class CentralNervousSystem implements Initializable {
         }
     }
 
-    // update the customers menu after a customer is deleted
-    public void updateCustomersMenu() throws SQLException {
+    /**
+     * updateCustomersMenu updates the customers menu
+     * clears the menu, creates a new observable list, establishes connection, sets the items in the menu to the new observable list
+     * */
+    @FXML public void updateCustomersMenu() throws SQLException {
         try {
             customersMenu.getItems().clear(); // clear the items in the table
             ObservableList<String> newCustomers = FXCollections.observableArrayList(CustomerAccess.getAllCustomerNameStrings()); // create a new observable list
-            connection = JDBC.openConnection(); // establish connection
             customersMenu.setItems(newCustomers); // set the items in the table to the customers list
-            connection.close(); // close the connection
         }
         catch (Exception e) {
             AgentFord.apprehendException(e, theCrimeScene); // if an exception is thrown, display the exception in the crime scene text area
@@ -795,11 +798,6 @@ public class CentralNervousSystem implements Initializable {
                 countriesList.stream().map(Country::getCountryName).forEach(countryList::add); // add the country names to the observable list
                 countryMenu.setItems(countryList); // set the items in the country menu to the observable list
             }
-
-            // call getDivisions method to populate an ObservableList to populate the division menu
-//            ObservableList<DivisionAccess> divisionsList = DivisionAccess.getDivisions(); // get the list of divisions from the db
-//            divisionsList.stream().map(Division::getDivisionName).forEach(divisionObservableList::add); // add the division names to the observable list
-//            divisionMenu.setItems(divisionObservableList); // set the items in the division menu to the observable list
 
             ObservableList<String> contactsList = FXCollections.observableArrayList(ContactAccess.getContactNames()); // get the list of contact names from the db
             contactsMenu.setItems(contactsList); // set the items in the contact menu to the observable list
