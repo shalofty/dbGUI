@@ -149,7 +149,7 @@
                <content>
                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <TextArea fx:id="theSacredScroll" editable="false" layoutX="14.0" layoutY="26.0" prefHeight="180.0" prefWidth="880.0" />
+                        <TextArea fx:id="caseFile" editable="false" layoutX="14.0" layoutY="26.0" prefHeight="180.0" prefWidth="880.0" />
                         <Button fx:id="espionageButton" layoutX="14.0" layoutY="216.0" mnemonicParsing="false" onAction="#reportBack" prefHeight="25.0" prefWidth="109.0" text="Export" />
                         <TextArea fx:id="infraredGoggles" layoutX="14.0" layoutY="491.0" prefHeight="223.0" prefWidth="586.0" />
                         <Separator layoutY="249.0" prefHeight="6.0" prefWidth="908.0" />

@@ -29,15 +29,17 @@ public class AgentFord {
     @FXML
     public static void gatherIntel(TextArea textArea) {
         try {
-            Connection connection = JDBC.getConnection(); // get the connection
             StackTraceElement trace = Thread.currentThread().getStackTrace()[2]; // get the stack trace
             String codeLog = trace.getFileName() + " . Line" + trace.getLineNumber() + ". " + trace.getMethodName(); // get the file name, line number, and method name
             String userLog = Instant.now() + " User: " + LoginController.getUsername() + ". Session ID: " + JDBC.getConnection() + ". "; // get the username, connection, and time
-            textArea.appendText(userLog + codeLog + "\n"); // append the log to the text area
-            connection.close();
+            if (textArea != null) {
+                textArea.appendText(userLog + codeLog + "\n"); // append the log to the text area
+            }
         }
         catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+            e.printStackTrace(); // print the stack trace
+            e.getMessage(); // get the message
+            e.getCause(); // get the cause
         }
     }
 
@@ -85,7 +87,7 @@ public class AgentFord {
     @FXML public static void deBriefing(TextArea textArea) {
         try {
             String time = String.valueOf(LocalDateTime.now()).replace(":", "-"); // replace : with -
-            String userName = JDBC.getUsername(); // get username
+            String userName = LoginController.getUsername(); // get the username
             String fileName = time + "_" + userName + ".txt"; // create file name
             String filePath = "ActivityLog/"; // create file path
             FileWriter fileWriter = new FileWriter(filePath + fileName); // create file writer

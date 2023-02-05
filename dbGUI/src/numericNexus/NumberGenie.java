@@ -8,8 +8,6 @@ import theAgency.AgentFord;
 import java.sql.SQLException;
 import java.util.Random;
 
-import static controllers.CentralNervousSystem.theCrimeScene;
-
 /**
  * NumberGenie is a class that generates random numbers
  * @method magicAppointment generates a new appointment ID
@@ -36,7 +34,7 @@ public class NumberGenie {
             return newID;
         }
         catch (Exception e) {
-            AgentFord.apprehendException(e, theCrimeScene); // if an exception is thrown, display the exception in the crime scene text area
+            e.printStackTrace(); // print the stack trace
             throw e;
         }
     }
@@ -60,7 +58,7 @@ public class NumberGenie {
             return newID;
         }
         catch (Exception e) {
-            AgentFord.apprehendException(e, theCrimeScene); // if an exception is thrown, display the exception in the crime scene text area
+            e.printStackTrace(); // print the stack trace
             throw e;
         }
     }
@@ -84,7 +82,7 @@ public class NumberGenie {
             return newID; // return the new ID
         }
         catch (Exception e) {
-            AgentFord.apprehendException(e, theCrimeScene); // if an exception is thrown, display the exception in the crime scene text area
+            e.printStackTrace(); // print the stack trace
             throw e;
         }
     }

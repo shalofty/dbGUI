@@ -31,7 +31,7 @@ public class CentralNervousSystem implements Initializable {
     @FXML public Connection connection = null;
     @FXML public PreparedStatement preparedStatement = null;
     @FXML public Tab appointmentsTab, customersTab, reportsTab, logTab;
-    @FXML public static TextArea theSacredScroll, infraredGoggles, theCrimeScene;
+    @FXML public TextArea caseFile, infraredGoggles, theCrimeScene;
     @FXML public static Button espionageButton, exportDBButton, logoutButton;
 
     // Appointments Variables ///////////////////////////////////////////////////////////////////////////////////////////
@@ -90,7 +90,7 @@ public class CentralNervousSystem implements Initializable {
             AgentFord.apprehendException(e, theCrimeScene); // if an exception is thrown, display the exception in the crime scene text area
         }
         finally {
-            AgentFord.gatherIntel(theSacredScroll);
+            AgentFord.gatherIntel(caseFile); // gather intel
         }
     }
 
@@ -115,7 +115,7 @@ public class CentralNervousSystem implements Initializable {
             AgentFord.apprehendException(e, theCrimeScene); // if an exception is thrown, display the exception in the crime scene text area
         }
         finally {
-            AgentFord.gatherIntel(theSacredScroll); // Gather Intel
+            AgentFord.gatherIntel(caseFile); // Gather Intel
         }
     }
 
@@ -149,7 +149,7 @@ public class CentralNervousSystem implements Initializable {
             AgentFord.apprehendException(e, theCrimeScene); // if an exception is thrown, display the exception in the crime scene text area
         }
         finally {
-            AgentFord.gatherIntel(theSacredScroll); // Gather Intel
+            AgentFord.gatherIntel(caseFile); // Gather Intel
         }
     }
 
@@ -173,7 +173,7 @@ public class CentralNervousSystem implements Initializable {
             AgentFord.apprehendException(e, theCrimeScene); // if an exception is thrown, display the exception in the crime scene text area
         }
         finally {
-            AgentFord.gatherIntel(theSacredScroll); // Gather Intel
+            AgentFord.gatherIntel(caseFile); // Gather Intel
         }
     }
 
@@ -248,7 +248,7 @@ public class CentralNervousSystem implements Initializable {
         } finally {
             connection = JDBC.closeConnection(); // close the connection
             updateAppointments(); // update the appointments table
-            AgentFord.gatherIntel(theSacredScroll); // Gather Intel
+            AgentFord.gatherIntel(caseFile); // Gather Intel
         }
     }
 
@@ -332,7 +332,7 @@ public class CentralNervousSystem implements Initializable {
                 connection.close();
             }
             updateAppointments(); // update the appointments table
-            AgentFord.gatherIntel(theSacredScroll); // Gather Intel
+            AgentFord.gatherIntel(caseFile); // Gather Intel
         }
     }
 
@@ -366,7 +366,7 @@ public class CentralNervousSystem implements Initializable {
                 connection.close(); // close the connection
             }
             updateAppointments(); // update the appointments table
-            AgentFord.gatherIntel(theSacredScroll); // Gather Intel
+            AgentFord.gatherIntel(caseFile); // Gather Intel
         }
     }
 
@@ -398,6 +398,8 @@ public class CentralNervousSystem implements Initializable {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+            } finally {
+                AgentFord.gatherIntel(caseFile); // Gather Intel
             }
         });
 
@@ -424,7 +426,7 @@ public class CentralNervousSystem implements Initializable {
             AgentFord.apprehendException(e, theCrimeScene); // if an exception is thrown, display the exception in the crime scene text area
         }
         finally {
-            AgentFord.gatherIntel(theSacredScroll); // Gather Intel
+            AgentFord.gatherIntel(caseFile); // Gather Intel
         }
     }
 
@@ -471,7 +473,7 @@ public class CentralNervousSystem implements Initializable {
                 connection.close(); // close the connection
             }
             updateCustomers(); // update customers tableview
-            AgentFord.gatherIntel(theSacredScroll); // Gather Intel
+            AgentFord.gatherIntel(caseFile); // Gather Intel
         }
     }
 
@@ -522,7 +524,7 @@ public class CentralNervousSystem implements Initializable {
                 connection.close(); // close the connection
             }
             updateCustomers(); // update customers tableview
-            AgentFord.gatherIntel(theSacredScroll); // Gather Intel
+            AgentFord.gatherIntel(caseFile); // Gather Intel
         }
 
     }
@@ -563,7 +565,7 @@ public class CentralNervousSystem implements Initializable {
                 connection.close(); // close the connection
             }
             updateCustomers(); // update customers tableview
-            AgentFord.gatherIntel(theSacredScroll); // Gather Intel
+            AgentFord.gatherIntel(caseFile); // Gather Intel
         }
     }
 
@@ -599,6 +601,8 @@ public class CentralNervousSystem implements Initializable {
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
+            } finally {
+                AgentFord.gatherIntel(caseFile); // Gather Intel
             }
         });
     }
@@ -635,23 +639,26 @@ public class CentralNervousSystem implements Initializable {
             if (connection != null) {
                 connection = JDBC.closeConnection(); // close the connection
             }
-            AgentFord.gatherIntel(theSacredScroll); // Gather Intel
+            AgentFord.gatherIntel(caseFile); // Gather Intel
         }
     }
 
     /**
      * reportBack gathers intel, reports back to HQ when espionageButton is triggered
+     * @method deBriefing exports the intel to a text file
+     * @method apprehendException displays the exception in the crime scene text area
+     * @method gatherIntel gathers intel and displays it in the text area
      * */
     @FXML public void reportBack() {
         try {
-            AgentFord.deBriefing(theSacredScroll); // deBriefing method
+            AgentFord.deBriefing(caseFile); // deBriefing method exports the intel to a text file
 
         }
         catch (Exception e) {
             AgentFord.apprehendException(e, theCrimeScene); // if an exception is thrown, display the exception in the crime scene text area
         }
         finally {
-            AgentFord.gatherIntel(theSacredScroll); // Gather Intel
+            AgentFord.gatherIntel(caseFile); // Gather Intel
         }
     }
 
@@ -672,7 +679,7 @@ public class CentralNervousSystem implements Initializable {
             if (connection != null) {
                 connection.close(); // close the connection
             }
-            AgentFord.gatherIntel(theSacredScroll); // Gather Intel
+            AgentFord.gatherIntel(caseFile); // Gather Intel
         }
     }
 
@@ -693,7 +700,7 @@ public class CentralNervousSystem implements Initializable {
             if (connection != null) {
                 connection.close(); // close the connection
             }
-            AgentFord.gatherIntel(theSacredScroll); // Gather Intel
+            AgentFord.gatherIntel(caseFile); // Gather Intel
         }
     }
 
@@ -714,7 +721,7 @@ public class CentralNervousSystem implements Initializable {
             if (connection != null) {
                 connection.close(); // close the connection
             }
-            AgentFord.gatherIntel(theSacredScroll); // Gather Intel
+            AgentFord.gatherIntel(caseFile); // Gather Intel
         }
     }
 
@@ -816,7 +823,7 @@ public class CentralNervousSystem implements Initializable {
                 catch (SQLException e) {AgentFord.apprehendException(e, theCrimeScene); // if an exception is thrown, display the exception in the crime scene text area
                 }
             }
-            AgentFord.gatherIntel(theSacredScroll); // Gather Intel
+            AgentFord.gatherIntel(caseFile); // Gather Intel
         }
     }
 }
