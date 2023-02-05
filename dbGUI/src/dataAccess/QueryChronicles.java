@@ -14,23 +14,51 @@ import java.time.LocalDateTime;
  * */
 public class QueryChronicles {
     /// User Statement
-    public static final String INSERT_NEW_USER_STATEMENT = "INSERT INTO client_schedule.users " +
-            "(USER_ID, User_Name, Password, Create_Date, Created_By, Last_Update, Last_Updated_By)\n" + "VALUES " +
-            "(?, ?, ?, ?, ?, ?, ?);\n";
-    public static final String SELECT_ALL_USER_IDS_STATEMENT = "SELECT User_ID FROM users"; // select all user IDs
-    public static final String SELECT_ALL_USER_NAMES_STATEMENT = "SELECT User_Name FROM users"; // select all user names
-    public static final String SELECT_USER_NAME_STATEMENT = "SELECT User_Name FROM users WHERE User_ID = ?"; // select user name by user ID
-    public static final String GET_ALL_USERS = "SELECT * FROM users"; // get all users
-    public static final String NEW_USER_STATEMENT = "INSERT INTO users (User_ID, User_Name, Password) VALUES (?,?,?)"; // insert new user
-    public static final String USER_LOGIN_STATEMENT = "SELECT * FROM users WHERE User_Name = ? AND Password = ?"; // user login
-    public static final String CHECK_USER = "SELECT * FROM users WHERE User_Name = ? AND Password = ? AND User_ID = ?"; // check user credentials
-    public static final String SELECT_USER_ID_STATEMENT = "SELECT User_ID FROM users WHERE User_Name = ?"; // select user ID by username
+    public static final String SELECT_ALL_USER_IDS_STATEMENT =
+            "SELECT User_ID " +
+            "FROM users"; // select all user IDs
+    public static final String SELECT_ALL_USER_NAMES_STATEMENT =
+            "SELECT User_Name " +
+            "FROM users"; // select all user names
+    public static final String SELECT_USER_NAME_STATEMENT =
+            "SELECT User_Name " +
+            "FROM users " +
+            "WHERE User_ID = ?"; // select username by user ID
+    public static final String GET_ALL_USERS =
+            "SELECT * FROM users"; // get all users
+    public static final String NEW_USER_STATEMENT =
+            "INSERT INTO users " +
+            "(User_ID, User_Name, Password) " +
+            "VALUES (?,?,?)"; // insert new user
+    public static final String USER_LOGIN_STATEMENT =
+            "SELECT * FROM users " +
+            "WHERE User_Name = ? " +
+            "AND Password = ?"; // user login
+    public static final String CHECK_USER =
+            "SELECT * FROM users " +
+            "WHERE User_Name = ? " +
+            "AND Password = ? " +
+            "AND User_ID = ?"; // check user credentials
+    public static final String SELECT_USER_ID_STATEMENT =
+            "SELECT User_ID FROM users " +
+            "WHERE User_Name = ?"; // select user ID by username
     /// Appointment Statements
-    public static final String GET_ALL_APPOINTMENTS_STATEMENT = "SELECT * from appointments"; // select all appointments
-    public static final String GET_ALL_APPOINTMENTS_WITHIN_7_DAYS_STATEMENT = "SELECT * FROM appointments WHERE Start BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 7 DAY);"; // select all appointments within 7 days
-    public static final String GET_ALL_APPOINTMENTS_WITHIN_30_DAYS_STATEMENT = "SELECT * FROM appointments WHERE start BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 30 DAY)"; // select all appointments within 30 days
-    public static final String GET_ALL_APPOINTMENTS_BY_CUSTOMER_ID_STATEMENT = "SELECT * FROM appointments WHERE Customer_ID = ?"; // select all appointments by customer ID
-    public static final String DELETE_FROM_APPOINTMENTS_STATEMENT = "DELETE FROM appointments WHERE Appointment_ID=?"; // delete appointment by appointment ID
+    public static final String GET_ALL_APPOINTMENTS_STATEMENT =
+            "SELECT * from appointments"; // select all appointments
+    public static final String GET_ALL_APPOINTMENTS_WITHIN_7_DAYS_STATEMENT =
+            "SELECT * FROM appointments " +
+            "WHERE Start BETWEEN NOW() " +
+            "AND DATE_ADD(NOW(), INTERVAL 7 DAY);"; // select all appointments within 7 days
+    public static final String GET_ALL_APPOINTMENTS_WITHIN_30_DAYS_STATEMENT =
+            "SELECT * FROM appointments " +
+            "WHERE start BETWEEN NOW() " +
+            "AND DATE_ADD(NOW(), INTERVAL 30 DAY)"; // select all appointments within 30 days
+    public static final String GET_ALL_APPOINTMENTS_BY_CUSTOMER_ID_STATEMENT =
+            "SELECT * FROM appointments " +
+            "WHERE Customer_ID = ?"; // select all appointments by customer ID
+    public static final String DELETE_FROM_APPOINTMENTS_STATEMENT =
+            "DELETE FROM appointments " +
+            "WHERE Appointment_ID=?"; // delete appointment by appointment ID
     public static final String APPOINTMENT_INSERT_STATEMENT =
             "INSERT INTO appointments " +
             "(Appointment_ID, " +
@@ -62,9 +90,16 @@ public class QueryChronicles {
             "Contact_ID = ? " +
             "WHERE Appointment_ID = ?"; // update appointment
     /// Contacts Statements
-    public static final String SELECT_ALL_CONTACTS_STATEMENT = "SELECT * from contacts"; // select all contacts
-    public static String SELECT_CONTACTS_BY_ID_STATEMENT = "SELECT Contact_Name FROM contacts WHERE Contact_ID = ?"; // select contact name by contact ID
-    public static final String SELECT_CONTACTS_BY_NAME_STATEMENT = "SELECT Contact_ID FROM contacts WHERE Contact_Name = ?"; // select contact ID by contact name
+    public static final String SELECT_ALL_CONTACTS_STATEMENT =
+            "SELECT * from contacts"; // select all contacts
+    public static String SELECT_CONTACTS_BY_ID_STATEMENT =
+            "SELECT Contact_Name " +
+            "FROM contacts " +
+            "WHERE Contact_ID = ?"; // select contact name by contact ID
+    public static final String SELECT_CONTACTS_BY_NAME_STATEMENT =
+            "SELECT Contact_ID " +
+            "FROM contacts " +
+            "WHERE Contact_Name = ?"; // select contact ID by contact name
     /// Customer Statements
     public static final String SELECT_CUSTOMERS_STATEMENT =
             "SELECT customers.Customer_ID, " +
@@ -98,18 +133,33 @@ public class QueryChronicles {
             "Last_Updated_By = ?, " +
             "Division_ID = ? " +
             "WHERE Customer_ID = ?"; // update customer
-    public static final String SELECT_CUSTOMER_NAME_BY_ID_STATEMENT = "SELECT Customer_Name FROM customers WHERE Customer_ID = ?"; // select customer name by customer ID
-    public static final String SELECT_CUSTOMER_ID_BY_NAME_STATEMENT = "SELECT Customer_ID FROM customers WHERE Customer_Name = ?"; // select customer ID by customer name
-    public static final String DELETE_FROM_CUSTOMERS_STATEMENT = "DELETE FROM customers WHERE Customer_ID=?"; // delete customer by customer ID
+    public static final String SELECT_CUSTOMER_NAME_BY_ID_STATEMENT =
+            "SELECT Customer_Name " +
+            "FROM customers " +
+            "WHERE Customer_ID = ?"; // select customer name by customer ID
+    public static final String SELECT_CUSTOMER_ID_BY_NAME_STATEMENT =
+            "SELECT Customer_ID " +
+            "FROM customers " +
+            "WHERE Customer_Name = ?"; // select customer ID by customer name
+    public static final String DELETE_FROM_CUSTOMERS_STATEMENT =
+            "DELETE FROM customers " +
+            "WHERE Customer_ID=?"; // delete customer by customer ID
 
     /// Division & Country Statements
-    public static final String SELECT_DIVISION_ID_BY_DIVISION_NAME = "SELECT Division_ID FROM first_level_divisions WHERE Division = ?"; // select division ID by division name
-    public static final String SELECT_COUNTRIES = "SELECT Country_ID, Country FROM countries"; // select all countries
-    public static final String SELECT_COUNTRY_ID_BY_COUNTRY_NAME = "SELECT Country_ID FROM countries WHERE Country = ?"; // select country ID by country name
-    public static final String SELECT_COUNTRY_NAME_BY_DIVISION_ID_STATEMENT = "SELECT Country FROM countries WHERE Country_ID = ?"; // select country by division ID
-    public static final String SELECT_DIVISION_BY_COUNTRY_ID_STATEMENT = "SELECT Division FROM first_level_divisions WHERE Country_ID = ?"; // select division by division ID
-    public static final String SELECT_DIVISION_NAME_BY_DIVISION_ID_STATEMENT = "SELECT Division FROM first_level_divisions WHERE Division_ID = ?"; // select division by division ID
-    public static final String SELECT_COUNTRY_NAME_BY_COUNTRY_ID_STATEMENT = "SELECT Country FROM countries WHERE Country_ID = ?"; // select country by country ID
+    public static final String SELECT_DIVISION_ID_BY_DIVISION_NAME =
+            "SELECT Division_ID " +
+            "FROM first_level_divisions " +
+            "WHERE Division = ?"; // select division ID by division name
+    public static final String SELECT_COUNTRIES =
+            "SELECT Country_ID, Country " +
+            "FROM countries"; // select all countries
+    public static final String SELECT_COUNTRY_ID_BY_COUNTRY_NAME =
+            "SELECT Country_ID " +
+            "FROM countries WHERE Country = ?"; // select country ID by country name
+    public static final String SELECT_DIVISION_BY_COUNTRY_ID_STATEMENT =
+            "SELECT Division " +
+            "FROM first_level_divisions " +
+            "WHERE Country_ID = ?"; // select division by division ID
     public static final String INNER_JOIN_STATEMENT =
             "SELECT countries.country\n" +
             "FROM first_level_divisions\n" +
@@ -119,6 +169,11 @@ public class QueryChronicles {
 
     /// New User Method //////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Inserts a new user into the database. Wasn't required, but I thought it would be a nice feature.
+     * Took the opportunity to practice with prepared statements and incorporating this into the GUI functionality
+     * Decided not to remove it, as it is a nice feature to have. I also added a new user to the database.
+     * */
     public static void INSERT_NEW_USER(Connection connection,
                                        int ID,
                                        String userName,
@@ -145,7 +200,6 @@ public class QueryChronicles {
         }
     }
 
-    /// Appointment Methods //////////////////////////////////////////////////////////////////////////
     /**
      * insertInto inserts a new appointment into the database
      * */
@@ -243,8 +297,6 @@ public class QueryChronicles {
         }
     }
 
-    /// Customer Methods //////////////////////////////////////////////////////////////////////////
-
     /**
      * addCustomer adds a new customer to the database
      * */
@@ -309,7 +361,9 @@ public class QueryChronicles {
         }
     }
 
-    // deleteFromCustomers deletes a customer from the database
+    /**
+     * deleteFromCustomers deletes a customer from the database
+     * */
     public static void DELETE_CUSTOMER_METHOD(Connection connection, int customerID)
     {
         try {

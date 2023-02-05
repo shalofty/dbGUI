@@ -28,7 +28,7 @@ public class DivisionAccess extends Division {
      * getDivisions method gets the divisions from the database
      * @return ObservableList<DivisionAccess> as a list of divisions
      * */
-    public static ObservableList<String> getDivisions(int countryID) throws SQLException {
+    public static ObservableList<String> getDivisionList(int countryID) throws SQLException {
         try (Connection connection = JDBC.openConnection();  // open the connection
              PreparedStatement statement = connection.prepareStatement(QueryChronicles.SELECT_DIVISION_BY_COUNTRY_ID_STATEMENT))  // prepare the statement
         {
@@ -67,32 +67,6 @@ public class DivisionAccess extends Division {
                 divisionID = set.getInt("Division_ID"); // get the division ID
             }
             return divisionID; // return the division ID
-        } catch (SQLException e) {
-            throw e;
-        } finally {
-            if (set != null) set.close(); // close set
-            if (statement != null) statement.close(); // close statement
-            if (connection != null) connection.close(); // close connection
-        }
-    }
-
-    /**
-     * getDivisionName method gets the division name
-     * @param divisionID as an int
-     * @return divisionName as a String
-     * */
-    public static String getDivisionName(int divisionID) throws SQLException {
-        try (Connection connection = JDBC.openConnection();  // open the connection
-             PreparedStatement statement = connection.prepareStatement(QueryChronicles.SELECT_DIVISION_NAME_BY_DIVISION_ID_STATEMENT))  // prepare the statement
-        {
-            statement.setInt(1, divisionID); // set the division ID
-            set = statement.executeQuery(); // execute the statement
-            String divisionName = ""; // initialize the division name
-            // loop through the result set
-            while (set.next()) {
-                divisionName = set.getString("Division"); // get the division name
-            }
-            return divisionName; // return the division name
         } catch (SQLException e) {
             throw e;
         } finally {

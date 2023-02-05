@@ -75,47 +75,11 @@ public class CountryAccess extends Country {
         }
     }
 
-    // get countryName from divisionID
-    public static String getCountryName(int divisionID) throws SQLException {
-        try {
-            connection = JDBC.openConnection(); // open connection
-            statement = connection.prepareStatement(QueryChronicles.SELECT_COUNTRY_NAME_BY_COUNTRY_ID_STATEMENT); // create statement
-            statement.setInt(1, divisionID); // set division ID
-            set = statement.executeQuery(); // execute statement
-            if (set.next()) {
-                return set.getString("Country"); // return country name
-            }
-            return null;
-        } catch (Exception e) {
-            throw e;
-        } finally {
-            if (set != null) set.close(); // close result set
-            if (statement != null) statement.close(); // close statement
-            if (connection != null) connection.close(); // close connection
-        }
-    }
 
-    // get countryID from divisionID
-    public static int getCountryNamebyDivisionID(int divisionID) throws SQLException {
-        try {
-            connection = JDBC.openConnection(); // open connection
-            statement = connection.prepareStatement(QueryChronicles.SELECT_COUNTRY_NAME_BY_DIVISION_ID_STATEMENT); // create statement
-            statement.setInt(1, divisionID); // set division ID
-            set = statement.executeQuery(); // execute statement
-            if (set.next()) {
-                return set.getInt("Country_ID");
-            }
-            return 0;
-        } catch (Exception e) {
-            throw e;
-        } finally {
-            if (set != null) set.close(); // close result set
-            if (statement != null) statement.close(); // close statement
-            if (connection != null) connection.close(); // close connection
-        }
-    }
-
-    // get countryName from Division ID using an inner join
+    /**
+     * getCountryName method gets the country name from the division ID
+     * @param divisionID as an int
+     * */
     public static String innerJoin(int divisionID) throws SQLException {
         try {
             connection = JDBC.openConnection(); // open connection

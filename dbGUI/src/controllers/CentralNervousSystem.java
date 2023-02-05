@@ -578,7 +578,7 @@ public class CentralNervousSystem implements Initializable {
                 if (selectedCountry != null) {
                     divisionMenu.setItems(null); // clear division menu
                     int countryID = CountryAccess.getCountryNamebyID(selectedCountry); // get country ID
-                    ObservableList<String> divisions = DivisionAccess.getDivisions(countryID); // get divisions
+                    ObservableList<String> divisions = DivisionAccess.getDivisionList(countryID); // get divisions
                     divisionMenu.setItems(divisions); // set divisions menu
                     divisionMenu.setDisable(false); // enable divisions menu
                 } else {

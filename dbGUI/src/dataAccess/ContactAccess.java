@@ -55,23 +55,6 @@ public class ContactAccess {
         return 0; // return 0 if contact not found
     }
 
-    /**
-     * Create contact object from result set.
-     * @param set result set from query execution
-     * @return contact
-     */
-    private static Contacts createContact(ResultSet set) throws SQLException {
-        try {
-            int contactID = set.getInt("Contact_ID"); // get contact ID
-            String contactName = set.getString("Contact_Name"); // get contact name
-            String contactEmail = set.getString("Email"); // get contact email
-            return new Contacts(contactID, contactName, contactEmail); // return contact
-        }
-        catch (SQLException e) {
-            e.printStackTrace(); // print stack trace
-            throw e;
-        }
-    }
 
     // a method that generates an ObservableList of all contacts to be used in CentralNervousSystem in a ComboBox
     /**
