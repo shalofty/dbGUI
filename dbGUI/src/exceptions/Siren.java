@@ -2,7 +2,6 @@ package exceptions;
 
 import javafx.scene.control.Alert;
 
-import javax.xml.transform.Result;
 import java.sql.SQLException;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -61,11 +60,20 @@ public class Siren {
     /**
      * customerConfirm() displays a confirmation alert if the user is trying to schedule an appointment
      * */
-    public static boolean customerConfirm() {
+    public static boolean addCustomerConfirm() {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Customer Confirmation");
         confirm.setHeaderText("Customer Confirmation");
         confirm.setContentText("Are you sure you want to add this customer?");
+        confirm.showAndWait();
+        return confirm.getResult().getText().equals("OK");
+    }
+
+    public static boolean modifyCustomerConfirm() {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Customer Confirmation");
+        confirm.setHeaderText("Customer Confirmation");
+        confirm.setContentText("Are you sure you want to modify this customer?");
         confirm.showAndWait();
         return confirm.getResult().getText().equals("OK");
     }

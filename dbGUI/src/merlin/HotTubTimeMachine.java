@@ -3,10 +3,12 @@ package merlin;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 
 import dataAccess.AppointmentAccess;
 import javafx.scene.control.Alert;
 import models.Appointments;
+
 
 /**
  * HotTubTimeMachine is a utility class that provides methods for getting hours and minutes, and manipulating dates and times.
@@ -34,6 +36,19 @@ public class HotTubTimeMachine {
      */
     public static LocalDateTime convertFromUTC(LocalDateTime dateTime) {
         return dateTime.atZone(UTC).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime(); // Convert from UTC
+    }
+
+    /**
+     * timeTransmutation() returns a formatted LocalTime[] of the start and end times
+     * @param startTime the start time of the appointment
+     * @param endTime the end time of the appointment
+     * @return LocalTime[] the start and end times
+     * */
+    public static LocalTime[] timeTransmutation(String startTime, String endTime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mm a"); // create a DateTimeFormatter object
+        LocalTime localStartTime = LocalTime.parse(startTime, formatter); // parse the start time
+        LocalTime localEndTime = LocalTime.parse(endTime, formatter); // parse the end time
+        return new LocalTime[] {localStartTime, localEndTime};
     }
 
     /**

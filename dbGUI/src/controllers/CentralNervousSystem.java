@@ -165,11 +165,11 @@ public class CentralNervousSystem implements Initializable {
                 int contactID = ContactAccess.findContactID(contactName); // find contact ID
 
                 LocalDate localDate = datePicker.getValue(); // get the date from the date picker
-                String localStartHour = startHourBox.getValue(); // get the start hour from the combo box
-                String localEndHour = endHourBox.getValue(); // get the end hour from the combo box
+                String localStartTime = startHourBox.getValue(); // get the start hour from the combo box
+                String localEndTime = endHourBox.getValue(); // get the end hour from the combo box
 
                 // input data validation
-                String[] strings = {newTitle, newLocation, newType, newDescriptionText, localStartHour, localEndHour}; // array of strings
+                String[] strings = {newTitle, newLocation, newType, newDescriptionText, localStartTime, localEndTime}; // array of strings
                 int[] numbers = {newAppointmentID, userID, customerID, contactID}; // array of numbers
                 LocalDate[] dates = {localDate}; // array of dates
 
@@ -179,11 +179,11 @@ public class CentralNervousSystem implements Initializable {
                     return;
                 }
 
-                // time manipulation
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mm a"); // create a DateTimeFormatter object
-                LocalTime localStartTime = LocalTime.parse(localStartHour, formatter); // parse the start time
-                LocalTime localEndTime = LocalTime.parse(localEndHour, formatter); // parse the end time
-                Timestamp[] timeStamps = HotTubTimeMachine.interdimensionalUTCWarpDrive(localDate, localStartTime, localEndTime); // use the HotTubTimeMachine to get the timestamps in UTC for storage
+                LocalTime[] localTimes = HotTubTimeMachine.timeTransmutation(localStartTime, localEndTime); // use the HotTubTimeMachine to format the times
+                LocalTime transmutedStartTime = localTimes[0]; // get the start time
+                LocalTime transmutedEndTime = localTimes[1]; // get the end time
+
+                Timestamp[] timeStamps = HotTubTimeMachine.interdimensionalUTCWarpDrive(localDate, transmutedStartTime, transmutedEndTime); // use the HotTubTimeMachine to get the timestamps in UTC for storage
                 Timestamp dbStartTime = timeStamps[0]; // get the start time
                 Timestamp dbEndTime = timeStamps[1]; // get the end time
 
@@ -207,8 +207,8 @@ public class CentralNervousSystem implements Initializable {
                             userID,
                             contactID); // insertIntoAppointment method
                     Siren.successAlert(); // successAlert method
+                    updateAppointments(); // update the appointments table
                 }
-                clearSelectedAppointment(); // clear the selected appointment
             }
 
         }
@@ -286,8 +286,8 @@ public class CentralNervousSystem implements Initializable {
                                                             contactID); // update the appointment
                     Siren.successAlert(); // successAlert method
                     clearSelectedAppointment(); // clear the text fields
+                    updateAppointments(); // update the appointments table
                 }
-                clearSelectedAppointment(); // clear the text fields
             }
         }
         catch (Exception e) {
@@ -393,7 +393,7 @@ public class CentralNervousSystem implements Initializable {
         try (Connection connection = JDBC.openConnection())
         {
             // if the user clicks OK
-            if (Siren.customerConfirm()) {
+            if (Siren.addCustomerConfirm()) {
                 int customerID = NumberGenie.magicCustomer(); // get customer id
                 String id = String.valueOf(customerID); // convert customer id to string
                 String customerName = customerNameField.getText(); // get customer name
@@ -421,10 +421,9 @@ public class CentralNervousSystem implements Initializable {
                                                                 phone,
                                                                 divisionID); // insert customer into database
                     Siren.successAlert(); // display success alert
+                    clearSelectedCustomer(); // clear selected customer
+                    updateCustomersMenu(); // update customers menu to show new customer
                 }
-
-                clearSelectedCustomer(); // clear selected customer
-                updateCustomersMenu(); // update customers menu to show new customer
             }
         }
         catch (Exception e) {
@@ -449,7 +448,7 @@ public class CentralNervousSystem implements Initializable {
         try (Connection connection = JDBC.openConnection())
         {
             // if the user clicks OK
-            if (Siren.customerConfirm()) {
+            if (Siren.modifyCustomerConfirm()) {
                 int customerID = selectedCustomer.getCustomerID(); // get customer id
                 String customerName = customerNameField.getText(); // get customer name
                 String address = addressField.getText(); // get customer address
@@ -476,11 +475,10 @@ public class CentralNervousSystem implements Initializable {
                             phone,
                             divisionID); // insert customer into database
                     Siren.successAlert(); // display success alert
+                    clearSelectedCustomer(); // clear selected customer
+                    updateCustomers(); // update customers tableview
+                    updateCustomersMenu(); // update customers menu
                 }
-
-                clearSelectedCustomer(); // clear selected customer
-                updateCustomers(); // update customers tableview
-                updateCustomersMenu(); // update customers menu
             }
         }
         catch (Exception e) {
@@ -511,7 +509,7 @@ public class CentralNervousSystem implements Initializable {
                 clearSelectedCustomer(); // clear selected customer
                 updateCustomersMenu(); // update customers menu in add appointment to prevent null pointer exception
                 Siren.successAlert(); // display success alert
-            } else {
+            } else if (!AppointmentAccess.noAppointments(selectedCustomer.getCustomerID())) {
                 Siren.hasAppointments(); // display error message
             }
         }
