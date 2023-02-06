@@ -113,29 +113,6 @@ public class GateKeeper {
     }
 
     /**
-     * invalidCredentials() displays an error message if the credentials are invalid.
-     * @param currentLocale the current locale
-     * */
-    public static void accessDenied(String currentLocale) {
-        if (currentLocale.equals("fr")) {
-            ResourceBundle languageBundles = ResourceBundle.getBundle("bundles/fr_lang", Locale.FRANCE); // gets the login resource bundle
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle(languageBundles.getString("errorTitle.text"));
-            alert.setHeaderText(languageBundles.getString("errorHeader.text"));
-            alert.setContentText(languageBundles.getString("errorText.text"));
-            alert.showAndWait();
-        }
-        else if (currentLocale.equals("en")) {
-            ResourceBundle languageBundles = ResourceBundle.getBundle("bundles/en_lang", Locale.US); // gets the login resource bundle
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle(languageBundles.getString("errorTitle.text"));
-            alert.setHeaderText(languageBundles.getString("errorHeader.text"));
-            alert.setContentText(languageBundles.getString("errorContent.text"));
-            alert.showAndWait();
-        }
-    }
-
-    /**
      * verifyTraveler() returns true if the credentials are verified.
      * @param username the username
      * @param user_id the user_id

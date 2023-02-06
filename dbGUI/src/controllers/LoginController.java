@@ -12,6 +12,7 @@ package controllers;
 
 import dataAccess.QueryChronicles;
 import exceptions.GateKeeper;
+import exceptions.Siren;
 import helper.JDBC;
 import javafx.fxml.FXML;
 
@@ -118,7 +119,7 @@ public class LoginController implements Initializable {
                 stage.show(); // shows the stage
             } else {
                 String currentLocale = Locale.getDefault().getLanguage(); // gets the current locale
-                GateKeeper.accessDenied(currentLocale); // alert user of invalid credentials
+                Siren.accessDenied(currentLocale); // alert user of invalid credentials
             }
         }
         catch (Exception e) {
