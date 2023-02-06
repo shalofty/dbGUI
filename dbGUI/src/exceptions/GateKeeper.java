@@ -6,6 +6,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.ResourceBundle;
@@ -185,7 +187,7 @@ public class GateKeeper {
      * */
     public static boolean stringCheck(String... field) throws Exception {
         return Stream.of(field)
-                .anyMatch(f -> !f.isEmpty()); // returns true if any fields are empty
+                .anyMatch(s-> s==null || s.isEmpty()); // returns true if any fields are empty
     }
 
     /**
@@ -199,27 +201,27 @@ public class GateKeeper {
     }
 
     /**
-     * fieldCheck() returns true if any of the fields are empty.
-     * @param field TextField... field variable length argument, makes the method more flexible
-     * @return boolean true if any of the fields are empty, false otherwise
+     * dateCheck() returns true if any of the dates are null.
+     * @param dates LocalDate... dates variable length argument, makes the method more flexible
+     * @return boolean true if any of the dates are null, false otherwise
      * */
-    public static boolean fieldCheck(TextField... field) throws Exception {
-        return Stream.of(field)
-                .anyMatch(f -> f.getText().isEmpty()); // returns true if any fields are empty
+    public static boolean dateCheck(LocalDate... dates) throws Exception {
+        return Stream.of(dates)
+                .anyMatch(Objects::isNull);
     }
 
     /**
      * dataCheck() returns true if any of the fields are empty.
      * @param strings String[] strings array of strings
 *      @param ints int[] ints array of ints
-     * @param fields TextField[] fields array of text fields
+     * @param dates LocalDate[] dates array of dates
      * @return boolean true if any of the fields are empty, false otherwise
      * */
-    public static boolean dataCheck(String[] strings, int[] ints, TextField[] fields) throws Exception {
-        boolean stringResult = stringCheck(strings);
-        boolean numberResult = numberCheck(ints);
-        boolean textResult = fieldCheck(fields);
-        return stringResult || numberResult || textResult;
+    public static boolean dataCheck(String[] strings, int[] ints, LocalDate[] dates) throws Exception {
+        boolean stringResult = stringCheck(strings); // Check if any of the strings are empty
+        boolean numberResult = numberCheck(ints); // Check if any of the ints are null
+        boolean dateResult = dateCheck(dates); // Check if any of the dates are null
+        return stringResult || numberResult || dateResult; // Return true if any of the results are true
     }
 
 }

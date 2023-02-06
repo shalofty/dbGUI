@@ -1,8 +1,8 @@
 package controllers;
 
 import dataAccess.*;
-import exceptions.Confundo;
-import javafx.beans.property.SimpleObjectProperty;
+import exceptions.GateKeeper;
+import exceptions.Siren;
 import numericNexus.NumberGenie;
 import helper.JDBC;
 import theAgency.AgentFord;
@@ -219,38 +219,49 @@ public class CentralNervousSystem implements Initializable {
             int contactID = ContactAccess.findContactID(contactName); // find contact ID
 
             LocalDate localDate = datePicker.getValue(); // get the date from the date picker
-
             String localStartHour = startHourBox.getValue(); // get the start hour from the combo box
-            System.out.println("localStartHour: " + localStartHour);
             String localEndHour = endHourBox.getValue(); // get the end hour from the combo box
-            System.out.println("localEndHour: " + localEndHour);
 
+            // input data validation
+            String[] strings = {newTitle, newLocation, newType, newDescriptionText, localStartHour, localEndHour}; // array of strings
+            int[] numbers = {newAppointmentID, userID, customerID, contactID}; // array of numbers
+            LocalDate[] dates = {localDate}; // array of dates
+            boolean dataCheck = GateKeeper.dataCheck(strings, numbers, dates); // dataCheck method
+
+            if (dataCheck) {
+                Siren.emptyAlert(); // checkFields method
+                return;
+            }
+
+            // time manipulation
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mm a"); // create a DateTimeFormatter object
-
             LocalTime localStartTime = LocalTime.parse(localStartHour, formatter); // parse the start time
-            System.out.println("localStartTime: " + localStartTime);
             LocalTime localEndTime = LocalTime.parse(localEndHour, formatter); // parse the end time
-            System.out.println("localEndTime: " + localEndTime);
-
-            Timestamp[] timeStamps = HotTubTimeMachine.interdimensionalWarpDrive(localDate, localStartTime, localEndTime); // use the HotTubTimeMachine to get the timestamps in UTC for storage
+            Timestamp[] timeStamps = HotTubTimeMachine.interdimensionalUTCWarpDrive(localDate, localStartTime, localEndTime); // use the HotTubTimeMachine to get the timestamps in UTC for storage
             Timestamp dbStartTime = timeStamps[0]; // get the start time
-            System.out.println("dbStartTime: " + dbStartTime);
             Timestamp dbEndTime = timeStamps[1]; // get the end time
-            System.out.println("dbEndTime: " + dbEndTime);
 
-            // adding the new appointment to the database
-            QueryChronicles.INSERT_INTO_APPOINTMENTS_METHOD(connection,
-                                                        newAppointmentID,
-                                                        newTitle,
-                                                        newDescriptionText,
-                                                        newLocation,
-                                                        newType,
-                                                        dbStartTime,
-                                                        dbEndTime,
-                                                        customerID,
-                                                        userID,
-                                                        contactID); // insertIntoAppointment method
-            successAlert(); // successAlert method
+            // use timestamp to see if appointments overlap with any other appointments
+            boolean overLap = QueryChronicles.CHECK_APPOINTMENT_OVERLAP_METHOD(connection, dbStartTime, dbEndTime); // checkAppointmentOverlap method
+            if (overLap) {
+                Siren.overlapAlert(); // overlapAlert method
+                return;
+            }
+            else {
+                // adding the new appointment to the database
+                QueryChronicles.INSERT_INTO_APPOINTMENTS_METHOD(connection,
+                                                                newAppointmentID,
+                                                                newTitle,
+                                                                newDescriptionText,
+                                                                newLocation,
+                                                                newType,
+                                                                dbStartTime,
+                                                                dbEndTime,
+                                                                customerID,
+                                                                userID,
+                                                                contactID); // insertIntoAppointment method
+                successAlert(); // successAlert method
+            }
             connection.close(); // close the connection
             clearSelectedAppointment(); // clear the selected appointment
         }
@@ -301,7 +312,7 @@ public class CentralNervousSystem implements Initializable {
                 LocalTime localEndTime = LocalTime.parse(localEndHour, formatter); // parse the end time
 
                 // convert back to UTC from local time for storage in db
-                Timestamp[] timeStamps = HotTubTimeMachine.interdimensionalWarpDrive(localDate, localStartTime, localEndTime); // use the HotTubTimeMachine to get the timestamps in UTC for storage
+                Timestamp[] timeStamps = HotTubTimeMachine.interdimensionalUTCWarpDrive(localDate, localStartTime, localEndTime); // use the HotTubTimeMachine to get the timestamps in UTC for storage
                 Timestamp dbStartTime = timeStamps[0]; // get the start time in UTC
                 Timestamp dbEndTime = timeStamps[1]; // get the end time in UTC
 
@@ -743,7 +754,6 @@ public class CentralNervousSystem implements Initializable {
                     ZonedDateTime estZonedTime = ZonedDateTime.of(LocalDate.now(), estTime, estZone); // create a zoned date time object for est
                     // ZoneId localZone = ZoneId.of("Asia/Shanghai"); // get the local zone for Shanghai for testing
                     ZoneId localZone = ZoneId.systemDefault(); // create a zone id object for the local time zone, comment this out for testing other zones
-                    System.out.println("Local Zone" + localZone);
                     ZonedDateTime localZonedTime = estZonedTime.withZoneSameInstant(localZone); // create a zoned date time object for the local time zone
                     startHourBox.getItems().add(localZonedTime.format(DateTimeFormatter.ofPattern("h:mm a"))); // add the time to the start hour combo box
                     endHourBox.getItems().add(localZonedTime.format(DateTimeFormatter.ofPattern("h:mm a"))); // add the time to the end hour combo box
@@ -757,7 +767,6 @@ public class CentralNervousSystem implements Initializable {
                 LocalDateTime start = appointment.getStartTime(); // get the start time
                 // ZoneId localZone = ZoneId.of("Asia/Shanghai"); // get the local zone for Shanghai for testing
                 ZoneId localZone = ZoneId.systemDefault(); // get the local zone, comment this out for testing other zones
-                System.out.println("Local Zone" + localZone);
                 ZonedDateTime localStart = start.atZone(ZoneId.of("UTC")).withZoneSameInstant(localZone); // convert the start time to the local zone from UTC
                 return new SimpleStringProperty(localStart.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT))); // return the start time
             });
@@ -770,7 +779,6 @@ public class CentralNervousSystem implements Initializable {
                 LocalDateTime end = appointment.getEndTime(); // get the end time
                 // ZoneId localZone = ZoneId.of("Asia/Shanghai"); // get the local zone for Shanghai
                 ZoneId localZone = ZoneId.systemDefault(); // get the local zone, comment this out for testing other zones
-                System.out.println("Local Zone" + localZone);
                 ZonedDateTime localStart = end.atZone(ZoneId.of("UTC")).withZoneSameInstant(localZone); // convert the end time to the local zone from UTC
                 return new SimpleStringProperty(localStart.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT))); // return the end time
             });

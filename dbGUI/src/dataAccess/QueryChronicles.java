@@ -89,6 +89,7 @@ public class QueryChronicles {
             "User_ID = ?, " +
             "Contact_ID = ? " +
             "WHERE Appointment_ID = ?"; // update appointment
+    public static final String CHECK_APPOINTMENT_OVERLAP_STATEMENT = "SELECT * FROM appointments WHERE start BETWEEN ? AND ? OR end BETWEEN ? AND ?"; // check for appointment overlap
     /// Contacts Statements
     public static final String SELECT_ALL_CONTACTS_STATEMENT =
             "SELECT * from contacts"; // select all contacts
@@ -374,6 +375,27 @@ public class QueryChronicles {
         }
         catch (Exception e) {
             e.printStackTrace(); // print the stack trace
+        }
+    }
+
+    // using dbstartime and dbendtime timestamps to check for overlapping appointments
+    public static boolean CHECK_APPOINTMENT_OVERLAP_METHOD(Connection connection,
+                                                           Timestamp startTime,
+                                                           Timestamp endTime)
+    {
+        try {
+            JDBC.setPreparedStatement(connection, QueryChronicles.CHECK_APPOINTMENT_OVERLAP_STATEMENT); // set the prepared statement
+            PreparedStatement statement = JDBC.getPreparedStatement(); // get the prepared statement
+            statement.setTimestamp(1, startTime); // set the start time
+            statement.setTimestamp(2, endTime); // set the end time
+            statement.setTimestamp(3, startTime); // set the start time
+            statement.setTimestamp(4, endTime); // set the end time
+            ResultSet resultSet = statement.executeQuery(); // execute the query
+            return resultSet.next(); // return true if there is an overlap
+        }
+        catch (Exception e) {
+            e.printStackTrace(); // print the stack trace
+            return false;
         }
     }
 }
