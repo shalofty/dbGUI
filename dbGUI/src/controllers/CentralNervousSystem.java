@@ -221,17 +221,22 @@ public class CentralNervousSystem implements Initializable {
             LocalDate localDate = datePicker.getValue(); // get the date from the date picker
 
             String localStartHour = startHourBox.getValue(); // get the start hour from the combo box
+            System.out.println("localStartHour: " + localStartHour);
             String localEndHour = endHourBox.getValue(); // get the end hour from the combo box
+            System.out.println("localEndHour: " + localEndHour);
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mm a"); // create a DateTimeFormatter object
 
             LocalTime localStartTime = LocalTime.parse(localStartHour, formatter); // parse the start time
+            System.out.println("localStartTime: " + localStartTime);
             LocalTime localEndTime = LocalTime.parse(localEndHour, formatter); // parse the end time
+            System.out.println("localEndTime: " + localEndTime);
 
             Timestamp[] timeStamps = HotTubTimeMachine.interdimensionalWarpDrive(localDate, localStartTime, localEndTime); // use the HotTubTimeMachine to get the timestamps in UTC for storage
             Timestamp dbStartTime = timeStamps[0]; // get the start time
             System.out.println("dbStartTime: " + dbStartTime);
             Timestamp dbEndTime = timeStamps[1]; // get the end time
+            System.out.println("dbEndTime: " + dbEndTime);
 
             // adding the new appointment to the database
             QueryChronicles.INSERT_INTO_APPOINTMENTS_METHOD(connection,
@@ -286,6 +291,7 @@ public class CentralNervousSystem implements Initializable {
 
                 LocalDate localDate = datePicker.getValue(); // get the date from the date picker
 
+                // local start and end times were converted from UTC in the selectedAppointment method
                 String localStartHour = startHourBox.getValue(); // get the start hour from the combo box
                 String localEndHour = endHourBox.getValue(); // get the end hour from the combo box
 
@@ -294,10 +300,10 @@ public class CentralNervousSystem implements Initializable {
                 LocalTime localStartTime = LocalTime.parse(localStartHour, formatter); // parse the start time
                 LocalTime localEndTime = LocalTime.parse(localEndHour, formatter); // parse the end time
 
+                // convert back to UTC from local time for storage in db
                 Timestamp[] timeStamps = HotTubTimeMachine.interdimensionalWarpDrive(localDate, localStartTime, localEndTime); // use the HotTubTimeMachine to get the timestamps in UTC for storage
-                Timestamp dbStartTime = timeStamps[0]; // get the start time
-                System.out.println("dbStartTime: " + dbStartTime);
-                Timestamp dbEndTime = timeStamps[1]; // get the end time
+                Timestamp dbStartTime = timeStamps[0]; // get the start time in UTC
+                Timestamp dbEndTime = timeStamps[1]; // get the end time in UTC
 
                 // data verification and validation, for use later
                 String[] strings = {title, location, type, descriptionText}; // array of strings
@@ -721,8 +727,7 @@ public class CentralNervousSystem implements Initializable {
             customersMenu.setItems(CustomerAccess.getAllCustomerNameStrings()); // Sets the customer combo box
             customersMenu.setValue("Customers"); // Sets the customer combo box
 
-            // set the default time zone to Shanghai for fun during testing
-            // TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai")); // <--- uncomment this line to test the time zone
+            // set the default time zone to Shanghai for fun during testing, can be found in the code below
             // More values which can be used to test time zones
             // "US/Mountain" for Arizona, "US/Eastern" for New York, "Europe/London" for London, "Canada/Eastern" for Montreal
             // "Asia/Shanghai" for Shanghai, "Australia/Sydney" for Sydney, "Africa/Johannesburg" for Johannesburg just to check
@@ -736,12 +741,40 @@ public class CentralNervousSystem implements Initializable {
                     LocalTime estTime = LocalTime.of(hour, minute); // create a local time object
                     ZoneId estZone = ZoneId.of("America/New_York"); // create a zone id object for est
                     ZonedDateTime estZonedTime = ZonedDateTime.of(LocalDate.now(), estTime, estZone); // create a zoned date time object for est
-                    ZoneId localZone = ZoneId.systemDefault(); // create a zone id object for the local time zone
+                    // ZoneId localZone = ZoneId.of("Asia/Shanghai"); // get the local zone for Shanghai for testing
+                    ZoneId localZone = ZoneId.systemDefault(); // create a zone id object for the local time zone, comment this out for testing other zones
+                    System.out.println("Local Zone" + localZone);
                     ZonedDateTime localZonedTime = estZonedTime.withZoneSameInstant(localZone); // create a zoned date time object for the local time zone
                     startHourBox.getItems().add(localZonedTime.format(DateTimeFormatter.ofPattern("h:mm a"))); // add the time to the start hour combo box
                     endHourBox.getItems().add(localZonedTime.format(DateTimeFormatter.ofPattern("h:mm a"))); // add the time to the end hour combo box
                 }
             });
+
+            // lambda expression to set the cell value factory for the start time column
+            TableColumn<Appointments, String> startColumn = new TableColumn<>("Start (Local)"); // create a new table column for the start time
+            startColumn.setCellValueFactory(cellData -> { // set the cell value factory for the start time column
+                Appointments appointment = cellData.getValue(); // get the value of the cell
+                LocalDateTime start = appointment.getStartTime(); // get the start time
+                // ZoneId localZone = ZoneId.of("Asia/Shanghai"); // get the local zone for Shanghai for testing
+                ZoneId localZone = ZoneId.systemDefault(); // get the local zone, comment this out for testing other zones
+                System.out.println("Local Zone" + localZone);
+                ZonedDateTime localStart = start.atZone(ZoneId.of("UTC")).withZoneSameInstant(localZone); // convert the start time to the local zone from UTC
+                return new SimpleStringProperty(localStart.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT))); // return the start time
+            });
+            viewAppointments.getColumns().add(6, startColumn); // add the start time column to the table
+
+            // lambda expression to set the cell value factory for the end time column
+            TableColumn<Appointments, String> endColumn = new TableColumn<>("End (Local)"); // create a new table column for the end time
+            endColumn.setCellValueFactory(cellData -> { // set the cell value factory for the end time column
+                Appointments appointment = cellData.getValue(); // get the value of the cell
+                LocalDateTime end = appointment.getEndTime(); // get the end time
+                // ZoneId localZone = ZoneId.of("Asia/Shanghai"); // get the local zone for Shanghai
+                ZoneId localZone = ZoneId.systemDefault(); // get the local zone, comment this out for testing other zones
+                System.out.println("Local Zone" + localZone);
+                ZonedDateTime localStart = end.atZone(ZoneId.of("UTC")).withZoneSameInstant(localZone); // convert the end time to the local zone from UTC
+                return new SimpleStringProperty(localStart.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT))); // return the end time
+            });
+            viewAppointments.getColumns().add(7, endColumn); // add the end time column to the table
 
             // observable list of all appointments
             ObservableList<Appointments> appointmentsList = FXCollections.observableArrayList(AppointmentAccess.allAppointments());
@@ -762,28 +795,6 @@ public class CentralNervousSystem implements Initializable {
                 return new SimpleStringProperty(contactName); // return the contact name
             });
             viewAppointments.getColumns().add(3, contactColumn); // add the contact column to the table
-
-            // lambda expression to set the cell value factory for the start time column
-            TableColumn<Appointments, String> startColumn = new TableColumn<>("Start (Local)"); // create a new table column for the start time
-            startColumn.setCellValueFactory(cellData -> { // set the cell value factory for the start time column
-                Appointments appointment = cellData.getValue(); // get the value of the cell
-                LocalDateTime start = appointment.getStartTime(); // get the start time
-                ZoneId localZone = ZoneId.systemDefault(); // get the local zone
-                ZonedDateTime localStart = start.atZone(ZoneId.of("UTC")).withZoneSameInstant(localZone); // convert the start time to the local zone
-                return new SimpleStringProperty(localStart.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT))); // return the start time
-            });
-            viewAppointments.getColumns().add(6, startColumn); // add the start time column to the table
-
-            // lambda expression to set the cell value factory for the end time column
-            TableColumn<Appointments, String> endColumn = new TableColumn<>("End (Local)"); // create a new table column for the end time
-            endColumn.setCellValueFactory(cellData -> { // set the cell value factory for the end time column
-                Appointments appointment = cellData.getValue(); // get the value of the cell
-                LocalDateTime end = appointment.getEndTime(); // get the end time
-                ZoneId localZone = ZoneId.systemDefault(); // get the local zone
-                ZonedDateTime localStart = end.atZone(ZoneId.of("UTC")).withZoneSameInstant(localZone); // convert the end time to the local zone
-                return new SimpleStringProperty(localStart.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT))); // return the end time
-            });
-            viewAppointments.getColumns().add(7, endColumn); // add the end time column to the table
 
             // set up the Appointment columns in the table, must match the names of the variables in the model
             appIDColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentID")); // set the cell value factory for the appointment ID column
