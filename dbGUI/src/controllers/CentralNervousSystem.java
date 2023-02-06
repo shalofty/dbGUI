@@ -70,6 +70,15 @@ public class CentralNervousSystem implements Initializable {
     // Appointments Tab Methods ////////////////////////////////////////////////////////////////////////////////////////
 
     /**
+     * sortAppointmentsByWeek sorts the appointments by week
+     * */
+    @FXML public void sortAppointmentsByMonth() throws SQLException {
+        appointmentsList = AppointmentAccess.allAppointments(); // Gets all appointments
+        appointmentsList.sort((o1, o2) -> o1.getAppointmentDate().compareTo(o2.getAppointmentDate())); // Sorts the appointments by date
+        viewAppointments.setItems(appointmentsList); // Sets the appointments table to the sorted list
+    }
+
+    /**
      * selectAppointment selects an appointment from the tableview and populates the text fields
      * */
     @FXML public void selectAppointment() {
@@ -526,6 +535,25 @@ public class CentralNervousSystem implements Initializable {
     }
 
     /**
+     * findAppointments finds appointments within 15 minutes of the current time
+     * if an appointment is found, an alert is displayed
+     * Called in the initialize method
+     * */
+    public void findAppointments() throws SQLException {
+        ObservableList<Appointments> appointments = AppointmentAccess.allAppointments(); // get appointments
+        for (Appointments appointment : appointments) {
+            LocalDateTime now = LocalDateTime.now(); // get current, local time
+            LocalDateTime appointmentTimeUTC = appointment.getStartTime(); // get appointment time
+            LocalDateTime localDT = HotTubTimeMachine.convertFromUTC(appointmentTimeUTC); // convert appointment time to local time
+            Duration duration = Duration.between(now, localDT); // get duration between now and appointment time
+            long minutes = duration.toMinutes(); // convert duration to minutes
+            if (minutes <= 15 && minutes >= 0) { // if the appointment is within 15 minutes
+                Siren.fifteenMinuteAlert(appointment); // display appointment alert
+            }
+        }
+    }
+
+    /**
      * updateCustomersMenu updates the customers divisions menu in the add appointment screen
      * NOTE: I've noticed a sort of buginess with this feature, sometimes a double click is necessary. I'm not sure why this is happening.
      * */
@@ -660,6 +688,7 @@ public class CentralNervousSystem implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         try {
             // TODO
+            findAppointments(); // Find Appointments with fifteen minutes of the current time
             AgentFord.frontDoorSurveillance(infraredGoggles); // Front Door Surveillance, tracks logins
             InetAddress ip = InetAddress.getLocalHost(); // get the local host
             String username = LoginController.getUsername(); // get the username

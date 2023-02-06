@@ -9,7 +9,6 @@ import dataAccess.AppointmentAccess;
 import javafx.scene.control.Alert;
 import models.Appointments;
 
-
 /**
  * HotTubTimeMachine is a utility class that provides methods for getting hours and minutes, and manipulating dates and times.
  * @method getHours() returns an ObservableList of Strings representing the hours of the day.

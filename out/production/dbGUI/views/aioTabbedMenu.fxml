@@ -95,7 +95,7 @@
                         <Button fx:id="addAppointmentButton" layoutX="175.0" layoutY="632.0" mnemonicParsing="false" onAction="#addAppointment" prefHeight="25.0" prefWidth="85.0" text="Add" />
                         <Button fx:id="modifyAppointmentButton" disable="true" layoutX="272.0" layoutY="632.0" mnemonicParsing="false" onAction="#modifyAppointment" prefHeight="25.0" prefWidth="85.0" text="Modify" />
                         <Button fx:id="deleteAppointmentButton" disable="true" layoutX="369.0" layoutY="632.0" mnemonicParsing="false" onAction="#deleteAppointment" prefHeight="25.0" prefWidth="85.0" text="Delete" />
-                        <RadioButton fx:id="radioMonth" layoutX="813.0" layoutY="356.0" mnemonicParsing="false" text="This Month" />
+                        <RadioButton fx:id="radioMonth" layoutX="813.0" layoutY="356.0" mnemonicParsing="false" onAction="#sortAppointmentsByMonth" text="This Month" />
                         <RadioButton fx:id="radioWeek" layoutX="731.0" layoutY="356.0" mnemonicParsing="false" text="This Week" />
                         <Button fx:id="clearSelectionButton" layoutX="14.0" layoutY="352.0" mnemonicParsing="false" onAction="#clearSelectedAppointment" prefHeight="25.0" prefWidth="152.0" text="Clear Selection" />
                         <Label layoutX="179.0" layoutY="356.0" prefHeight="17.0" prefWidth="77.0" text="Logged in as:" />

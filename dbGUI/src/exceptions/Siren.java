@@ -1,8 +1,11 @@
 package exceptions;
 
 import javafx.scene.control.Alert;
+import models.Appointments;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -130,5 +133,22 @@ public class Siren {
             alert.setContentText(languageBundles.getString("errorContent.text"));
             alert.showAndWait();
         }
+    }
+
+    // fifteenminAlert() displays an alert if the user has an appointment within 15 minutes
+    public static void fifteenMinuteAlert(Appointments appointment) throws SQLException {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Appointment Alert");
+        alert.setHeaderText("Appointment Alert");
+        String appointmentID = String.valueOf(appointment.getAppointmentID()); // convert appointmentID to string
+        String appointmentDate = String.valueOf(appointment.getAppointmentDate()); // convert appointmentDate to string
+        LocalDateTime appointmentTimeRaw = appointment.getStartTime(); // get appointment time
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm a"); // format appointment time
+        String appointmentTime = appointmentTimeRaw.format(formatter); // convert appointmentTime to string
+        alert.setContentText("You have an appointment within 15 minutes." +
+                            "\nAppointment ID: " + appointmentID +
+                            "\nAppointment Date: " + appointmentDate +
+                            "\nAppointment Time: " + appointmentTime);
+        alert.showAndWait();
     }
 }
