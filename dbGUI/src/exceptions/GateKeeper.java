@@ -156,7 +156,7 @@ public class GateKeeper {
     }
 
     /**
-     * aspiciansCampos() returns true if all fields are not empty.
+     * stringCheck() returns true if all fields are not empty.
      * @param field String... field variable length argument, makes the method more flexible
      * @return boolean true if all fields are not empty, false otherwise
      * */
@@ -199,6 +199,11 @@ public class GateKeeper {
         return stringResult || numberResult || dateResult; // Return true if any of the results are true
     }
 
+    /**
+     * customerDataCheck() returns true if any of the fields are empty.
+     * @param strings String[] strings array of strings
+     * @param ints int[] ints array of ints
+     * */
     public static boolean customerDataCheck(String[] strings, int[] ints) throws Exception {
         boolean stringResult = stringCheck(strings); // Check if any of the strings are empty
         boolean numberResult = numberCheck(ints); // Check if any of the ints are null

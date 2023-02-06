@@ -40,11 +40,11 @@ public class Siren {
     /**
      * emptyAlert() displays an alert if the user is trying to schedule an appointment without filling out all fields
      * */
-    public static void emptyAlert() throws SQLException {
+    public static void emptyAlert(String string) throws SQLException {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Appointment Alert");
         alert.setHeaderText("Appointment Alert");
-        alert.setContentText("Please fill out all fields, and make sure all data in the fields is correct.");
+        alert.setContentText("The following field is empty or invalid: " + string);
         alert.showAndWait();
     }
 
@@ -135,8 +135,11 @@ public class Siren {
         }
     }
 
-    // fifteenminAlert() displays an alert if the user has an appointment within 15 minutes
-    public static void fifteenMinuteAlert(Appointments appointment) throws SQLException {
+    /**
+     * fifteenMinuteAlert() displays an alert if the user has an appointment within 15 minutes
+     * @param appointment the appointment to be displayed
+     * */
+    public static void fifteenMinuteAlert(Appointments appointment) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Appointment Alert");
         alert.setHeaderText("Appointment Alert");
