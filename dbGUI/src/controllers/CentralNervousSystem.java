@@ -195,8 +195,7 @@ public class CentralNervousSystem implements Initializable {
      * the logic for handling the time zone conversion is in the HotTubTimeMachine class and the initialize method in the MainController class
      * */
     @FXML public void addAppointment() throws Exception {
-        try {
-            connection = JDBC.openConnection(); // establish connection, passing into insertIntoAppointment()
+        try (Connection connection = JDBC.openConnection()) {
             Alert confirm = new Alert(Alert.AlertType.CONFIRMATION); // confirmation alert
             confirm.setTitle("Confirmation"); // set title
             confirm.setHeaderText("You are about to add an appointment."); // set header text
@@ -262,7 +261,6 @@ public class CentralNervousSystem implements Initializable {
                                                                 contactID); // insertIntoAppointment method
                 successAlert(); // successAlert method
             }
-            connection.close(); // close the connection
             clearSelectedAppointment(); // clear the selected appointment
         }
         catch (Exception e) {
@@ -301,38 +299,49 @@ public class CentralNervousSystem implements Initializable {
                 int contactID = ContactAccess.findContactID(contactName); // getting the contact ID
 
                 LocalDate localDate = datePicker.getValue(); // get the date from the date picker
-
-                // local start and end times were converted from UTC in the selectedAppointment method
                 String localStartHour = startHourBox.getValue(); // get the start hour from the combo box
                 String localEndHour = endHourBox.getValue(); // get the end hour from the combo box
 
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mm a"); // create a DateTimeFormatter object
+                // input data validation
+                String[] strings = {title, location, type, descriptionText, localStartHour, localEndHour}; // array of strings
+                int[] numbers = {appointmentID, userID, customerID, contactID}; // array of numbers
+                LocalDate[] dates = {localDate}; // array of dates
+                boolean dataCheck = GateKeeper.dataCheck(strings, numbers, dates); // dataCheck method
 
+                if (dataCheck) {
+                    Siren.emptyAlert(); // checkFields method
+                    return;
+                }
+
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mm a"); // create a DateTimeFormatter object
                 LocalTime localStartTime = LocalTime.parse(localStartHour, formatter); // parse the start time
                 LocalTime localEndTime = LocalTime.parse(localEndHour, formatter); // parse the end time
-
-                // convert back to UTC from local time for storage in db
                 Timestamp[] timeStamps = HotTubTimeMachine.interdimensionalUTCWarpDrive(localDate, localStartTime, localEndTime); // use the HotTubTimeMachine to get the timestamps in UTC for storage
                 Timestamp dbStartTime = timeStamps[0]; // get the start time in UTC
                 Timestamp dbEndTime = timeStamps[1]; // get the end time in UTC
 
-                // data verification and validation, for use later
-                String[] strings = {title, location, type, descriptionText}; // array of strings
-                int[] numbers = {customerID, userID, contactID}; // array of numbers
-                TextField[] fields = {titleField, locationField, typeField}; // array of text fields
-
-                QueryChronicles.UPDATE_APPOINTMENT_METHOD(connection,
-                                                    appointmentID,
-                                                    title,
-                                                    descriptionText,
-                                                    location,
-                                                    type,
-                                                    dbStartTime,
-                                                    dbEndTime,
-                                                    customerID,
-                                                    userID,
-                                                    contactID); // update the appointment
-                successAlert(); // successAlert method
+                // use timestamp to see if appointments overlap with any other appointments
+                boolean overLap = QueryChronicles.CHECK_APPOINTMENT_OVERLAP_METHOD(connection, dbStartTime, dbEndTime); // checkAppointmentOverlap method
+                if (overLap) {
+                    Siren.overlapAlert(); // overlapAlert method
+                    return;
+                }
+                else {
+                    // adding the new appointment to the database
+                    QueryChronicles.UPDATE_APPOINTMENT_METHOD(connection,
+                                                            appointmentID,
+                                                            title,
+                                                            descriptionText,
+                                                            location,
+                                                            type,
+                                                            dbStartTime,
+                                                            dbEndTime,
+                                                            customerID,
+                                                            userID,
+                                                            contactID); // update the appointment
+                    successAlert(); // successAlert method
+                    clearSelectedAppointment(); // clear the text fields
+                }
                 clearSelectedAppointment(); // clear the text fields
             }
         }
