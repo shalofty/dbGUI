@@ -190,6 +190,9 @@ public class CentralNervousSystem implements Initializable {
 
     /**
      * addAppointment adds a new appointment to the database
+     * the startHourBox and endHourBox combo boxes are populated with times relative to the user's time zone, but only between the EST hours of business
+     * this prevents the user from scheduling appointments outside of business hours
+     * the logic for handling the time zone conversion is in the HotTubTimeMachine class and the initialize method in the MainController class
      * */
     @FXML public void addAppointment() throws Exception {
         try {
@@ -295,7 +298,6 @@ public class CentralNervousSystem implements Initializable {
                 Timestamp dbStartTime = timeStamps[0]; // get the start time
                 System.out.println("dbStartTime: " + dbStartTime);
                 Timestamp dbEndTime = timeStamps[1]; // get the end time
-
 
                 // data verification and validation, for use later
                 String[] strings = {title, location, type, descriptionText}; // array of strings
@@ -699,6 +701,10 @@ public class CentralNervousSystem implements Initializable {
      * @param resourceBundle is the resource bundle
      * uses a lambda expression to set the cell value factory for the contact column considering constraints of the entity relationships
      * also incorporates streams to filter countries and first level divisions
+     * this method also handles populating the time boxes with the appropriate time zones
+     * I designed the code to handle the time boxes so that they would only populate the boxes with local times that are related to business hours
+     * Being designed this way prevents the user from scheduling appointments outside of business hours
+     * You can find code to test for different time zones, which were mentioned in the project outline, in the comments below
      * */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -715,9 +721,11 @@ public class CentralNervousSystem implements Initializable {
             customersMenu.setItems(CustomerAccess.getAllCustomerNameStrings()); // Sets the customer combo box
             customersMenu.setValue("Customers"); // Sets the customer combo box
 
-            TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai")); // set the default time zone to Shanghai for fun during testing
-            // US/Mountain for Arizona, US/Eastern for New York, Europe/London for London, Canada/Eastern for Montreal
-            // Asia/Shanghai for Shanghai, Australia/Sydney for Sydney, Africa/Johannesburg for Johannesburg just to check
+            // set the default time zone to Shanghai for fun during testing
+            // TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai")); // <--- uncomment this line to test the time zone
+            // More values which can be used to test time zones
+            // "US/Mountain" for Arizona, "US/Eastern" for New York, "Europe/London" for London, "Canada/Eastern" for Montreal
+            // "Asia/Shanghai" for Shanghai, "Australia/Sydney" for Sydney, "Africa/Johannesburg" for Johannesburg just to check
 
             // set the start and end hour combo boxes, only adding hours between 8am and 10pm which are business hours
             IntStream.rangeClosed(8, 22).forEach(hour -> { // start at 8 and end at 22
@@ -733,12 +741,6 @@ public class CentralNervousSystem implements Initializable {
                     startHourBox.getItems().add(localZonedTime.format(DateTimeFormatter.ofPattern("h:mm a"))); // add the time to the start hour combo box
                     endHourBox.getItems().add(localZonedTime.format(DateTimeFormatter.ofPattern("h:mm a"))); // add the time to the end hour combo box
                 }
-            });
-
-            // lambda expression to populate minute boxes
-            IntStream.rangeClosed(0, 59).forEach(minute -> {
-                startMinBox.getItems().add(String.valueOf(minute)); // add the minutes to the start minute combo box
-                endMinBox.getItems().add(String.valueOf(minute)); // add the minutes to the end minute combo box
             });
 
             // observable list of all appointments
