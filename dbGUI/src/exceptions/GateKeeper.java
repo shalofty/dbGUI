@@ -2,12 +2,10 @@ package exceptions;
 import dataAccess.QueryChronicles;
 import helper.JDBC;
 import javafx.scene.control.Alert;
-import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 
 import java.sql.*;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.ResourceBundle;
@@ -217,12 +215,17 @@ public class GateKeeper {
      * @param dates LocalDate[] dates array of dates
      * @return boolean true if any of the fields are empty, false otherwise
      * */
-    public static boolean dataCheck(String[] strings, int[] ints, LocalDate[] dates) throws Exception {
+    public static boolean appointmentDataCheck(String[] strings, int[] ints, LocalDate[] dates) throws Exception {
         boolean stringResult = stringCheck(strings); // Check if any of the strings are empty
         boolean numberResult = numberCheck(ints); // Check if any of the ints are null
         boolean dateResult = dateCheck(dates); // Check if any of the dates are null
         return stringResult || numberResult || dateResult; // Return true if any of the results are true
     }
 
+    public static boolean customerDataCheck(String[] strings, int[] ints) throws Exception {
+        boolean stringResult = stringCheck(strings); // Check if any of the strings are empty
+        boolean numberResult = numberCheck(ints); // Check if any of the ints are null
+        return stringResult || numberResult; // Return true if any of the results are true
+    }
 }
 

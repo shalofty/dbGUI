@@ -225,9 +225,9 @@ public class CentralNervousSystem implements Initializable {
             String[] strings = {newTitle, newLocation, newType, newDescriptionText, localStartHour, localEndHour}; // array of strings
             int[] numbers = {newAppointmentID, userID, customerID, contactID}; // array of numbers
             LocalDate[] dates = {localDate}; // array of dates
-            boolean dataCheck = GateKeeper.dataCheck(strings, numbers, dates); // dataCheck method
 
-            if (dataCheck) {
+            // check if any of the fields are empty
+            if (GateKeeper.appointmentDataCheck(strings, numbers, dates)) {
                 Siren.emptyAlert(); // checkFields method
                 return;
             }
@@ -306,9 +306,9 @@ public class CentralNervousSystem implements Initializable {
                 String[] strings = {title, location, type, descriptionText, localStartHour, localEndHour}; // array of strings
                 int[] numbers = {appointmentID, userID, customerID, contactID}; // array of numbers
                 LocalDate[] dates = {localDate}; // array of dates
-                boolean dataCheck = GateKeeper.dataCheck(strings, numbers, dates); // dataCheck method
 
-                if (dataCheck) {
+                // check if any of the fields are empty
+                if (GateKeeper.appointmentDataCheck(strings, numbers, dates)) {
                     Siren.emptyAlert(); // checkFields method
                     return;
                 }
@@ -472,13 +472,24 @@ public class CentralNervousSystem implements Initializable {
                 String division = divisionMenu.getValue(); // get customer division
                 int divisionID = DivisionAccess.getDivisionID(division); // get division ID
 
-                QueryChronicles.INSERT_INTO_CUSTOMERS_METHOD(connection,
-                                                        customerID,
-                                                        customerName,
-                                                        address,
-                                                        postalCode,
-                                                        phone,
-                                                        divisionID);
+                String[] strings = {id, customerName, address, postalCode, phone, division, country}; // create string array
+                int[] ints = {divisionID, customerID}; // create int array
+
+                // check if any fields are empty
+                if (GateKeeper.customerDataCheck(strings, ints)) {
+                    Siren.emptyAlert(); // display empty alert
+                    return;
+                }
+                else {
+                    QueryChronicles.INSERT_INTO_CUSTOMERS_METHOD(connection,
+                                                                customerID,
+                                                                customerName,
+                                                                address,
+                                                                postalCode,
+                                                                phone,
+                                                                divisionID); // insert customer into database
+                    successAlert(); // display success alert
+                }
 
                 clearSelectedCustomer(); // clear selected customer
                 updateCustomersMenu(); // update customers menu to show new customer
@@ -522,13 +533,24 @@ public class CentralNervousSystem implements Initializable {
                 String division = divisionMenu.getValue(); // get customer division
                 int divisionID = DivisionAccess.getDivisionID(division); // get division ID
 
-                QueryChronicles.UPDATE_CUSTOMER_METHOD(connection,
-                                                    customerID,
-                                                    customerName,
-                                                    address,
-                                                    postalCode,
-                                                    phone,
-                                                    divisionID); // update customers
+                String[] strings = {customerName, address, postalCode, phone, division, country}; // create string array
+                int[] ints = {customerID, divisionID, customerID}; // create int array
+
+                // check if any fields are empty
+                if (GateKeeper.customerDataCheck(strings, ints)) {
+                    Siren.emptyAlert(); // display empty alert
+                    return;
+                }
+                else {
+                    QueryChronicles.INSERT_INTO_CUSTOMERS_METHOD(connection,
+                            customerID,
+                            customerName,
+                            address,
+                            postalCode,
+                            phone,
+                            divisionID); // insert customer into database
+                    successAlert(); // display success alert
+                }
 
                 clearSelectedCustomer(); // clear selected customer
                 updateCustomers(); // update customers tableview
