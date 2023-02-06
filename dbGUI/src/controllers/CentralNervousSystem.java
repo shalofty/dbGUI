@@ -281,20 +281,20 @@ public class CentralNervousSystem implements Initializable {
                 String contactName = contactsMenu.getValue(); // getting the contact name
                 int contactID = ContactAccess.findContactID(contactName); // getting the contact ID
 
-                LocalDate localDate = datePicker.getValue(); // get date
-                LocalTime localStartTime = LocalTime.of(Integer.parseInt(startHourBox.getValue()), Integer.parseInt(startMinBox.getValue())); // get start time
-                LocalTime localEndTime = LocalTime.of(Integer.parseInt(endHourBox.getValue()), Integer.parseInt(endMinBox.getValue())); // get end time
+                LocalDate localDate = datePicker.getValue(); // get the date from the date picker
 
-                if (!HotTubTimeMachine.withinBusinessHours(localDate, localStartTime, localEndTime)) {
-                    Confundo.businessHours(); // Alert the user that the appointment is not within business hours
-                    return;
-                }
+                String localStartHour = startHourBox.getValue(); // get the start hour from the combo box
+                String localEndHour = endHourBox.getValue(); // get the end hour from the combo box
 
-                LocalDateTime startDT = HotTubTimeMachine.getDateTimeFromPickers(datePicker, startHourBox, endMinBox); // get start date and time
-                LocalDateTime endDT = HotTubTimeMachine.getDateTimeFromPickers(datePicker, endHourBox, endMinBox); // get end date and time
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mm a"); // create a DateTimeFormatter object
 
-                LocalDateTime startUTC = HotTubTimeMachine.convertToUTC(startDT); // convert start date and time to UTC
-                LocalDateTime endUTC = HotTubTimeMachine.convertToUTC(endDT); // convert end date and time to UTC
+                LocalTime localStartTime = LocalTime.parse(localStartHour, formatter); // parse the start time
+                LocalTime localEndTime = LocalTime.parse(localEndHour, formatter); // parse the end time
+
+                Timestamp[] timeStamps = HotTubTimeMachine.interdimensionalWarpDrive(localDate, localStartTime, localEndTime); // use the HotTubTimeMachine to get the timestamps in UTC for storage
+                Timestamp dbStartTime = timeStamps[0]; // get the start time
+                System.out.println("dbStartTime: " + dbStartTime);
+                Timestamp dbEndTime = timeStamps[1]; // get the end time
 
 
                 // data verification and validation, for use later
@@ -308,11 +308,12 @@ public class CentralNervousSystem implements Initializable {
                                                     descriptionText,
                                                     location,
                                                     type,
-                                                    startUTC,
-                                                    endUTC,
+                                                    dbStartTime,
+                                                    dbEndTime,
                                                     customerID,
                                                     userID,
                                                     contactID); // update the appointment
+                successAlert(); // successAlert method
                 clearSelectedAppointment(); // clear the text fields
             }
         }

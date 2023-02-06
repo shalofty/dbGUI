@@ -249,8 +249,8 @@ public class QueryChronicles {
                                                  String description,
                                                  String location,
                                                  String type,
-                                                 LocalDateTime start,
-                                                 LocalDateTime end,
+                                                 Timestamp start,
+                                                 Timestamp end,
                                                  int customerID,
                                                  int userID,
                                                  int contactID) throws Exception {
@@ -263,8 +263,8 @@ public class QueryChronicles {
             statement.setString(2, description); // description
             statement.setString(3, location); // location
             statement.setString(4, type); // type
-            statement.setTimestamp(5, Timestamp.valueOf(start)); // start
-            statement.setTimestamp(6, Timestamp.valueOf(end)); // end
+            statement.setTimestamp(5, start); // start
+            statement.setTimestamp(6, end); // end
             statement.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now())); // last update
             statement.setString(8, LoginController.getUsername()); // last updated by
             statement.setInt(9, customerID); // customer ID
