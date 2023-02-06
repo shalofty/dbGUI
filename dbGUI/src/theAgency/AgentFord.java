@@ -105,7 +105,7 @@ public class AgentFord {
      * @param textArea the text area to append the logins to
      * */
     @FXML public static void frontDoorSurveillance(TextArea textArea) {
-        try (BufferedReader eyeSpy = new BufferedReader(new FileReader("ActivityLog/loginActivity.txt")))
+        try (BufferedReader eyeSpy = new BufferedReader(new FileReader("ActivityLog/loginActivity.txt"))) // create a buffered reader
         {
             StringBuilder agentZero = new StringBuilder(); // create a string builder
             String spyLine = eyeSpy.readLine(); // read the first line

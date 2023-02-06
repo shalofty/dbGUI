@@ -2,6 +2,7 @@ package controllers;
 
 import dataAccess.*;
 import exceptions.Confundo;
+import javafx.beans.property.SimpleObjectProperty;
 import numericNexus.NumberGenie;
 import helper.JDBC;
 import theAgency.AgentFord;
@@ -17,11 +18,10 @@ import merlin.HotTubTimeMachine;
 
 import java.net.InetAddress;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -36,7 +36,7 @@ public class CentralNervousSystem implements Initializable {
 
     // Appointments Variables ///////////////////////////////////////////////////////////////////////////////////////////
     @FXML public Label userCreds;
-    @FXML public TextField appIDField, userIDField, locationField, typeField, titleField;
+    @FXML public TextField appIDField, userIDField, locationField, typeField, titleField, startHourField, startMinField, endHourField, endMinField;
     @FXML public DatePicker datePicker;
     @FXML public ComboBox<String> contactsMenu = new ComboBox<>(); // Contacts Menu
     @FXML public ComboBox<String> customersMenu = new ComboBox<>(); // Customers Menu
@@ -46,7 +46,7 @@ public class CentralNervousSystem implements Initializable {
     @FXML public ComboBox<String> startMinBox = new ComboBox<>(); // Start Minute Menu
     @FXML public ComboBox<String> endMinBox = new ComboBox<>(); // End Minute Menu
     @FXML public TextArea descriptionTextArea; // Description Text Area
-    @FXML public RadioButton radioWeek, radioMonth; // Radio Buttons
+    @FXML public RadioButton radioWeek, radioMonth, amRadio, pmRadio; // Radio Buttons
     @FXML public TableColumn<?, ?> appIDColumn, titleColumn, descriptionColumn, locationColumn, typeColumn, customerIDAppointmentsColumn, userIDColumn, contactColumn, startColumn, endColumn;
     @FXML public Button addAppointmentButton, modifyAppointmentButton, deleteAppointmentButton, clearSelectionButton;
     @FXML public TableView<Appointments> viewAppointments; // Appointments Table
@@ -136,10 +136,23 @@ public class CentralNervousSystem implements Initializable {
                 typeField.setText(String.valueOf(selectedAppointment.getAppointmentType())); // Sets the appointment type text field
                 descriptionTextArea.setText(String.valueOf(selectedAppointment.getAppointmentDescription())); // Sets the appointment description text field
                 datePicker.setValue(selectedAppointment.getAppointmentDate()); // Sets the date picker
-                startHourBox.setValue(String.valueOf(selectedAppointment.getStartTime().getHour())); // Sets the start hour combo box
-                endHourBox.setValue(String.valueOf(selectedAppointment.getEndTime().getHour())); // Sets the end hour combo box
-                startMinBox.setValue(String.valueOf(selectedAppointment.getStartTime().getMinute())); // Sets the start minute combo box
-                endMinBox.setValue(String.valueOf(selectedAppointment.getEndTime().getMinute())); // Sets the end minute combo box
+
+                ZoneId zoneID = ZoneId.systemDefault(); // Gets the system default zone ID
+                ZonedDateTime zonedStartTIme = selectedAppointment.getStartTime().atZone(ZoneId.of("UTC")); // Converts the start time to a ZonedDateTime
+                ZonedDateTime localStartTime = zonedStartTIme.withZoneSameInstant(zoneID); // Converts the ZonedDateTime to the local time zone
+                ZonedDateTime zonedEndTIme = selectedAppointment.getEndTime().atZone(ZoneId.of("UTC")); // Converts the end time to a ZonedDateTime
+                ZonedDateTime localEndTime = zonedEndTIme.withZoneSameInstant(zoneID); // Converts the ZonedDateTime to the local time zone
+
+                String localStartHour = String.valueOf(localStartTime.getHour()); // Gets the start hour of the appointment
+                String localStartMin = String.valueOf(localStartTime.getMinute()); // Gets the start minute of the appointment
+                String localEndHour = String.valueOf(localEndTime.getHour()); // Gets the end hour of the appointment
+                String localEndMin = String.valueOf(localEndTime.getMinute()); // Gets the end minute of the appointment
+
+                startHourBox.setValue(localStartHour); // Sets the start hour combo box
+                startMinBox.setValue(localStartMin); // Sets the start minute combo box
+                endHourBox.setValue(localEndHour); // Sets the end hour combo box
+                endMinBox.setValue(localEndMin); // Sets the end minute combo box
+
                 addAppointmentButton.setDisable(true); // Disables the add appointment button
                 modifyAppointmentButton.setDisable(false); // Enables the modify appointment button
                 deleteAppointmentButton.setDisable(false); // Enables the delete appointment button
@@ -204,29 +217,23 @@ public class CentralNervousSystem implements Initializable {
             String contactName = contactsMenu.getValue(); // get contact name from the contacts menu box
             int contactID = ContactAccess.findContactID(contactName); // find contact ID
 
-            LocalDate localDate = datePicker.getValue(); // get date
-            LocalTime localStartTime = LocalTime.of(Integer.parseInt(startHourBox.getValue()), Integer.parseInt(startMinBox.getValue())); // get start time
-            LocalTime localEndTime = LocalTime.of(Integer.parseInt(endHourBox.getValue()), Integer.parseInt(endMinBox.getValue())); // get end time
-            System.out.println(localDate + " " + localStartTime + " " + localEndTime);
+            LocalDate localDate = datePicker.getValue(); // get the date from the date picker
 
-            if (!HotTubTimeMachine.isWithinBusinessHours(localDate, localStartTime, localEndTime)) {
-                Confundo.businessHours(); // Alert the user that the appointment is not within business hours
-            }
+            // get the start and end times from the combo boxes
+            LocalTime startTime = LocalTime.of(
+                    Integer.parseInt(startHourBox.getValue().split(":")[0]), // split the string at the colon and get the first element
+                    Integer.parseInt(startMinBox.getValue()) // get the second element
+            );
 
-            LocalDateTime startDT = HotTubTimeMachine.getDateTimeFromPickers(datePicker, startHourBox, endMinBox); // get start date and time
-            LocalDateTime endDT = HotTubTimeMachine.getDateTimeFromPickers(datePicker, endHourBox, endMinBox); // get end date and time
-            System.out.println(startDT + " " + endDT);
+            LocalTime endTime = LocalTime.of(
+                    Integer.parseInt(endHourBox.getValue().split(":")[0]), // split the string at the colon and get the first element
+                    Integer.parseInt(endMinBox.getValue()) // get the second element
+            );
 
-            LocalDateTime startUTC = HotTubTimeMachine.convertToUTC(startDT); // convert start date and time to UTC
-            LocalDateTime endUTC = HotTubTimeMachine.convertToUTC(endDT); // convert end date and time to UTC
-            System.out.println(startUTC + " " + endUTC);
+            Timestamp[] timeStamps = HotTubTimeMachine.interdimensionalWarpDrive(localDate, startTime, endTime); // use the HotTubTimeMachine to get the timestamps
+            Timestamp dbStartTime = timeStamps[0]; // get the start time
+            Timestamp dbEndTime = timeStamps[1]; // get the end time
 
-            // convert startUTC and endUTC to strings
-            String startUTCString = startUTC.toString().replace("T", " "); // replace T with a space
-            String endUTCString = endUTC.toString().replace("T", " "); // replace T with a space
-            System.out.println(startUTCString + " " + endUTCString);
-
-            System.out.println("contact id: " + contactID);
             // adding the new appointment to the database
             QueryChronicles.INSERT_INTO_APPOINTMENTS_METHOD(connection,
                                                         newAppointmentID,
@@ -234,8 +241,8 @@ public class CentralNervousSystem implements Initializable {
                                                         newDescriptionText,
                                                         newLocation,
                                                         newType,
-                                                        startUTCString,
-                                                        endUTCString,
+                                                        dbStartTime,
+                                                        dbEndTime,
                                                         customerID,
                                                         userID,
                                                         contactID); // insertIntoAppointment method
@@ -282,7 +289,7 @@ public class CentralNervousSystem implements Initializable {
                 LocalTime localStartTime = LocalTime.of(Integer.parseInt(startHourBox.getValue()), Integer.parseInt(startMinBox.getValue())); // get start time
                 LocalTime localEndTime = LocalTime.of(Integer.parseInt(endHourBox.getValue()), Integer.parseInt(endMinBox.getValue())); // get end time
 
-                if (!HotTubTimeMachine.isWithinBusinessHours(localDate, localStartTime, localEndTime)) {
+                if (!HotTubTimeMachine.withinBusinessHours(localDate, localStartTime, localEndTime)) {
                     Confundo.businessHours(); // Alert the user that the appointment is not within business hours
                 }
 
@@ -596,40 +603,6 @@ public class CentralNervousSystem implements Initializable {
     }
 
     /**
-     * fifteenMinuteAlert checks if there is an appointment within fifteen minutes of the current local time
-     * if there is an appointment within fifteen minutes, an alert is displayed
-     * */
-    @FXML public void fifteenMinuteAlert() {
-        try {
-            connection = JDBC.openConnection(); // establish connection
-            JDBC.setPreparedStatement(connection, QueryChronicles.GET_ALL_APPOINTMENTS_STATEMENT); // set the prepared statement
-            PreparedStatement statement = JDBC.getPreparedStatement(); // get the prepared statement
-            ResultSet resultSet = statement.executeQuery(); // execute the query
-            // loop through the result set
-            while (resultSet.next()) {
-                // if the appointment is within fifteen minutes of the current local time
-                if (resultSet.getTimestamp("Start").toLocalDateTime().isBefore(LocalDateTime.now().plusMinutes(15)) &&
-                        resultSet.getTimestamp("Start").toLocalDateTime().isAfter(LocalDateTime.now())) {
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Appointment Alert");
-                    alert.setHeaderText("Appointment within 15 minutes");
-                    alert.setContentText("You have an appointment within 15 minutes.");
-                    alert.showAndWait();
-                }
-            }
-        }
-        catch (Exception e) {
-            AgentFord.apprehendException(e, theCrimeScene); // if an exception is thrown, display the exception in the crime scene text area
-        }
-        finally {
-            if (connection != null) {
-                connection = JDBC.closeConnection(); // close the connection
-            }
-            AgentFord.gatherIntel(caseFile); // Gather Intel
-        }
-    }
-
-    /**
      * reportBack gathers intel, reports back to HQ when espionageButton is triggered
      * @method deBriefing exports the intel to a text file
      * @method apprehendException displays the exception in the crime scene text area
@@ -734,7 +707,6 @@ public class CentralNervousSystem implements Initializable {
         try {
             // TODO
             AgentFord.frontDoorSurveillance(infraredGoggles); // Front Door Surveillance, tracks logins
-            fifteenMinuteAlert(); // fifteen minute alert
             InetAddress ip = InetAddress.getLocalHost(); // get the local host
             String username = LoginController.getUsername(); // get the username
             userCreds.setText(username + " from " + ip); // set the user credentials label to the username
@@ -745,10 +717,32 @@ public class CentralNervousSystem implements Initializable {
             customersMenu.setItems(CustomerAccess.getAllCustomerNameStrings()); // Sets the customer combo box
             customersMenu.setValue("Customers"); // Sets the customer combo box
 
-            // lambda expression to populate hour boxes
-            IntStream.rangeClosed(8, 22).forEach(hour -> {
-                startHourBox.getItems().add(String.valueOf(hour)); // add the hours to the start hour combo box
-                endHourBox.getItems().add(String.valueOf(hour)); // add the hours to the end hour combo box
+//            // lambda expression to populate hour boxes
+//            IntStream.rangeClosed(8, 22).forEach(hour -> {
+//                startHourBox.getItems().add(String.valueOf(hour)); // add the hours to the start hour combo box
+//                endHourBox.getItems().add(String.valueOf(hour)); // add the hours to the end hour combo box
+//            });
+
+//            // lambda expression to populate hour boxes
+//            IntStream.rangeClosed(8, 22).forEach(hour -> { // add the hours to the start hour combo box
+//                String hourString = String.valueOf(hour % 12 == 0 ? 12 : hour % 12); // if the hour is 0, set it to 12, otherwise set it to the hour mod 12
+//                String amPm = hour < 12 ? "AM" : "PM"; // if the hour is less than 12, set it to AM, otherwise set it to PM
+//                startHourBox.getItems().add(hourString + " " + amPm); // add the hours to the start hour combo box
+//                endHourBox.getItems().add(hourString + " " + amPm); // add the hours to the end hour combo box
+//            });
+
+//            IntStream.rangeClosed(8, 22).forEach(hour -> { // add the hours to the start hour combo box
+//                String hourString = String.valueOf(hour % 12 == 0 ? 12 : hour % 12); // if the hour is 0, set it to 12, otherwise set it to the hour mod 12
+//                String amPm = hour < 12 ? "AM" : "PM"; // if the hour is less than 12, set it to AM, otherwise set it to PM
+//                startHourBox.getItems().add(hourString + " " + amPm); // add the hours to the start hour combo box
+//                endHourBox.getItems().add(hourString + " " + amPm); // add the hours to the end hour combo box
+//            });
+
+
+            IntStream.rangeClosed(8, 22).forEach(hour -> { // loop through the hours from 8 to 22
+                LocalTime localTime = LocalTime.of(hour, 0); // create a new LocalTime object for the current hour
+                startHourBox.getItems().add(String.valueOf(localTime)); // add the LocalTime object to the combo box
+                endHourBox.getItems().add(String.valueOf(localTime)); // add the LocalTime object to the combo box
             });
 
             // lambda expression to populate minute boxes
@@ -777,6 +771,28 @@ public class CentralNervousSystem implements Initializable {
             });
             viewAppointments.getColumns().add(3, contactColumn); // add the contact column to the table
 
+            // lambda expression to set the cell value factory for the start time column
+            TableColumn<Appointments, String> startColumn = new TableColumn<>("Start (Local)"); // create a new table column for the start time
+            startColumn.setCellValueFactory(cellData -> { // set the cell value factory for the start time column
+                Appointments appointment = cellData.getValue(); // get the value of the cell
+                LocalDateTime start = appointment.getStartTime(); // get the start time
+                ZoneId localZone = ZoneId.systemDefault(); // get the local zone
+                ZonedDateTime localStart = start.atZone(ZoneId.of("UTC")).withZoneSameInstant(localZone); // convert the start time to the local zone
+                return new SimpleStringProperty(localStart.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT))); // return the start time
+            });
+            viewAppointments.getColumns().add(6, startColumn); // add the start time column to the table
+
+            // lambda expression to set the cell value factory for the end time column
+            TableColumn<Appointments, String> endColumn = new TableColumn<>("End (Local)"); // create a new table column for the end time
+            endColumn.setCellValueFactory(cellData -> { // set the cell value factory for the end time column
+                Appointments appointment = cellData.getValue(); // get the value of the cell
+                LocalDateTime end = appointment.getEndTime(); // get the end time
+                ZoneId localZone = ZoneId.systemDefault(); // get the local zone
+                ZonedDateTime localStart = end.atZone(ZoneId.of("UTC")).withZoneSameInstant(localZone); // convert the end time to the local zone
+                return new SimpleStringProperty(localStart.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT))); // return the end time
+            });
+            viewAppointments.getColumns().add(7, endColumn); // add the end time column to the table
+
             // set up the Appointment columns in the table, must match the names of the variables in the model
             appIDColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentID")); // set the cell value factory for the appointment ID column
             titleColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentTitle")); // set the cell value factory for the appointment title column
@@ -785,8 +801,6 @@ public class CentralNervousSystem implements Initializable {
             typeColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentType")); // set the cell value factory for the appointment type column
             customerIDAppointmentsColumn.setCellValueFactory(new PropertyValueFactory<>("customerID")); // set the cell value factory for the appointment customer ID column
             userIDColumn.setCellValueFactory(new PropertyValueFactory<>("userID")); // set the cell value factory for the appointment user ID column
-            startColumn.setCellValueFactory(new PropertyValueFactory<>("startTime")); // set the cell value factory for the appointment start time column
-            endColumn.setCellValueFactory(new PropertyValueFactory<>("endTime")); // set the cell value factory for the appointment end time column
 
             // set up the Customer columns in the table, must match the names of the variables in the model
             customerIDRecordsColumn.setCellValueFactory(new PropertyValueFactory<>("customerID")); // set the cell value factory for the customer ID column
@@ -808,9 +822,9 @@ public class CentralNervousSystem implements Initializable {
 
             viewAppointments.setItems(appointmentsList); // set the items in the table to the appointments list made above
             viewCustomers.setItems(customersList); // set the items in the table to the customers list
-            connection.close(); // close the connection
         }
         catch (Exception e) {
+            e.printStackTrace();
             AgentFord.apprehendException(e, theCrimeScene); // if an exception is thrown, display the exception in the crime scene text area
         }
         finally {

@@ -1,16 +1,18 @@
 package merlin;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import dataAccess.AppointmentAccess;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
+import models.Appointments;
 
 /**
  * HotTubTimeMachine is a utility class that provides methods for getting hours and minutes, and manipulating dates and times.
@@ -58,7 +60,7 @@ public class HotTubTimeMachine {
     /**
      * isWithinBusinessHours() returns true if the appointment is within business hours.
      */
-    public static boolean isWithinBusinessHours(LocalDate startDate, LocalTime startTime, LocalTime endTime) {
+    public static boolean withinBusinessHours(LocalDate startDate, LocalTime startTime, LocalTime endTime) {
         final int START_HOUR = 8; // 8am
         final int END_HOUR = 22; // 10pm
         try {
@@ -101,4 +103,64 @@ public class HotTubTimeMachine {
         String minute = minutePicker.getValue(); // Get the minute from the ComboBox
         return LocalDateTime.of(date, LocalTime.of(Integer.parseInt(hour), Integer.parseInt(minute))); // Return the LocalDateTime
     }
+
+    /**
+     * isOverlappingAppointment() returns true if the appointment overlaps with another appointment.
+     * @param start start time of the appointment
+     * @param end end time of the appointment
+     * @return boolean true if the appointment overlaps with another appointment
+     * */
+    public static boolean isOverlappingAppointment(LocalDateTime start, LocalDateTime end) throws SQLException {
+        // Loop through all appointments
+        for (Appointments appointment : AppointmentAccess.allAppointments()) {
+            // Check if the appointment overlaps with another appointment
+            if (appointment.getStartTime().isBefore(end) && appointment.getEndTime().isAfter(start)) {
+                return true; // Return true if the appointment overlaps with another appointment
+            }
+        }
+        return false; // Return false if the appointment does not overlap with another appointment
+    }
+
+    public static boolean checkForAppointments() throws SQLException {
+        try {
+            // Loop through all appointments
+            for (Appointments appointment : AppointmentAccess.allAppointments()) {
+                LocalDateTime startTime = HotTubTimeMachine.convertFromUTC(appointment.getStartTime()); // Convert to Eastern Standard Time
+                LocalDate appointmentDate = appointment.getAppointmentDate(); // Get the appointment date
+                System.out.println(startTime);
+                // Check if the appointment is within 15 minutes
+                if (appointmentDate.equals(LocalDate.now()) && startTime.isBefore(LocalDateTime.now().plusMinutes(15)) && startTime.isAfter(LocalDateTime.now())) {
+                    return true; // Return true if the appointment is within 15 minutes
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false; // Return false if no appointments are within 15 minutes
+    }
+
+    public static void appointmentsAlert() throws SQLException {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Appointment Alert");
+        alert.setHeaderText("Appointment Alert");
+        alert.setContentText("You have an appointment within 15 minutes.");
+        alert.showAndWait();
+    }
+
+    public static Timestamp[] interdimensionalWarpDrive(LocalDate localDate, LocalTime startTime, LocalTime endTime) {
+        LocalDateTime localStartDateTime = LocalDateTime.of(localDate, startTime);
+        LocalDateTime localEndDateTime = LocalDateTime.of(localDate, endTime);
+
+        ZonedDateTime localStartZDT = localStartDateTime.atZone(ZoneId.systemDefault());
+        ZonedDateTime localEndZDT = localEndDateTime.atZone(ZoneId.systemDefault());
+
+        ZonedDateTime utcStartZDT = localStartZDT.withZoneSameInstant(ZoneId.of("UTC"));
+        ZonedDateTime utcEndZDT = localEndZDT.withZoneSameInstant(ZoneId.of("UTC"));
+
+        Timestamp dbStartTime = Timestamp.valueOf(utcStartZDT.toLocalDateTime());
+        Timestamp dbEndTime = Timestamp.valueOf(utcEndZDT.toLocalDateTime());
+
+        return new Timestamp[]{dbStartTime, dbEndTime};
+    }
+
 }

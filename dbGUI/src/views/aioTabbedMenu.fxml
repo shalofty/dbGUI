@@ -17,25 +17,23 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="757.0" prefWidth="908.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.CentralNervousSystem">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="757.0" prefWidth="947.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.CentralNervousSystem">
    <children>
-      <TabPane prefHeight="757.0" prefWidth="908.0" tabClosingPolicy="UNAVAILABLE">
+      <TabPane prefHeight="757.0" prefWidth="948.0" tabClosingPolicy="UNAVAILABLE">
         <tabs>
           <Tab fx:id="appointmentsTab" text="Appointments">
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="728.0" prefWidth="943.0">
                      <children>
-                        <TableView fx:id="viewAppointments" layoutX="14.0" layoutY="18.0" onMouseClicked="#selectAppointment" prefHeight="326.0" prefWidth="879.0">
+                        <TableView fx:id="viewAppointments" layoutX="14.0" layoutY="18.0" onMouseClicked="#selectAppointment" prefHeight="326.0" prefWidth="919.0">
                            <columns>
                               <TableColumn fx:id="appIDColumn" prefWidth="46.0" text="ID" />
                               <TableColumn fx:id="titleColumn" prefWidth="79.0" text="Title" />
-                              <TableColumn fx:id="descriptionColumn" prefWidth="136.0" text="Description" />
-                              <TableColumn fx:id="typeColumn" prefWidth="90.0" text="Type" />
-                              <TableColumn fx:id="locationColumn" prefWidth="97.0" text="Location" />
-                              <TableColumn fx:id="startColumn" prefWidth="91.0" text="Start" />
-                              <TableColumn fx:id="endColumn" prefWidth="87.0" text="End" />
-                              <TableColumn fx:id="customerIDAppointmentsColumn" prefWidth="92.0" text="Customer ID" />
-                              <TableColumn fx:id="userIDColumn" prefWidth="75.0" text="User ID" />
+                              <TableColumn fx:id="descriptionColumn" prefWidth="126.0" text="Description" />
+                              <TableColumn fx:id="typeColumn" prefWidth="85.0" text="Type" />
+                              <TableColumn fx:id="locationColumn" prefWidth="112.0" text="Location" />
+                              <TableColumn fx:id="customerIDAppointmentsColumn" prefWidth="83.0" text="Customer ID" />
+                              <TableColumn fx:id="userIDColumn" prefWidth="59.0" text="User ID" />
                            </columns>
                         </TableView>
                         <GridPane layoutX="14.0" layoutY="379.0" prefHeight="343.0" prefWidth="153.0">
