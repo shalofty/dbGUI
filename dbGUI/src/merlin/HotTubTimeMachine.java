@@ -148,19 +148,19 @@ public class HotTubTimeMachine {
     }
 
     public static Timestamp[] interdimensionalWarpDrive(LocalDate localDate, LocalTime startTime, LocalTime endTime) {
-        LocalDateTime localStartDateTime = LocalDateTime.of(localDate, startTime);
-        LocalDateTime localEndDateTime = LocalDateTime.of(localDate, endTime);
+        LocalDateTime localStartDateTime = LocalDateTime.of(localDate, startTime); // Convert to LocalDateTime
+        LocalDateTime localEndDateTime = LocalDateTime.of(localDate, endTime); // Convert to LocalDateTime
 
-        ZonedDateTime localStartZDT = localStartDateTime.atZone(ZoneId.systemDefault());
-        ZonedDateTime localEndZDT = localEndDateTime.atZone(ZoneId.systemDefault());
+        ZonedDateTime localStartZDT = localStartDateTime.atZone(ZoneId.systemDefault()); // Convert to ZonedDateTime
+        ZonedDateTime localEndZDT = localEndDateTime.atZone(ZoneId.systemDefault()); // Convert to ZonedDateTime
 
-        ZonedDateTime utcStartZDT = localStartZDT.withZoneSameInstant(ZoneId.of("UTC"));
-        ZonedDateTime utcEndZDT = localEndZDT.withZoneSameInstant(ZoneId.of("UTC"));
+        ZonedDateTime utcStartZDT = localStartZDT.withZoneSameInstant(ZoneId.of("UTC")); // Convert to UTC
+        ZonedDateTime utcEndZDT = localEndZDT.withZoneSameInstant(ZoneId.of("UTC")); // Convert to UTC
 
-        Timestamp dbStartTime = Timestamp.valueOf(utcStartZDT.toLocalDateTime());
-        Timestamp dbEndTime = Timestamp.valueOf(utcEndZDT.toLocalDateTime());
+        Timestamp dbStartTime = Timestamp.valueOf(utcStartZDT.toLocalDateTime()); // Convert to Timestamp
+        Timestamp dbEndTime = Timestamp.valueOf(utcEndZDT.toLocalDateTime()); // Convert to Timestamp
 
-        return new Timestamp[]{dbStartTime, dbEndTime};
+        return new Timestamp[]{dbStartTime, dbEndTime}; // Return the Timestamps
     }
 
 }

@@ -137,21 +137,19 @@ public class CentralNervousSystem implements Initializable {
                 descriptionTextArea.setText(String.valueOf(selectedAppointment.getAppointmentDescription())); // Sets the appointment description text field
                 datePicker.setValue(selectedAppointment.getAppointmentDate()); // Sets the date picker
 
-                ZoneId zoneID = ZoneId.systemDefault(); // Gets the system default zone ID
-                ZonedDateTime zonedStartTIme = selectedAppointment.getStartTime().atZone(ZoneId.of("UTC")); // Converts the start time to a ZonedDateTime
-                ZonedDateTime localStartTime = zonedStartTIme.withZoneSameInstant(zoneID); // Converts the ZonedDateTime to the local time zone
-                ZonedDateTime zonedEndTIme = selectedAppointment.getEndTime().atZone(ZoneId.of("UTC")); // Converts the end time to a ZonedDateTime
-                ZonedDateTime localEndTime = zonedEndTIme.withZoneSameInstant(zoneID); // Converts the ZonedDateTime to the local time zone
+                LocalDateTime utcStartTime = selectedAppointment.getStartTime(); // Gets the start time of the appointment
+                LocalDateTime utcEndTime = selectedAppointment.getEndTime(); // Gets the end time of the appointment
 
-                String localStartHour = String.valueOf(localStartTime.getHour()); // Gets the start hour of the appointment
-                String localStartMin = String.valueOf(localStartTime.getMinute()); // Gets the start minute of the appointment
-                String localEndHour = String.valueOf(localEndTime.getHour()); // Gets the end hour of the appointment
-                String localEndMin = String.valueOf(localEndTime.getMinute()); // Gets the end minute of the appointment
+                LocalDateTime localStartTime = HotTubTimeMachine.convertFromUTC(utcStartTime); // Converts the start time to local time
+                LocalDateTime localEndTime = HotTubTimeMachine.convertFromUTC(utcEndTime); // Converts the end time to local time
 
-                startHourBox.setValue(localStartHour); // Sets the start hour combo box
-                startMinBox.setValue(localStartMin); // Sets the start minute combo box
-                endHourBox.setValue(localEndHour); // Sets the end hour combo box
-                endMinBox.setValue(localEndMin); // Sets the end minute combo box
+                LocalTime startTime = localStartTime.toLocalTime(); // Gets the start time of the appointment
+                LocalTime endTime = localEndTime.toLocalTime(); // Gets the end time of the appointment
+
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mm a"); // Creates a formatter for the time
+
+                startHourBox.setValue(String.valueOf(startTime.format(formatter))); // Sets the start hour combo box
+                endHourBox.setValue(String.valueOf(endTime.format(formatter))); // Sets the end hour combo box
 
                 addAppointmentButton.setDisable(true); // Disables the add appointment button
                 modifyAppointmentButton.setDisable(false); // Enables the modify appointment button
@@ -219,19 +217,17 @@ public class CentralNervousSystem implements Initializable {
 
             LocalDate localDate = datePicker.getValue(); // get the date from the date picker
 
-            // get the start and end times from the combo boxes
-            LocalTime startTime = LocalTime.of(
-                    Integer.parseInt(startHourBox.getValue().split(":")[0]), // split the string at the colon and get the first element
-                    Integer.parseInt(startMinBox.getValue()) // get the second element
-            );
+            String localStartHour = startHourBox.getValue(); // get the start hour from the combo box
+            String localEndHour = endHourBox.getValue(); // get the end hour from the combo box
 
-            LocalTime endTime = LocalTime.of(
-                    Integer.parseInt(endHourBox.getValue().split(":")[0]), // split the string at the colon and get the first element
-                    Integer.parseInt(endMinBox.getValue()) // get the second element
-            );
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mm a"); // create a DateTimeFormatter object
 
-            Timestamp[] timeStamps = HotTubTimeMachine.interdimensionalWarpDrive(localDate, startTime, endTime); // use the HotTubTimeMachine to get the timestamps
+            LocalTime localStartTime = LocalTime.parse(localStartHour, formatter); // parse the start time
+            LocalTime localEndTime = LocalTime.parse(localEndHour, formatter); // parse the end time
+
+            Timestamp[] timeStamps = HotTubTimeMachine.interdimensionalWarpDrive(localDate, localStartTime, localEndTime); // use the HotTubTimeMachine to get the timestamps in UTC for storage
             Timestamp dbStartTime = timeStamps[0]; // get the start time
+            System.out.println("dbStartTime: " + dbStartTime);
             Timestamp dbEndTime = timeStamps[1]; // get the end time
 
             // adding the new appointment to the database
@@ -291,6 +287,7 @@ public class CentralNervousSystem implements Initializable {
 
                 if (!HotTubTimeMachine.withinBusinessHours(localDate, localStartTime, localEndTime)) {
                     Confundo.businessHours(); // Alert the user that the appointment is not within business hours
+                    return;
                 }
 
                 LocalDateTime startDT = HotTubTimeMachine.getDateTimeFromPickers(datePicker, startHourBox, endMinBox); // get start date and time
@@ -717,32 +714,24 @@ public class CentralNervousSystem implements Initializable {
             customersMenu.setItems(CustomerAccess.getAllCustomerNameStrings()); // Sets the customer combo box
             customersMenu.setValue("Customers"); // Sets the customer combo box
 
-//            // lambda expression to populate hour boxes
-//            IntStream.rangeClosed(8, 22).forEach(hour -> {
-//                startHourBox.getItems().add(String.valueOf(hour)); // add the hours to the start hour combo box
-//                endHourBox.getItems().add(String.valueOf(hour)); // add the hours to the end hour combo box
-//            });
+            TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai")); // set the default time zone to Shanghai for fun during testing
+            // US/Mountain for Arizona, US/Eastern for New York, Europe/London for London, Canada/Eastern for Montreal
+            // Asia/Shanghai for Shanghai, Australia/Sydney for Sydney, Africa/Johannesburg for Johannesburg just to check
 
-//            // lambda expression to populate hour boxes
-//            IntStream.rangeClosed(8, 22).forEach(hour -> { // add the hours to the start hour combo box
-//                String hourString = String.valueOf(hour % 12 == 0 ? 12 : hour % 12); // if the hour is 0, set it to 12, otherwise set it to the hour mod 12
-//                String amPm = hour < 12 ? "AM" : "PM"; // if the hour is less than 12, set it to AM, otherwise set it to PM
-//                startHourBox.getItems().add(hourString + " " + amPm); // add the hours to the start hour combo box
-//                endHourBox.getItems().add(hourString + " " + amPm); // add the hours to the end hour combo box
-//            });
-
-//            IntStream.rangeClosed(8, 22).forEach(hour -> { // add the hours to the start hour combo box
-//                String hourString = String.valueOf(hour % 12 == 0 ? 12 : hour % 12); // if the hour is 0, set it to 12, otherwise set it to the hour mod 12
-//                String amPm = hour < 12 ? "AM" : "PM"; // if the hour is less than 12, set it to AM, otherwise set it to PM
-//                startHourBox.getItems().add(hourString + " " + amPm); // add the hours to the start hour combo box
-//                endHourBox.getItems().add(hourString + " " + amPm); // add the hours to the end hour combo box
-//            });
-
-
-            IntStream.rangeClosed(8, 22).forEach(hour -> { // loop through the hours from 8 to 22
-                LocalTime localTime = LocalTime.of(hour, 0); // create a new LocalTime object for the current hour
-                startHourBox.getItems().add(String.valueOf(localTime)); // add the LocalTime object to the combo box
-                endHourBox.getItems().add(String.valueOf(localTime)); // add the LocalTime object to the combo box
+            // set the start and end hour combo boxes, only adding hours between 8am and 10pm which are business hours
+            IntStream.rangeClosed(8, 22).forEach(hour -> { // start at 8 and end at 22
+                for (int minute = 0; minute < 60; minute += 30) { // increment by 30 minutes
+                    if (hour == 22 && minute == 30) { // if the hour is 22 and the minute is 30, break
+                        return;
+                    }
+                    LocalTime estTime = LocalTime.of(hour, minute); // create a local time object
+                    ZoneId estZone = ZoneId.of("America/New_York"); // create a zone id object for est
+                    ZonedDateTime estZonedTime = ZonedDateTime.of(LocalDate.now(), estTime, estZone); // create a zoned date time object for est
+                    ZoneId localZone = ZoneId.systemDefault(); // create a zone id object for the local time zone
+                    ZonedDateTime localZonedTime = estZonedTime.withZoneSameInstant(localZone); // create a zoned date time object for the local time zone
+                    startHourBox.getItems().add(localZonedTime.format(DateTimeFormatter.ofPattern("h:mm a"))); // add the time to the start hour combo box
+                    endHourBox.getItems().add(localZonedTime.format(DateTimeFormatter.ofPattern("h:mm a"))); // add the time to the end hour combo box
+                }
             });
 
             // lambda expression to populate minute boxes
