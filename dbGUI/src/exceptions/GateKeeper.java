@@ -154,12 +154,23 @@ public class GateKeeper {
     /**
      * addressCheck() returns true if any of the addresses aren't formatted properly
      * @param address String address
+     * The regex formatting in this code is based on the example addresses provided in the project overview
      * */
-    public static boolean incorrectAddress(String address) throws Exception {
+    public static boolean incorrectAddress(String address, String country) throws Exception {
         String addressNumber = "[0-9]+\\s"; // regex for address number
-        String addressName = "([a-zA-Z]+\\s)+"; // regex for address name
-        String addressType = "[a-zA-Z]+"; // regex for address type
-        return !address.matches(addressNumber + addressName + addressType); // returns true if the address does not match
+        String addressName = "[a-zA-Z]+\\s+"; // regex for address name
+        String addressType = "[a-zA-Z]+\\s"; // regex for address type
+        String addressArea = "[a-zA-Z]+,\\s"; // regex for address area. ie Winchester
+        String addressCity = "[a-zA-Z]+"; // regex for address city. ie London
+        switch (country) {
+            case "U.S": // United States
+                return !address.matches(addressNumber + addressName + addressType + addressArea); // returns true if the address does not match
+            case "Canada": // Canada
+                return !address.matches(addressNumber + addressName + addressType + addressArea); // returns true if the address does not match
+            case "United Kingdom": // United Kingdom
+                return !address.matches(addressNumber + addressName + addressType + addressArea + addressCity); // returns true if the address does not match
+        }
+        return false; // returns false if the country is not recognized
     }
 
     /**
@@ -194,7 +205,7 @@ public class GateKeeper {
      * @param strings String... strings variable length argument, makes the method more flexible
      * */
     public static boolean customerInfoCheck(String... strings) throws Exception {
-        if (incorrectAddress(strings[0])) {
+        if (incorrectAddress(strings[0], strings[3])) {
             Siren.incorrectAddressFormat(); // displays an error message if the address is not formatted properly
             return false; // returns false if the address is not formatted properly
         }
