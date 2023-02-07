@@ -56,7 +56,7 @@ public class CentralNervousSystem implements Initializable {
     @FXML public ComboBox<String> endMinBox = new ComboBox<>(); // End Minute Menu
     @FXML public TextArea descriptionTextArea; // Description Text Area
     @FXML public RadioButton radioWeek, radioMonth, amRadio, pmRadio; // Radio Buttons
-    @FXML public TableColumn<Appointments, String> appIDColumn, titleColumn, descriptionColumn, locationColumn, typeColumn, customerIDAppointmentsColumn, userIDColumn, startColumn, endColumn;
+    @FXML public TableColumn<Appointments, String> appIDColumn, titleColumn, descriptionColumn, locationColumn, typeColumn, customerIDAppointmentsColumn, userIDColumn, startColumn, endColumn, contactColumn;
     @FXML public TableColumn<Appointments, String> reportIDColumn, reportTitleColumn, reportDescriptionColumn, reportLocationColumn, reportTypeColumn, reportCIDColumn, reportStartColumn, reportEndColumn;
     @FXML public Button addAppointmentButton, modifyAppointmentButton, deleteAppointmentButton, clearSelectionButton;
     @FXML public TableView<Appointments> viewAppointments; // Appointments Table
@@ -849,7 +849,6 @@ public class CentralNervousSystem implements Initializable {
             ObservableList<Customers> customersList = FXCollections.observableArrayList(CustomerAccess.getAllCustomers());
 
             // lambda expression to set the cell value factory for the contact column// create an observable list of appointments
-            TableColumn<Appointments, String> contactColumn = new TableColumn<>("Contact"); // create a new table column for the contact
             contactColumn.setCellValueFactory(cellData -> { // set the cell value factory for the contact column
                 Appointments appointment = cellData.getValue(); // get the value of the cell
                 int contactID = appointment.getContactID(); // get the contact ID
@@ -861,7 +860,6 @@ public class CentralNervousSystem implements Initializable {
                 }
                 return new SimpleStringProperty(contactName); // return the contact name
             });
-            viewAppointments.getColumns().add(3, contactColumn); // add the contact column to the table
 
             // set up the Appointment columns in the table, must match the names of the variables in the model
             appIDColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentID")); // set the cell value factory for the appointment ID column
