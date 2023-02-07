@@ -128,7 +128,6 @@ public class CentralNervousSystem implements Initializable {
                 startHourBox.setValue(String.valueOf(startTime.format(formatter))); // Sets the start hour combo box
                 endHourBox.setValue(String.valueOf(endTime.format(formatter))); // Sets the end hour combo box
 
-                addAppointmentButton.setDisable(true); // Disables the add appointment button
                 modifyAppointmentButton.setDisable(false); // Enables the modify appointment button
                 deleteAppointmentButton.setDisable(false); // Enables the delete appointment button
             }
@@ -147,10 +146,17 @@ public class CentralNervousSystem implements Initializable {
      * */
     @FXML public void clearSelectedAppointment() {
         try {
-            selectedAppointment = null; // Clears the selected appointment
+            viewAppointments.getSelectionModel().clearSelection(); // Clears the selected appointment
+
             contactsMenu.setPromptText("Contacts"); // Clears the contact combo box
+            contactsMenu.getSelectionModel().clearSelection(); // Clears the contact combo box
+
             customersMenu.setPromptText("Customers"); // Clears the customer combo box
+            customersMenu.getSelectionModel().clearSelection(); // Clears the customer combo box
+
             usersMenu.setPromptText("Users"); // Clears the user combo box
+            usersMenu.getSelectionModel().clearSelection(); // Clears the user combo box
+
             // addAppointmentButton.setDisable(false); // Enables the add appointment button, need to test functionality with boolean bound methods
             Stream.of(appIDField, titleField).forEach(TextInputControl::clear); // Clears the appointment ID and title text fields
             Stream.of(userIDField, locationField, typeField, descriptionTextArea).forEach(TextInputControl::clear); // Clears the user ID, location, description and type text fields
@@ -351,7 +357,6 @@ public class CentralNervousSystem implements Initializable {
                     int divisionID = selectedCustomer.getDivisionID(); // get the division ID from the selected customer
                     String countryName = CountryAccess.innerJoin(divisionID); // get the country name based on divisionID using a join
                     countryMenu.setValue(countryName); // set the country menu
-                    addCustomerButton.setDisable(true); // disable add button, enable modify and delete buttons to prevent pointer exceptions
                     modifyCustomerButton.setDisable(false); // disable add button, enable modify and delete buttons to prevent pointer exceptions
                     deleteCustomerButton.setDisable(false); // disable add button, enable modify and delete buttons to prevent pointer exceptions
                 }
@@ -371,15 +376,16 @@ public class CentralNervousSystem implements Initializable {
      * */
     public void clearSelectedCustomer() throws RuntimeException {
         try {
-            selectedCustomer = null; // clear the selected customer
+            viewCustomers.getSelectionModel().clearSelection(); // clear the selection
+            Stream.of(countryMenu, divisionMenu).forEach(c->c.getSelectionModel().clearSelection()); // clear the country and division menus
+            countryMenu.setPromptText("Country"); // set the country menu prompt text
+            divisionMenu.setDisable(true); // disable the division menu
             Stream.of(customerRecordsIDField,
                     customerNameField,
                     addressField,
                     postalField,
                     phoneField).forEach(TextInputControl::clear); // clear the text fields
-            Stream.of(countryMenu, divisionMenu).forEach(c -> c.setValue(null)); // clear the country and division menus
             Stream.of(modifyCustomerButton, deleteCustomerButton).forEach(c -> c.setDisable(true)); // disable modify and delete buttons
-            // addCustomerButton.setDisable(false); // enable add button, need to test functionality with boolean bound methods
         }
         catch (Exception e) {
             AgentFord.apprehendException(e, theCrimeScene); // if an exception is thrown, display the exception in the crime scene text area
@@ -592,7 +598,8 @@ public class CentralNervousSystem implements Initializable {
      * */
     @FXML public void appointmentFieldSpy() {
         addAppointmentButton.disableProperty().bind(Bindings.createBooleanBinding(
-                        () -> titleField.getText().isEmpty() ||
+                        () ->   !viewAppointments.getSelectionModel().isEmpty() ||
+                                titleField.getText().isEmpty() ||
                                 descriptionTextArea.getText().isEmpty() ||
                                 locationField.getText().isEmpty() ||
                                 typeField.getText().isEmpty() ||
@@ -627,7 +634,8 @@ public class CentralNervousSystem implements Initializable {
      * */
     @FXML public void customerFieldSpy() {
         addCustomerButton.disableProperty().bind(Bindings.createBooleanBinding(
-                        () -> customerNameField.getText().isEmpty() ||
+                        () ->   !viewCustomers.getSelectionModel().isEmpty() ||
+                                customerNameField.getText().isEmpty() ||
                                 addressField.getText().isEmpty() ||
                                 postalField.getText().isEmpty() ||
                                 phoneField.getText().isEmpty() ||
