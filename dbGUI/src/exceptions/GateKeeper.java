@@ -8,7 +8,6 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.ResourceBundle;
 import java.util.stream.Stream;
 
 /**
@@ -113,49 +112,6 @@ public class GateKeeper {
     }
 
     /**
-     * verifyTraveler() returns true if the credentials are verified.
-     * @param username the username
-     * @param user_id the user_id
-     * @param password the password
-     * */
-    public static boolean verifyTraveler(String username, int user_id, String password) throws Exception {
-        boolean isVerified = false; // Initialize the boolean to false
-        connection = null; // Initialize the connection
-        statement = null; // Initialize the prepared statement
-        set = null; // Initialize the result set
-        try {
-            connection = JDBC.openConnection(); // Open a connection to the database
-            JDBC.setPreparedStatement(connection, QueryChronicles.CHECK_USER); // Set the prepared statement
-            statement = JDBC.getPreparedStatement(); // Get the prepared statement
-            statement.setString(1, username); // Set the username
-            statement.setInt(2, user_id); // Set the user_id
-            statement.setString(3, password); // Set the password
-            set = statement.executeQuery(); // Execute the query
-            if (set.next())
-            { // If the query returns a result
-                isVerified = true; // The credentials are verified
-            } else {
-                return false; // The credentials are not verified
-            }
-            return isVerified;
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        } finally {
-            if (set != null) {
-                set.close(); // Close the result set
-            }
-            if (statement != null) {
-                statement.close(); // Close the prepared statement
-            }
-            if (connection != null) {
-                connection.close(); // Close the connection
-            }
-        }
-    }
-
-    /**
      * stringCheck() returns true if all fields are not empty.
      * @param field String... field variable length argument, makes the method more flexible
      * @return boolean true if all fields are not empty, false otherwise
@@ -186,28 +142,75 @@ public class GateKeeper {
     }
 
     /**
-     * dataCheck() returns true if any of the fields are empty.
-     * @param strings String[] strings array of strings
-*      @param ints int[] ints array of ints
-     * @param dates LocalDate[] dates array of dates
-     * @return boolean true if any of the fields are empty, false otherwise
+     * nameCheck() returns true if any of the names aren't formatted properly
+     * @param name String name
      * */
-    public static boolean appointmentDataCheck(String[] strings, int[] ints, LocalDate[] dates) throws Exception {
-        boolean stringResult = stringCheck(strings); // Check if any of the strings are empty
-        boolean numberResult = numberCheck(ints); // Check if any of the ints are null
-        boolean dateResult = dateCheck(dates); // Check if any of the dates are null
-        return stringResult || numberResult || dateResult; // Return true if any of the results are true
+    public static boolean incorrectName(String name) throws Exception {
+        String firstName = "^[a-zA-Z]+"; // regex for first name
+        String lastName = "[a-zA-Z]+$"; // regex for last name
+        return !name.matches(firstName + " " + lastName); // returns true if the name does not match
     }
 
     /**
-     * customerDataCheck() returns true if any of the fields are empty.
-     * @param strings String[] strings array of strings
-     * @param ints int[] ints array of ints
+     * addressCheck() returns true if any of the addresses aren't formatted properly
+     * @param address String address
      * */
-    public static boolean customerDataCheck(String[] strings, int[] ints) throws Exception {
-        boolean stringResult = stringCheck(strings); // Check if any of the strings are empty
-        boolean numberResult = numberCheck(ints); // Check if any of the ints are null
-        return stringResult || numberResult; // Return true if any of the results are true
+    public static boolean incorrectAddress(String address) throws Exception {
+        String addressNumber = "[0-9]+\\s"; // regex for address number
+        String addressName = "([a-zA-Z]+\\s)+"; // regex for address name
+        String addressType = "[a-zA-Z]+"; // regex for address type
+        return !address.matches(addressNumber + addressName + addressType); // returns true if the address does not match
+    }
+
+    /**
+     * phoneNumberCheck() returns true if any of the phone numbers aren't formatted properly
+     * @param phoneNumber String phone number
+     * */
+    public static boolean incorrectPhone(String phoneNumber) throws Exception {
+        String phone = "[0-9]{3}-[0-9]{3}-[0-9]{4}"; // regex for phone number
+        return !phoneNumber.matches(phone); // returns true if the phone number does not match
+    }
+
+    /**
+     * postalCodeCheck() returns true if the postal code is not formatted properly
+     * @param postalCode String postal code
+     * */
+    public static boolean postalFormat(String postalCode, String country) {
+        switch (country) {
+            case "U.S": // United States
+                return postalCode.matches("^[0-9]{5}(?:-[0-9]{4})?$"); // regex for U.S postal code
+            case "Canada": // Canada
+                return postalCode.matches("^[A-Z][0-9][A-Z] [0-9][A-Z][0-9]$") ||
+                        postalCode.matches("^[A-Z][0-9][A-Z][0-9][A-Z][0-9]$"); // regex for Canadian postal code
+            case "UK":
+                return postalCode.matches("^[A-Z]{1,2}[0-9][A-Z0-9]? [0-9][ABDEFGHJLNPQRSTUWXYZ]{2}$"); // regex for UK postal code
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * customerInfoCheck() checks the address and phone number format
+     * @param strings String... strings variable length argument, makes the method more flexible
+     * */
+    public static boolean customerInfoCheck(String... strings) throws Exception {
+        if (incorrectAddress(strings[0])) {
+            Siren.incorrectAddressFormat(); // displays an error message if the address is not formatted properly
+            return false; // returns false if the address is not formatted properly
+        }
+        if (incorrectPhone(strings[1])) {
+            Siren.incorrectPhoneFormat(); // displays an error message if the phone number is not formatted properly
+            return false; // returns false if the phone number is not formatted properly
+        }
+        if (!postalFormat(strings[2], strings[3])) {
+            Siren.incorrectPostalCodeFormat(); // displays an error message if the postal code is not formatted properly
+            return false; // returns false if the postal code is not formatted properly
+        }
+        if (incorrectName(strings[4])) {
+            Siren.incorrectNameFormat(); // displays an error message if the name is not formatted properly
+            return false; // returns false if the name is not formatted properly
+        }
+        return true; // returns true if the address and phone number are formatted properly
     }
 }
 

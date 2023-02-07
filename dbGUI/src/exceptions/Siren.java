@@ -16,17 +16,6 @@ import java.util.ResourceBundle;
 public class Siren {
 
     /**
-     * appointmentsAlert() displays an alert if the user has an appointment within 15 minutes
-     * */
-    public static void appointmentsAlert() throws SQLException {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Appointment Alert");
-        alert.setHeaderText("Appointment Alert");
-        alert.setContentText("You have an appointment within 15 minutes.");
-        alert.showAndWait();
-    }
-
-    /**
      * overlapAlert() displays an alert if the user is trying to schedule an appointment that overlaps with a previously scheduled appointment
      * */
     public static void overlapAlert() throws SQLException {
@@ -141,6 +130,64 @@ public class Siren {
                             "\nAppointment ID: " + appointmentID +
                             "\nAppointment Date: " + appointmentDate +
                             "\nAppointment Time: " + appointmentTime);
+        alert.showAndWait();
+    }
+
+    /**
+     * noAppointments() displays an alert if the user has no appointments within 15 minutes
+     * */
+    public static void noImpendingAppointments() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("No Appointments");
+        alert.setHeaderText("I checked for appointments within 15 minutes.");
+        alert.setContentText("You have no upcoming appointments.");
+        alert.showAndWait();
+    }
+
+    /**
+     * incorrectNameFormat() displays an error message if the name format is incorrect.
+     * */
+    public static void incorrectNameFormat() {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText("Incorrect Name Format");
+        alert.setContentText("Please enter a valid name." + "\n" +
+                            "Example: John Smith");
+        alert.showAndWait();
+    }
+
+    /**
+     * incorrectAddressFormat() displays an error message if the address format is incorrect.
+     * */
+    public static void incorrectAddressFormat() {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText("Incorrect Address Format");
+        alert.setContentText("Please enter a valid address." + "\n" +
+                            "Example: 123 Main Street");
+        alert.showAndWait();
+    }
+
+    /**
+     * incorrectPhoneFormat() displays an error message if the phone format is incorrect.
+     * */
+    public static void incorrectPhoneFormat() {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText("Incorrect Phone Format");
+        alert.setContentText("Please enter a valid phone number." + "\n" +
+                            "Example: 123-456-7890");
+        alert.showAndWait();
+    }
+
+    /**
+     * incorrectPostalCodeFormat() displays an error message if the postal code format is incorrect.
+     * */
+    public static void incorrectPostalCodeFormat() {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText("Incorrect Postal Code Format");
+        alert.setContentText("Please enter a valid postal code.");
         alert.showAndWait();
     }
 }

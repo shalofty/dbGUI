@@ -1,6 +1,7 @@
 package controllers;
 
 import dataAccess.*;
+import exceptions.GateKeeper;
 import exceptions.Siren;
 import javafx.beans.binding.Bindings;
 import javafx.scene.chart.BarChart;
@@ -99,7 +100,9 @@ public class CentralNervousSystem implements Initializable {
         chartButton.setDisable(true); // disables the chart button
     }
 
-    // a method that clears the customersChart when the customersReportTab is selected
+    /**
+     * clearChart clears the chart when the user leaves the tab
+     * */
     @FXML public void clearChart() {
         customersChart.getData().clear(); // clears the data from the chart
         chartButton.setDisable(false); // enables the chart button
@@ -184,14 +187,8 @@ public class CentralNervousSystem implements Initializable {
     @FXML public void clearSelectedAppointment() {
         try {
             viewAppointments.getSelectionModel().clearSelection(); // Clears the selected appointment
-
-            contactsMenu.setPromptText("Contacts"); // Clears the contact combo box
             contactsMenu.getSelectionModel().clearSelection(); // Clears the contact combo box
-
-            customersMenu.setPromptText("Customers"); // Clears the customer combo box
             customersMenu.getSelectionModel().clearSelection(); // Clears the customer combo box
-
-            usersMenu.setPromptText("Users"); // Clears the user combo box
             usersMenu.getSelectionModel().clearSelection(); // Clears the user combo box
 
             // addAppointmentButton.setDisable(false); // Enables the add appointment button, need to test functionality with boolean bound methods
@@ -201,9 +198,13 @@ public class CentralNervousSystem implements Initializable {
             Stream.of(modifyAppointmentButton, deleteAppointmentButton).forEach(c->c.setDisable(true)); // Disables the modify and delete appointment buttons
         }
         catch (Exception e) {
+            e.printStackTrace();
             AgentFord.apprehendException(e, theCrimeScene); // if an exception is thrown, display the exception in the crime scene text area
         }
         finally {
+            contactsMenu.setPromptText("Contacts");
+            usersMenu.setPromptText("Users");
+            contactsMenu.setPromptText("Contacts");
             AgentFord.gatherIntel(caseFile); // Gather Intel
         }
     }
@@ -448,16 +449,21 @@ public class CentralNervousSystem implements Initializable {
                 String country = countryMenu.getValue(); // get customer country
                 String division = divisionMenu.getValue(); // get customer division
                 int divisionID = DivisionAccess.getDivisionID(division); // get division ID
-                QueryChronicles.INSERT_INTO_CUSTOMERS_METHOD(connection,
-                                                            customerID,
-                                                            customerName,
-                                                            address,
-                                                            postalCode,
-                                                            phone,
-                                                            divisionID); // insert customer into database
-                Siren.successAlert(); // display success alert
-                clearSelectedCustomer(); // clear selected customer
-                updateCustomersMenu(); // update customers menu to show new customer
+
+                String[] strings = {address, phone, postalCode, country, customerName}; // create string array of address and phone
+
+                if (GateKeeper.customerInfoCheck(strings)) {
+                    QueryChronicles.INSERT_INTO_CUSTOMERS_METHOD(connection,
+                                                                customerID,
+                                                                customerName,
+                                                                address,
+                                                                postalCode,
+                                                                phone,
+                                                                divisionID); // insert customer into database
+                    Siren.successAlert(); // display success alert
+                    clearSelectedCustomer(); // clear selected customer
+                    updateCustomersMenu(); // update customers menu to show new customer
+                }
             }
         }
         catch (Exception e) {
@@ -491,17 +497,21 @@ public class CentralNervousSystem implements Initializable {
                 String country = countryMenu.getValue(); // get customer country
                 String division = divisionMenu.getValue(); // get customer division
                 int divisionID = DivisionAccess.getDivisionID(division); // get division ID
-                QueryChronicles.UPDATE_CUSTOMER_METHOD(connection,
-                                                        customerID,
-                                                        customerName,
-                                                        address,
-                                                        postalCode,
-                                                        phone,
-                                                        divisionID); // insert customer into database
-                Siren.successAlert(); // display success alert
-                clearSelectedCustomer(); // clear selected customer
-                updateCustomers(); // update customers tableview
-                updateCustomersMenu(); // update customers menu
+
+                String[] strings = {address, phone, postalCode, country, customerName}; // create string array of address and phone
+                if (GateKeeper.customerInfoCheck(strings)) {
+                    QueryChronicles.UPDATE_CUSTOMER_METHOD(connection,
+                                                            customerID,
+                                                            customerName,
+                                                            address,
+                                                            postalCode,
+                                                            phone,
+                                                            divisionID); // insert customer into database
+                    Siren.successAlert(); // display success alert
+                    clearSelectedCustomer(); // clear selected customer
+                    updateCustomers(); // update customers tableview
+                    updateCustomersMenu(); // update customers menu
+                }
             }
         }
         catch (Exception e) {
@@ -563,6 +573,9 @@ public class CentralNervousSystem implements Initializable {
             long minutes = duration.toMinutes(); // convert duration to minutes
             if (minutes <= 15 && minutes >= 0) { // if the appointment is within 15 minutes
                 Siren.fifteenMinuteAlert(appointment); // display appointment alert
+            } else {
+                Siren.noImpendingAppointments(); // display no appointments alert
+                return; // return
             }
         }
     }
@@ -747,6 +760,7 @@ public class CentralNervousSystem implements Initializable {
             viewAppointments.setItems(newAppointments); // set the items in the table to the appointments list
         }
         catch (Exception e) {
+            e.printStackTrace(); // print the stack trace
             AgentFord.apprehendException(e, theCrimeScene); // if an exception is thrown, display the exception in the crime scene text area
         }
         finally {
