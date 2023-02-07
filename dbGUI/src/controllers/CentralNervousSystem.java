@@ -53,9 +53,8 @@ public class CentralNervousSystem implements Initializable {
     @FXML public ComboBox<String> startHourBox = new ComboBox<>(); // Start Hour Menu
     @FXML public ComboBox<String> endHourBox = new ComboBox<>(); // End Hour Menu
     @FXML public ComboBox<String> startMinBox = new ComboBox<>(); // Start Minute Menu
-    @FXML public ComboBox<String> endMinBox = new ComboBox<>(); // End Minute Menu
     @FXML public TextArea descriptionTextArea; // Description Text Area
-    @FXML public RadioButton radioWeek, radioMonth, amRadio, pmRadio; // Radio Buttons
+    @FXML public RadioButton radioWeek, radioMonth; // Radio Buttons
     @FXML public TableColumn<Appointments, String> appIDColumn, titleColumn, descriptionColumn, locationColumn, typeColumn, customerIDAppointmentsColumn, userIDColumn, startColumn, endColumn, contactColumn;
     @FXML public TableColumn<Appointments, String> reportIDColumn, reportTitleColumn, reportDescriptionColumn, reportLocationColumn, reportTypeColumn, reportCIDColumn, reportStartColumn, reportEndColumn;
     @FXML public Button addAppointmentButton, modifyAppointmentButton, deleteAppointmentButton, clearSelectionButton;
@@ -70,7 +69,6 @@ public class CentralNervousSystem implements Initializable {
     @FXML public ComboBox<String> countryMenu; // Country Menu
     @FXML public ComboBox<String> divisionMenu; // Division Menu
     @FXML public ObservableList<String> countryList = FXCollections.observableArrayList();
-    @FXML public ObservableList<String> divisionList = FXCollections.observableArrayList();
     @FXML public TableView<Customers> viewCustomers; // Customers Table
     @FXML public TableColumn<?, ?> customerIDRecordsColumn, nameColumn, phoneColumn, addressColumn, postalColumn, divisionColumn;
     @FXML public Button addCustomerButton;

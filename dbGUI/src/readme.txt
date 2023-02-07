@@ -1,45 +1,18 @@
-This project is for the performance assessment for C195 Software II: Advanced Java Concepts at WGU.
+This project represents a comprehensive performance evaluation for the advanced Java concepts course, C195 Software II, at WGU.
+It showcases a robust Java application that empowers users to efficiently manage customer appointments and information within a database.
 
-The project is a Java application that allows the user to create, edit, and delete customers and appointments in a database.
-The application also allows the user to view a calendar of appointments for the current month and week.
-There are other notable features which were required for the project. As well as some that weren't required but I added for fun.
+The project boasts several key features, including a view of appointments, the ability to create, edit, and delete customers, and a new user feature on the login screen.
+The latter was implemented as a result of the author's independent exploration of the project's requirements and functionality.
 
-I incorporated a New User feature on the login screen. Mainly because I figured a lot of this project out on my own, and didn't really use much of the student repo.
-I started the project off with the helper package, which establish the JDBC Connection functions which were part of a class video.
-After that I was off to a good start on my own.
+The model package contains essential classes such as Appointments, Contacts, Country, Customers, Division, and Users, each of which contains general setters and getters, as well as class constructors.
 
-The following classes can be found in the model package:
-Appointments, Contacts, Country, Customers, Division, Users.
+The dataAccess package was established next and features a SQL query library known as QueryChronicles, which contains all SQL queries used throughout the project, along with other database methods.
+The author tackled the project through trial and error, leading to a consolidation of redundant code.
 
-I initially start the project off with this package, as it has some general setter and getter methods that I use throughout the project.
-Class constructors can also be found here.
+The exceptions package features the GateKeeper and Siren classes.
+The Siren class, an alert library, was created to provide a clean and concise method of handling alerts. T
+he GateKeeper class handles input validation through the use of boolean binding, monitoring all GUI inputs to ensure only valid data is submitted.
 
-After warming up to the project requirements, and general functionality of the project, I moved onto building another package:
-dataAccess.
-This package started off with a SQL Query library, named QueryChronicles. This class contains all of the SQL queries that I use throughout the project.
-A lot of the big lifting database methods can be found in QueryChronicles, although some other classes in the package also have database methods.
-This came about simply because of how I tackled the project altogether. Trial and error.
-
-There are many classes which I rebuilt, restructured, or completely scrapped. I had a lot of fun with this project, and I learned a lot.
-
-After building the dataAccess package and the models package, I realized there was some redundancy in the code.
-I kept both packages around, regardless. After really getting into it, I started to realize how many different ways there were to handle different situations.
-
-The exceptions package contains the GateKeeper and Siren classes.
-The Siren class is an Alert Library that I built to handle all of the alerts in the project.
-I did this to make the code a little cleaner and more readale without being so repetitive and redundant.
-
-The GateKeeper class handles all of the input validation for the project.
-It has several methods that incorporate lambda expressions to perform input validation, but that didn't last long.
-I decided to use boolean binding to handle input validation. I created two boolean binding methods in the CNS which monitor all of the inputs in the GUI and only allow a user to submit
-data if all of the inputs are valid. I incoporated this same idea into Software I, and I really thought it to be more effective than repetitive lambda expressions.
-
-The merlin package contains the HotTubTimeMachine class.
-The HotTubTimeMachine handles all of the time manipulation methods for the project.
-
-The numericNexus package contains the NumberGenie class.
-The NumberGenie handles all of the random ID generation methods.
-All of the methods are essentially the same, but they loop through different ID's.
-
-The theAgency package contains the AgentFord class.
-The AgentFord class handles all of the methods that deal with monitoring using activity, user logs, exception logs, etc.
+The merlin package houses the HotTubTimeMachine class, which handles all time manipulation within the project.
+The numericNexus package contains the NumberGenie class, which generates random IDs through looping methods.
+Finally, the theAgency package features the AgentFord class, which manages monitoring activities, user logs, and exception logs.
