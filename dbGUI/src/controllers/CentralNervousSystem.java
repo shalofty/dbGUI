@@ -3,6 +3,8 @@ package controllers;
 import dataAccess.*;
 import exceptions.Siren;
 import javafx.beans.binding.Bindings;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.XYChart;
 import numericNexus.NumberGenie;
 import helper.JDBC;
 import theAgency.AgentFord;
@@ -63,8 +65,6 @@ public class CentralNervousSystem implements Initializable {
     @FXML public ObservableList<Appointments> appointmentsList; // Observable List of Appointments
     @FXML public ObservableList<Appointments> contactSchedule; // Observable List of Appointments
     @FXML public Appointments selectedAppointment; // Selected Appointment
-
-    // Customer Variables ///////////////////////////////////////////////////////////////////////////////////////////////
     @FXML public TextField customerRecordsIDField, customerNameField, addressField, postalField, phoneField;
     @FXML public ComboBox<String> countryMenu; // Country Menu
     @FXML public ComboBox<String> divisionMenu; // Division Menu
@@ -75,8 +75,35 @@ public class CentralNervousSystem implements Initializable {
     @FXML public Button modifyCustomerButton;
     @FXML public Button deleteCustomerButton;
     @FXML public Button clearSelectedCustomerButton;
-    @FXML public Button generateContactScheduleButton;
+    @FXML public Button generateContactScheduleButton, chartButton;
     @FXML public Customers selectedCustomer;
+    @FXML public Tab customersReportTab;
+    @FXML public BarChart<String, Integer> customersChart;
+
+    /**
+     * populateAppointmentsTable populates the appointments tableview with all appointments
+     * This is my extra report that I have control over. I decided to go with something visual.
+     * I wanted to make a bar chart that shows the number of appointments per month.
+     * */
+    @FXML public void populateCustomersChart() throws Exception {
+        int[] months = new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+        XYChart.Series<String, Integer> series = new XYChart.Series<>();
+
+        for (int month : months) {
+            int count = QueryChronicles.countAppointmentsByMonth(month);
+            String monthName = Month.of(month).name();
+            series.getData().add(new XYChart.Data<>(monthName, count));
+        }
+
+        customersChart.getData().add(series);
+        chartButton.setDisable(true); // disables the chart button
+    }
+
+    // a method that clears the customersChart when the customersReportTab is selected
+    @FXML public void clearChart() {
+        customersChart.getData().clear(); // clears the data from the chart
+        chartButton.setDisable(false); // enables the chart button
+    }
 
     /**
      * nextMonth populates the tableview with appointments within 30 days

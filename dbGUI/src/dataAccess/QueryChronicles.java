@@ -174,8 +174,30 @@ public class QueryChronicles {
             "WHERE first_level_divisions.division_id = ?;\n"; // select country by division ID
 
     public static final String COUNT_APPOINTMENTS_BY_TYPE_AND_MONTH_STATEMENT = "SELECT COUNT(*) FROM appointments WHERE Type = ? AND MONTH(Start) = ?"; // count appointments by type and month
+    public final static String GENERATE_SCHEDULE_STATEMENT = "SELECT Appointment_ID, Title, Description, Location, Type, Start, End, Customer_ID, Contact_ID, User_ID FROM appointments WHERE Contact_ID = ? "; // generate schedule
+    public final static String COUNT_APPOINTMENTS_BY_CONTACT_STATEMENT = "SELECT COUNT(*) FROM appointments WHERE Contact_ID = ?"; // count appointments by contact
+    public final static String COUNT_APPOINTMENTS_BY_MONTH_STATEMENT = "SELECT COUNT(*) FROM appointments WHERE MONTH(Start) = ?"; // count appointments by month
+    public final static String APPOINTMENTS_PER_MONTH_STATEMENT =
+            "SELECT COUNT(*) " +
+            "FROM customers " +
+            "JOIN appointments ON customers.Customer_ID = appointments.Customer_ID " +
+            "WHERE MONTH(appointments.Start) = ? ";
 
-    /// New User Method //////////////////////////////////////////////////////////////////////////////
+    // count appointments by month using APPOINTMENTS_PER_MONTH_STATEMENT
+    public static int countAppointmentsByMonth(int month) throws Exception {
+        try (Connection connection = JDBC.openConnection()) {
+            JDBC.setPreparedStatement(connection, QueryChronicles.APPOINTMENTS_PER_MONTH_STATEMENT); // set the prepared statement
+            PreparedStatement statement = JDBC.getPreparedStatement(); // get the prepared statement
+            statement.setInt(1, month); // set the first parameter
+            ResultSet resultSet = statement.executeQuery(); // execute the query
+            resultSet.next(); // move to the first row
+            return resultSet.getInt(1); // return the count
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
 
     /**
      * Inserts a new user into the database. Wasn't required, but I thought it would be a nice feature.
@@ -460,8 +482,4 @@ public class QueryChronicles {
             throw e;
         }
     }
-
-
-    // GENERATE_SCHEDULE_STATEMENT_BY_CONTACT SQL statement
-    public final static String GENERATE_SCHEDULE_STATEMENT = "SELECT Appointment_ID, Title, Description, Location, Type, Start, End, Customer_ID, Contact_ID, User_ID FROM appointments WHERE Contact_ID = ? ";
 }

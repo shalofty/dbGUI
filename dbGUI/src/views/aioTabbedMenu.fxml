@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
@@ -137,11 +140,11 @@
                   </AnchorPane>
             </content>
           </Tab>
-            <Tab fx:id="reportsTab" text="Reports">
+            <Tab fx:id="reportsTab" text="Contact Schedules">
                <content>
                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <TableView fx:id="viewContactReport" layoutX="14.0" layoutY="31.0" prefHeight="276.0" prefWidth="1030.0">
+                        <TableView fx:id="viewContactReport" layoutX="14.0" layoutY="31.0" prefHeight="638.0" prefWidth="1030.0">
                           <columns>
                             <TableColumn fx:id="reportIDColumn" prefWidth="44.0" resizable="false" text="ID" />
                             <TableColumn fx:id="reportTitleColumn" prefWidth="63.0" text="Title" />
@@ -153,10 +156,27 @@
                               <TableColumn fx:id="reportCIDColumn" prefWidth="83.0" resizable="false" text="Customer ID" />
                           </columns>
                         </TableView>
-                        <Button fx:id="generateContactScheduleButton" layoutX="114.0" layoutY="315.0" mnemonicParsing="false" onAction="#generateSchedule" prefHeight="25.0" prefWidth="122.0" text="Generate Schedule" />
-                        <ComboBox fx:id="reportContactMenu" layoutX="14.0" layoutY="315.0" prefHeight="25.0" prefWidth="90.0" promptText="Contact" />
-                        <Button fx:id="exportToFileButton" layoutX="245.0" layoutY="315.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="87.0" text="Export to File" />
+                        <Button fx:id="generateContactScheduleButton" layoutX="114.0" layoutY="682.0" mnemonicParsing="false" onAction="#generateSchedule" prefHeight="25.0" prefWidth="122.0" text="Generate Schedule" />
+                        <ComboBox fx:id="reportContactMenu" layoutX="14.0" layoutY="682.0" prefHeight="25.0" prefWidth="90.0" promptText="Contact" />
+                        <Button fx:id="exportToFileButton" layoutX="245.0" layoutY="682.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="87.0" text="Export to File" />
                      </children></AnchorPane>
+               </content>
+            </Tab>
+            <Tab fx:id="customerReportTab" onSelectionChanged="#clearChart" text="Customers Report">
+               <content>
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <BarChart fx:id="customersChart" animated="false" barGap="2.0" layoutX="27.0" layoutY="24.0" prefHeight="638.0" prefWidth="1003.0" title="Customers per Month">
+                          <xAxis>
+                            <CategoryAxis side="BOTTOM" />
+                          </xAxis>
+                          <yAxis>
+                            <NumberAxis side="LEFT" />
+                          </yAxis>
+                        </BarChart>
+                        <Button fx:id="chartButton" layoutX="918.0" layoutY="662.0" mnemonicParsing="false" onAction="#populateCustomersChart" prefHeight="25.0" prefWidth="94.0" text="Generate" />
+                     </children>
+                  </AnchorPane>
                </content>
             </Tab>
             <Tab fx:id="logTab" text="Activity Log">
