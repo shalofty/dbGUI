@@ -26,6 +26,16 @@ import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+/**
+ * CentralNervousSystem is the controller class for the main GUI
+ * There's a lot of code here. I tried to spread it out throughout different classes and packages.
+ * But it started to seem like some packages didn't make much sense, etc. SO there's a lot of code here.
+ * I also tried to be creative with naming conventions to add some flair and humor to the project.
+ *
+ * I'm not sure if I'm supposed to comment every single line of code, but I did my best to comment the important stuff.
+ * There's pretty much a comment explaining every line of code, just in case it's needed.
+ *
+ * */
 public class CentralNervousSystem implements Initializable {
 
     @FXML public Connection connection = null;
@@ -33,10 +43,8 @@ public class CentralNervousSystem implements Initializable {
     @FXML public Tab appointmentsTab, customersTab, reportsTab, logTab;
     @FXML public TextArea caseFile, infraredGoggles, theCrimeScene;
     @FXML public static Button espionageButton, exportDBButton, logoutButton;
-
-    // Appointments Variables ///////////////////////////////////////////////////////////////////////////////////////////
     @FXML public Label userCreds;
-    @FXML public TextField appIDField, userIDField, locationField, typeField, titleField, startHourField, startMinField, endHourField, endMinField;
+    @FXML public TextField appIDField, userIDField, locationField, typeField, titleField;
     @FXML public DatePicker datePicker;
     @FXML public ComboBox<String> contactsMenu = new ComboBox<>(); // Contacts Menu
     @FXML public ComboBox<String> reportContactMenu = new ComboBox<>(); // Contacts Menu for report
@@ -48,8 +56,8 @@ public class CentralNervousSystem implements Initializable {
     @FXML public ComboBox<String> endMinBox = new ComboBox<>(); // End Minute Menu
     @FXML public TextArea descriptionTextArea; // Description Text Area
     @FXML public RadioButton radioWeek, radioMonth, amRadio, pmRadio; // Radio Buttons
-    @FXML public TableColumn<?, ?> appIDColumn, titleColumn, descriptionColumn, locationColumn, typeColumn, customerIDAppointmentsColumn, userIDColumn;
-    @FXML public TableColumn<?, ?> reportIDColumn, reportTitleColumn, reportDescriptionColumn, reportLocationColumn, reportTypeColumn, reportCIDColumn, reportStartColumn, reportEndColumn;
+    @FXML public TableColumn<Appointments, String> appIDColumn, titleColumn, descriptionColumn, locationColumn, typeColumn, customerIDAppointmentsColumn, userIDColumn, startColumn, endColumn;
+    @FXML public TableColumn<Appointments, String> reportIDColumn, reportTitleColumn, reportDescriptionColumn, reportLocationColumn, reportTypeColumn, reportCIDColumn, reportStartColumn, reportEndColumn;
     @FXML public Button addAppointmentButton, modifyAppointmentButton, deleteAppointmentButton, clearSelectionButton;
     @FXML public TableView<Appointments> viewAppointments; // Appointments Table
     @FXML public TableView<Appointments> viewContactReport; // Appointments Table for contact report
@@ -666,7 +674,6 @@ public class CentralNervousSystem implements Initializable {
             contactSchedule = QueryChronicles.generateSchedule(connection , contactID); // get the contact schedule
 
             // lambda expression to set the cell value factory for the start time column
-            TableColumn<Appointments, String> reportStartColumn = new TableColumn<>("Start (Local)"); // create a new table column for the start time
             reportStartColumn.setCellValueFactory(cellData -> { // set the cell value factory for the start time column
                 Appointments appointment = cellData.getValue(); // get the value of the cell
                 LocalDateTime start = appointment.getStartTime(); // get the start time
@@ -675,10 +682,8 @@ public class CentralNervousSystem implements Initializable {
                 ZonedDateTime localStart = start.atZone(ZoneId.of("UTC")).withZoneSameInstant(localZone); // convert the start time to the local zone from UTC
                 return new SimpleStringProperty(localStart.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT))); // return the start time
             });
-            viewContactReport.getColumns().add(6, reportStartColumn); // add the start time column to the table
 
             // lambda expression to set the cell value factory for the end time column
-            TableColumn<Appointments, String> reportEndColumn = new TableColumn<>("End (Local)"); // create a new table column for the end time
             reportEndColumn.setCellValueFactory(cellData -> { // set the cell value factory for the end time column
                 Appointments appointment = cellData.getValue(); // get the value of the cell
                 LocalDateTime end = appointment.getEndTime(); // get the end time
@@ -687,7 +692,6 @@ public class CentralNervousSystem implements Initializable {
                 ZonedDateTime localStart = end.atZone(ZoneId.of("UTC")).withZoneSameInstant(localZone); // convert the end time to the local zone from UTC
                 return new SimpleStringProperty(localStart.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT))); // return the end time
             });
-            viewContactReport.getColumns().add(7, reportEndColumn); // add the end time column to the table
 
             // set the cell value factory for the other columns
             reportIDColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentID")); // set the appointment ID column
@@ -820,7 +824,6 @@ public class CentralNervousSystem implements Initializable {
             });
 
             // lambda expression to set the cell value factory for the start time column
-            TableColumn<Appointments, String> startColumn = new TableColumn<>("Start (Local)"); // create a new table column for the start time
             startColumn.setCellValueFactory(cellData -> { // set the cell value factory for the start time column
                 Appointments appointment = cellData.getValue(); // get the value of the cell
                 LocalDateTime start = appointment.getStartTime(); // get the start time
@@ -829,10 +832,8 @@ public class CentralNervousSystem implements Initializable {
                 ZonedDateTime localStart = start.atZone(ZoneId.of("UTC")).withZoneSameInstant(localZone); // convert the start time to the local zone from UTC
                 return new SimpleStringProperty(localStart.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT))); // return the start time
             });
-            viewAppointments.getColumns().add(6, startColumn); // add the start time column to the table
 
             // lambda expression to set the cell value factory for the end time column
-            TableColumn<Appointments, String> endColumn = new TableColumn<>("End (Local)"); // create a new table column for the end time
             endColumn.setCellValueFactory(cellData -> { // set the cell value factory for the end time column
                 Appointments appointment = cellData.getValue(); // get the value of the cell
                 LocalDateTime end = appointment.getEndTime(); // get the end time
@@ -841,7 +842,6 @@ public class CentralNervousSystem implements Initializable {
                 ZonedDateTime localStart = end.atZone(ZoneId.of("UTC")).withZoneSameInstant(localZone); // convert the end time to the local zone from UTC
                 return new SimpleStringProperty(localStart.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT))); // return the end time
             });
-            viewAppointments.getColumns().add(7, endColumn); // add the end time column to the table
 
             // observable list of all appointments
             ObservableList<Appointments> appointmentsList = FXCollections.observableArrayList(AppointmentAccess.allAppointments());

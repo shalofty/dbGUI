@@ -32,8 +32,10 @@
                               <TableColumn fx:id="descriptionColumn" prefWidth="126.0" text="Description" />
                               <TableColumn fx:id="typeColumn" prefWidth="85.0" text="Type" />
                               <TableColumn fx:id="locationColumn" prefWidth="112.0" text="Location" />
-                              <TableColumn fx:id="customerIDAppointmentsColumn" prefWidth="83.0" text="Customer ID" />
-                              <TableColumn fx:id="userIDColumn" prefWidth="59.0" text="User ID" />
+                              <TableColumn fx:id="customerIDAppointmentsColumn" prefWidth="107.0" text="Customer ID" />
+                              <TableColumn fx:id="userIDColumn" prefWidth="98.0" text="User ID" />
+                              <TableColumn fx:id="startColumn" prefWidth="120.0" text="Start (Local)" />
+                              <TableColumn fx:id="endColumn" prefWidth="145.0" text="End (Local)" />
                            </columns>
                         </TableView>
                         <GridPane layoutX="14.0" layoutY="379.0" prefHeight="343.0" prefWidth="153.0">
@@ -146,6 +148,8 @@
                               <TableColumn fx:id="reportLocationColumn" prefWidth="81.0" text="Location" />
                               <TableColumn fx:id="reportTypeColumn" prefWidth="75.0" text="Type" />
                               <TableColumn fx:id="reportCIDColumn" prefWidth="84.0" text="Customer ID" />
+                              <TableColumn fx:id="reportStartColumn" prefWidth="84.0" text="Start" />
+                              <TableColumn fx:id="reportEndColumn" prefWidth="84.0" text="End" />
                           </columns>
                         </TableView>
                         <Button fx:id="generateContactScheduleButton" layoutX="114.0" layoutY="315.0" mnemonicParsing="false" onAction="#generateSchedule" prefHeight="25.0" prefWidth="122.0" text="Generate Schedule" />
