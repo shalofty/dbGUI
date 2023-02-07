@@ -38,17 +38,6 @@ public class Siren {
     }
 
     /**
-     * emptyAlert() displays an alert if the user is trying to schedule an appointment without filling out all fields
-     * */
-    public static void emptyAlert(String string) throws SQLException {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Appointment Alert");
-        alert.setHeaderText("Appointment Alert");
-        alert.setContentText("The following field is empty or invalid: " + string);
-        alert.showAndWait();
-    }
-
-    /**
      * appointmentConfirm() displays a confirmation alert if the user is trying to schedule an appointment
      * */
     public static boolean appointmentConfirm() {

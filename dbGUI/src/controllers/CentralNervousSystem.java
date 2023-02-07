@@ -3,6 +3,7 @@ package controllers;
 import dataAccess.*;
 import exceptions.GateKeeper;
 import exceptions.Siren;
+import javafx.beans.binding.Bindings;
 import numericNexus.NumberGenie;
 import helper.JDBC;
 import theAgency.AgentFord;
@@ -66,8 +67,6 @@ public class CentralNervousSystem implements Initializable {
     @FXML public Button deleteCustomerButton;
     @FXML public Button clearSelectedCustomerButton;
     @FXML public Customers selectedCustomer;
-
-    // Appointments Tab Methods ////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * nextMonth populates the tableview with appointments within 30 days
@@ -149,10 +148,10 @@ public class CentralNervousSystem implements Initializable {
     @FXML public void clearSelectedAppointment() {
         try {
             selectedAppointment = null; // Clears the selected appointment
-            contactsMenu.setValue("Contacts"); // Clears the contact combo box
-            customersMenu.setValue("Customers"); // Clears the customer combo box
-            usersMenu.setValue("Users"); // Clears the user combo box
-            addAppointmentButton.setDisable(false); // Enables the add appointment button
+            contactsMenu.setPromptText("Contacts"); // Clears the contact combo box
+            customersMenu.setPromptText("Customers"); // Clears the customer combo box
+            usersMenu.setPromptText("Users"); // Clears the user combo box
+            // addAppointmentButton.setDisable(false); // Enables the add appointment button, need to test functionality with boolean bound methods
             Stream.of(appIDField, titleField).forEach(TextInputControl::clear); // Clears the appointment ID and title text fields
             Stream.of(userIDField, locationField, typeField, descriptionTextArea).forEach(TextInputControl::clear); // Clears the user ID, location, description and type text fields
             Stream.of(datePicker, startHourBox, endHourBox, startMinBox, startHourBox).forEach(c->c.setValue(null)); // Clears the start date, end date, start time and end time combo boxes
@@ -182,35 +181,22 @@ public class CentralNervousSystem implements Initializable {
                 String newDescriptionText = descriptionTextArea.getText(); // get description
                 String newLocation = locationField.getText(); // get location
                 String newType = typeField.getText(); // get type
-
                 String userName = usersMenu.getValue(); // get username
-                int userID = UserAccess.getUserID(userName); // get user ID
-
                 String customerName = customersMenu.getValue(); // get customer name
-                int customerID = CustomerAccess.getCustomerID(customerName); // get customer ID
-
                 String contactName = contactsMenu.getValue(); // get contact name from the contacts menu box
-                int contactID = ContactAccess.findContactID(contactName); // find contact ID
-
                 LocalDate localDate = datePicker.getValue(); // get the date from the date picker
                 String localStartTime = startHourBox.getValue(); // get the start hour from the combo box
                 String localEndTime = endHourBox.getValue(); // get the end hour from the combo box
 
-                // input data validation
-                String[] strings = {newTitle, newLocation, newType, newDescriptionText, localStartTime, localEndTime}; // array of strings
-                int[] numbers = {newAppointmentID, userID, customerID, contactID}; // array of numbers
-                LocalDate[] dates = {localDate}; // array of dates
+                // finding ID's based on the names
+                int userID = UserAccess.getUserID(userName); // get user ID
+                int customerID = CustomerAccess.getCustomerID(customerName); // get customer ID
+                int contactID = ContactAccess.findContactID(contactName); // find contact ID
 
-                // check if any of the fields are empty
-                if (GateKeeper.appointmentDataCheck(strings, numbers, dates)) {
-//                    Siren.emptyAlert(); // checkFields method
-                    return;
-                }
-
+                // time manipulation
                 LocalTime[] localTimes = HotTubTimeMachine.timeTransmutation(localStartTime, localEndTime); // use the HotTubTimeMachine to format the times
                 LocalTime transmutedStartTime = localTimes[0]; // get the start time
                 LocalTime transmutedEndTime = localTimes[1]; // get the end time
-
                 Timestamp[] timeStamps = HotTubTimeMachine.interdimensionalUTCWarpDrive(localDate, transmutedStartTime, transmutedEndTime); // use the HotTubTimeMachine to get the timestamps in UTC for storage
                 Timestamp dbStartTime = timeStamps[0]; // get the start time
                 Timestamp dbEndTime = timeStamps[1]; // get the end time
@@ -224,16 +210,16 @@ public class CentralNervousSystem implements Initializable {
                 else {
                     // adding the new appointment to the database
                     QueryChronicles.INSERT_INTO_APPOINTMENTS_METHOD(connection,
-                            newAppointmentID,
-                            newTitle,
-                            newDescriptionText,
-                            newLocation,
-                            newType,
-                            dbStartTime,
-                            dbEndTime,
-                            customerID,
-                            userID,
-                            contactID); // insertIntoAppointment method
+                                                                    newAppointmentID,
+                                                                    newTitle,
+                                                                    newDescriptionText,
+                                                                    newLocation,
+                                                                    newType,
+                                                                    dbStartTime,
+                                                                    dbEndTime,
+                                                                    customerID,
+                                                                    userID,
+                                                                    contactID); // insertIntoAppointment method
                     Siren.successAlert(); // successAlert method
                     updateAppointments(); // update the appointments table
                 }
@@ -274,17 +260,6 @@ public class CentralNervousSystem implements Initializable {
                 LocalDate localDate = datePicker.getValue(); // get the date from the date picker
                 String localStartHour = startHourBox.getValue(); // get the start hour from the combo box
                 String localEndHour = endHourBox.getValue(); // get the end hour from the combo box
-
-                // input data validation
-                String[] strings = {title, location, type, descriptionText, localStartHour, localEndHour}; // array of strings
-                int[] numbers = {appointmentID, userID, customerID, contactID}; // array of numbers
-                LocalDate[] dates = {localDate}; // array of dates
-
-                // check if any of the fields are empty
-                if (GateKeeper.appointmentDataCheck(strings, numbers, dates)) {
-//                    Siren.emptyAlert(); // checkFields method
-                    return;
-                }
 
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mm a"); // create a DateTimeFormatter object
                 LocalTime localStartTime = LocalTime.parse(localStartHour, formatter); // parse the start time
@@ -356,8 +331,6 @@ public class CentralNervousSystem implements Initializable {
         }
     }
 
-    // Customers Tab Methods ///////////////////////////////////////////////////////////////////////////////////////////
-
     /**
      * selectCustomer selects a customer from the tableview and displays the customer's information in the text fields
      * disables add button, enables modify and delete buttons to prevent pointer exceptions
@@ -406,7 +379,7 @@ public class CentralNervousSystem implements Initializable {
                     phoneField).forEach(TextInputControl::clear); // clear the text fields
             Stream.of(countryMenu, divisionMenu).forEach(c -> c.setValue(null)); // clear the country and division menus
             Stream.of(modifyCustomerButton, deleteCustomerButton).forEach(c -> c.setDisable(true)); // disable modify and delete buttons
-            addCustomerButton.setDisable(false); // enable add button
+            // addCustomerButton.setDisable(false); // enable add button, need to test functionality with boolean bound methods
         }
         catch (Exception e) {
             AgentFord.apprehendException(e, theCrimeScene); // if an exception is thrown, display the exception in the crime scene text area
@@ -422,61 +395,26 @@ public class CentralNervousSystem implements Initializable {
     @FXML public void addCustomer() throws SQLException {
         try (Connection connection = JDBC.openConnection())
         {
-            // if the user clicks OK
-            if (Siren.addCustomerConfirm()) {
-                // set all values to null to prevent pointer exceptions
-                String customerName;
-                String address;
-                String postalCode;
-                String phone;
-                String country;
-                String division;
-
+            if (Siren.addCustomerConfirm()) { // if the user clicks OK
                 int customerID = NumberGenie.magicCustomer(); // get customer id
                 String id = String.valueOf(customerID); // convert customer id to string
-                customerName = customerNameField.getText(); // get customer name
-                address = addressField.getText(); // get customer address
-                postalCode = postalField.getText(); // get customer postal code
-                phone = phoneField.getText(); // get customer phone
-                country = countryMenu.getValue(); // get customer country
-                division = divisionMenu.getValue(); // get customer division
+                String customerName = customerNameField.getText(); // get customer name
+                String address = addressField.getText(); // get customer address
+                String postalCode = postalField.getText(); // get customer postal code
+                String phone = phoneField.getText(); // get customer phone
+                String country = countryMenu.getValue(); // get customer country
+                String division = divisionMenu.getValue(); // get customer division
                 int divisionID = DivisionAccess.getDivisionID(division); // get division ID
-
-                // check if division menu is empty
-                if (divisionMenu.getValue() == null) { // if the division menu is empty
-                    Siren.emptyAlert("Division"); // display empty field alert
-                }
-
-                // check if country menu is empty
-                if (countryMenu.getValue() == null) { // if the country menu is empty
-                    Siren.emptyAlert("Country"); // display empty field alert
-                }
-
-                String[] stringValues = {customerName, address, postalCode, phone, country, division}; // string array
-                String[] stringNames = {"Customer Name", "Address", "Postal Code", "Phone", "Country", "Division"}; // string array
-
-                int[] numbers = {customerID, divisionID}; // int array
-
-                // check the rest of the fields
-                if (GateKeeper.customerDataCheck(stringValues, numbers)) {
-                    for (int i = 0; i < stringValues.length; i++) { // loop through string array
-                        if (stringValues[i].isEmpty() || stringValues[i] == null) { // if the string is empty or null
-                            Siren.emptyAlert(stringNames[i]); // display empty field alert
-                        }
-                    }
-                }
-                else {
-                    QueryChronicles.INSERT_INTO_CUSTOMERS_METHOD(connection,
-                                                                customerID,
-                                                                customerName,
-                                                                address,
-                                                                postalCode,
-                                                                phone,
-                                                                divisionID); // insert customer into database
-                    Siren.successAlert(); // display success alert
-                    clearSelectedCustomer(); // clear selected customer
-                    updateCustomersMenu(); // update customers menu to show new customer
-                }
+                QueryChronicles.INSERT_INTO_CUSTOMERS_METHOD(connection,
+                                                            customerID,
+                                                            customerName,
+                                                            address,
+                                                            postalCode,
+                                                            phone,
+                                                            divisionID); // insert customer into database
+                Siren.successAlert(); // display success alert
+                clearSelectedCustomer(); // clear selected customer
+                updateCustomersMenu(); // update customers menu to show new customer
             }
         }
         catch (Exception e) {
@@ -510,33 +448,17 @@ public class CentralNervousSystem implements Initializable {
                 String country = countryMenu.getValue(); // get customer country
                 String division = divisionMenu.getValue(); // get customer division
                 int divisionID = DivisionAccess.getDivisionID(division); // get division ID
-
-                String[] stringValues = {customerName, address, postalCode, phone, division, country}; // create string array
-                String[] stringNames = {"Customer Name", "Address", "Postal Code", "Phone", "Division", "Country"}; // create string array
-
-                int[] ints = {customerID, divisionID, customerID}; // create int array
-
-                // check if any fields are empty
-                if (GateKeeper.customerDataCheck(stringValues, ints)) {
-                    for (int i = 0; i < stringValues.length; i++) { // loop through string array
-                        if (stringValues[i].isEmpty() || stringValues[i] == null) { // if the string is empty or null
-                            Siren.emptyAlert(stringNames[i]); // display empty field alert
-                        }
-                    }
-                }
-                else {
-                    QueryChronicles.UPDATE_CUSTOMER_METHOD(connection,
-                                                            customerID,
-                                                            customerName,
-                                                            address,
-                                                            postalCode,
-                                                            phone,
-                                                            divisionID); // insert customer into database
-                    Siren.successAlert(); // display success alert
-                    clearSelectedCustomer(); // clear selected customer
-                    updateCustomers(); // update customers tableview
-                    updateCustomersMenu(); // update customers menu
-                }
+                QueryChronicles.UPDATE_CUSTOMER_METHOD(connection,
+                                                        customerID,
+                                                        customerName,
+                                                        address,
+                                                        postalCode,
+                                                        phone,
+                                                        divisionID); // insert customer into database
+                Siren.successAlert(); // display success alert
+                clearSelectedCustomer(); // clear selected customer
+                updateCustomers(); // update customers tableview
+                updateCustomersMenu(); // update customers menu
             }
         }
         catch (Exception e) {
@@ -623,13 +545,13 @@ public class CentralNervousSystem implements Initializable {
                 // set the division menu to the appropriate value based on the selected country
                 switch (selectedCountry) {
                     case "U.S": // if the selected country is the U.S, set the division menu to state
-                        divisionMenu.setValue("State");
+                        divisionMenu.setPromptText("State");
                         break;
                     case "Canada": // if the selected country is Canada, set the division menu to province
-                        divisionMenu.setValue("Province");
+                        divisionMenu.setPromptText("Province");
                         break;
                     case "UK": // if the selected country is the UK, set the division menu to country
-                        divisionMenu.setValue("Country");
+                        divisionMenu.setPromptText("Country");
                         break;
                 }
             } catch (SQLException e) {
@@ -657,6 +579,68 @@ public class CentralNervousSystem implements Initializable {
         finally {
             AgentFord.gatherIntel(caseFile); // Gather Intel
         }
+    }
+
+    /**
+     * addappFieldSpy disables the add appointment button if any of the fields are empty
+     * I used this same idea in Software I
+     * I used boolean bindings to bind the disable/enable property of the add appointment button to the text fields
+     * The method is called as the cursor enters the appointment tab
+     * So that all the fields must be filled in before the button is enabled
+     * This is an effective way to prevent the user from adding an appointment with empty fields
+     * And what I like to call Exception Prevention
+     * */
+    @FXML public void appointmentFieldSpy() {
+        addAppointmentButton.disableProperty().bind(Bindings.createBooleanBinding(
+                        () -> titleField.getText().isEmpty() ||
+                                descriptionTextArea.getText().isEmpty() ||
+                                locationField.getText().isEmpty() ||
+                                typeField.getText().isEmpty() ||
+                                usersMenu.getValue() == null ||
+                                customersMenu.getValue() == null ||
+                                contactsMenu.getValue() == null ||
+                                datePicker.getValue() == null ||
+                                startHourBox.getValue() == null ||
+                                endHourBox.getValue() == null,
+                        titleField.textProperty(),
+                        descriptionTextArea.textProperty(),
+                        locationField.textProperty(),
+                        typeField.textProperty(),
+                        usersMenu.valueProperty(),
+                        customersMenu.valueProperty(),
+                        contactsMenu.valueProperty(),
+                        datePicker.valueProperty(),
+                        startHourBox.valueProperty(),
+                        endHourBox.valueProperty()
+                )
+        );
+    }
+
+    /**
+     * addappFieldSpy disables the add appointment button if any of the fields are empty
+     * * I used this same idea in Software I
+     * I used boolean bindings to bind the disable/enable property of the add appointment button to the text fields
+     * The method is called as the cursor enters the customer tab
+     * So that all the fields must be filled in before the button is enabled
+     * This is an effective way to prevent the user from adding an appointment with empty fields
+     * And what I like to call Exception Prevention
+     * */
+    @FXML public void customerFieldSpy() {
+        addCustomerButton.disableProperty().bind(Bindings.createBooleanBinding(
+                        () -> customerNameField.getText().isEmpty() ||
+                                addressField.getText().isEmpty() ||
+                                postalField.getText().isEmpty() ||
+                                phoneField.getText().isEmpty() ||
+                                countryMenu.getValue() == null ||
+                                divisionMenu.getValue() == null,
+                        customerNameField.textProperty(),
+                        addressField.textProperty(),
+                        postalField.textProperty(),
+                        phoneField.textProperty(),
+                        countryMenu.valueProperty(),
+                        divisionMenu.valueProperty()
+                )
+        );
     }
 
     /**
@@ -744,10 +728,10 @@ public class CentralNervousSystem implements Initializable {
             userCreds.setText(username + " from " + ip); // set the user credentials label to the username
 
             usersMenu.setItems(UserAccess.getAllUserNames()); // set the user combo box to the usernames
-            usersMenu.setValue("Users"); // set the user combo box to the usernames
+            usersMenu.setPromptText("Users"); // set the prompt text for the user combo box
 
             customersMenu.setItems(CustomerAccess.getAllCustomerNameStrings()); // Sets the customer combo box
-            customersMenu.setValue("Customers"); // Sets the customer combo box
+            customersMenu.setPromptText("Customers"); // set the prompt text for the customer combo box
 
             // set the default time zone to Shanghai for fun during testing, can be found in the code below
             // More values which can be used to test time zones
@@ -841,6 +825,7 @@ public class CentralNervousSystem implements Initializable {
 
             ObservableList<String> contactsList = FXCollections.observableArrayList(ContactAccess.getContactNames()); // get the list of contact names from the db
             contactsMenu.setItems(contactsList); // set the items in the contact menu to the observable list
+            contactsMenu.setPromptText("Contacts"); // set the prompt text for the contact menu
 
             viewAppointments.setItems(appointmentsList); // set the items in the table to the appointments list made above
             viewCustomers.setItems(customersList); // set the items in the table to the customers list
