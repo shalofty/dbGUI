@@ -136,7 +136,22 @@
           </Tab>
             <Tab fx:id="reportsTab" text="Reports">
                <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <TableView fx:id="viewContactReport" layoutX="14.0" layoutY="31.0" prefHeight="276.0" prefWidth="694.0">
+                          <columns>
+                            <TableColumn fx:id="reportIDColumn" prefWidth="41.0" text="ID" />
+                            <TableColumn fx:id="reportTitleColumn" prefWidth="66.0" text="Title" />
+                              <TableColumn fx:id="reportDescriptionColumn" prefWidth="157.0" text="Description" />
+                              <TableColumn fx:id="reportLocationColumn" prefWidth="81.0" text="Location" />
+                              <TableColumn fx:id="reportTypeColumn" prefWidth="75.0" text="Type" />
+                              <TableColumn fx:id="reportCIDColumn" prefWidth="84.0" text="Customer ID" />
+                          </columns>
+                        </TableView>
+                        <Button fx:id="generateContactScheduleButton" layoutX="114.0" layoutY="315.0" mnemonicParsing="false" onAction="#generateSchedule" prefHeight="25.0" prefWidth="122.0" text="Generate Schedule" />
+                        <ComboBox fx:id="reportContactMenu" layoutX="14.0" layoutY="315.0" prefHeight="25.0" prefWidth="90.0" promptText="Contact" />
+                        <Button fx:id="exportToFileButton" layoutX="245.0" layoutY="315.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="87.0" text="Export to File" />
+                     </children></AnchorPane>
                </content>
             </Tab>
             <Tab fx:id="logTab" text="Activity Log">

@@ -2,10 +2,15 @@ package dataAccess;
 
 import controllers.LoginController;
 import helper.JDBC;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
+import models.Appointments;
 
 import java.sql.*;
 import java.time.LocalDateTime;
+
+import static dataAccess.AppointmentMapper.mapByContactID;
 
 /**
  * QueryChronicles is a class that contains all the SQL queries that I use in my program.
@@ -167,6 +172,8 @@ public class QueryChronicles {
             "INNER JOIN countries\n" +
             "ON first_level_divisions.country_id = countries.country_id\n" +
             "WHERE first_level_divisions.division_id = ?;\n"; // select country by division ID
+
+    public static final String COUNT_APPOINTMENTS_BY_TYPE_AND_MONTH_STATEMENT = "SELECT COUNT(*) FROM appointments WHERE Type = ? AND MONTH(Start) = ?"; // count appointments by type and month
 
     /// New User Method //////////////////////////////////////////////////////////////////////////////
 
@@ -398,4 +405,63 @@ public class QueryChronicles {
             return false;
         }
     }
+
+    /**
+     * countAppointmentsReport counts the number of appointments by type and month
+     * */
+    public static int countAppointmentsReport(Connection connection,
+                                              String type,
+                                              int month)
+    {
+        try {
+            JDBC.setPreparedStatement(connection, QueryChronicles.COUNT_APPOINTMENTS_BY_TYPE_AND_MONTH_STATEMENT); // set the prepared statement
+            PreparedStatement statement = JDBC.getPreparedStatement(); // get the prepared statement
+            statement.setString(1, type); // set the type
+            statement.setInt(2, month); // set the month
+            ResultSet resultSet = statement.executeQuery(); // execute the query
+            if (resultSet.next()) {
+                return resultSet.getInt(1); // return the count
+            }
+            else {
+                return 0; // return 0 if there are no appointments
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace(); // print the stack trace
+            return 0;
+        }
+    }
+
+
+    /**
+     * generateSchedule generates a schedule for a contact based on the contact ID
+     * Incorporates the mapByContactID method to map the appointments to the contact
+     * */
+    public static ObservableList<Appointments> generateSchedule(Connection connection, int contactID) throws Exception {
+        try {
+            JDBC.setPreparedStatement(connection, QueryChronicles.GENERATE_SCHEDULE_STATEMENT); // set the prepared statement
+            PreparedStatement statement = JDBC.getPreparedStatement(); // get the prepared statement
+            System.out.println(statement);
+            System.out.println("CONTACT ID FROM QUERY: " + contactID);
+            statement.setInt(1, contactID); // set the contact ID
+            ResultSet resultSet = statement.executeQuery(); // execute the query
+            ObservableList<Appointments> contactSchedule = FXCollections.observableArrayList(); // create an observable list of appointments
+            while (resultSet.next()) {
+                Appointments appointment = mapByContactID(resultSet, contactID); // map the appointments
+                if (appointment != null) {
+                    contactSchedule.add(appointment); // add the appointment to the list
+                }
+            }
+            System.out.println(contactSchedule);
+            return contactSchedule; // return the list
+        }
+        catch (Exception e) {
+            e.printStackTrace(); // print the stack trace
+            throw e;
+        }
+    }
+
+
+    // GENERATE_SCHEDULE_STATEMENT_BY_CONTACT SQL statement
+    public final static String GENERATE_SCHEDULE_STATEMENT = "SELECT Appointment_ID, Title, Description, Location, Type, Start, End, Customer_ID, Contact_ID, User_ID FROM appointments WHERE Contact_ID = ? ";
 }
