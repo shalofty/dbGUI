@@ -88,7 +88,7 @@ public class CentralNervousSystem implements Initializable {
      * reportTypeMonth() is the method that runs when the user clicks the "Generate Report" button.
      * It gets the selected type and month from the menus, and then gets the number of appointments for that type and month.
      * */
-    public void reportTypeMonth() throws Exception {
+    @FXML public void reportTypeMonth() throws Exception {
         try {
             String type = typesMenu.getValue(); // get the selected type
             String month = monthsMenu.getValue(); // get the selected month
@@ -103,7 +103,7 @@ public class CentralNervousSystem implements Initializable {
     /**
      * getMonthNum() is a helper method for reportTypeMonth().
      * */
-    public int getMonthNum(String month) {
+    @FXML public int getMonthNum(String month) {
         int monthNum = 0;
         switch (month) {
             case "January":
@@ -494,7 +494,7 @@ public class CentralNervousSystem implements Initializable {
      * disables add button, enables modify and delete buttons to prevent pointer exceptions
      * uses addListener to listen for a change in the selected item, which helps with bugginess
      * */
-    public void selectCustomer() {
+    @FXML public void selectCustomer() {
         // add listener to the tableview
         viewCustomers.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             try {
@@ -526,7 +526,7 @@ public class CentralNervousSystem implements Initializable {
      * enables add button, disables modify and delete buttons to prevent pointer exceptions
      * uses lambda expressions to clear the text fields, menus, and disable the buttons
      * */
-    public void clearSelectedCustomer() throws RuntimeException {
+    @FXML public void clearSelectedCustomer() throws RuntimeException {
         try {
             viewCustomers.getSelectionModel().clearSelection(); // clear the selection
             Stream.of(countryMenu, divisionMenu).forEach(c->c.getSelectionModel().clearSelection()); // clear the country and division menus
@@ -677,7 +677,7 @@ public class CentralNervousSystem implements Initializable {
      * if an appointment is found, an alert is displayed
      * Called in the initialize method
      * */
-    public void findAppointments() throws SQLException {
+    @FXML public void findAppointments() throws SQLException {
         ObservableList<Appointments> appointments = AppointmentAccess.allAppointments(); // get appointments
         for (Appointments appointment : appointments) {
             LocalDateTime now = LocalDateTime.now(); // get current, local time

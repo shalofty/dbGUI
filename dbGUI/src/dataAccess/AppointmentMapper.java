@@ -29,6 +29,9 @@ public class AppointmentMapper {
         return new Appointments(appointmentID, appointmentTitle, appointmentDescription, appointmentLocation, appointmentType, appointmentDate, startTime, endTime, customerID, contactID, userID);
     }
 
+    /**
+     * map appointment data from database to appointment object
+     * */
     public static Appointments mapByContactID(ResultSet resultSet, int contactID) throws SQLException {
         int appointmentID = resultSet.getInt("Appointment_ID"); // Appointment_ID
         String appointmentTitle = resultSet.getString("Title"); // Title

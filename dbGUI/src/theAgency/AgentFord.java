@@ -46,26 +46,6 @@ public class AgentFord {
     }
 
     /**
-     * actionDetails tracks the activity of the user and logs it to an activity log
-     * @param strings the strings to be logged
-     * */
-//    public static void actionDetails(TextArea textArea, String... strings) {
-//        try {
-//            StackTraceElement trace = Thread.currentThread().getStackTrace()[2]; // get the stack trace
-//            FileWriter fileWriter = new FileWriter("ActivityLog/userActivity.txt", true); // create file writer
-//            String theDetails = "User: " + LoginController.getUsername() + " called " + trace.getMethodName() + " at " + Instant.now() + " with the following parameters:"; // get the username, method name, and time
-//            fileWriter.write(theDetails + "\n"); // write to file
-//            for (String string : strings) {
-//                fileWriter.write(string + "\n"); // write to file
-//            }
-//            textArea.appendText(theDetails + "\n"); // append to text area
-//            fileWriter.close(); // close file writer
-//        } catch (IOException ioException) {
-//            ioException.printStackTrace();
-//        }
-//    }
-
-    /**
      * apprehendException appends the exception to the text area in the activity log
      * @param exception the exception to be appended
      * @param textArea the text area to append the exception to

@@ -45,35 +45,6 @@ public class UserAccess extends Users {
         }
     }
 
-    // a method that returns an observable list of all the user_id's in the database
-    public static ObservableList<Integer> getAllUserIDs() throws SQLException {
-        ObservableList<Integer> usersObservableList = FXCollections.observableArrayList(); // create observable list
-        try (Connection connection = JDBC.openConnection(); // open connection
-             PreparedStatement statement = connection.prepareStatement(QueryChronicles.SELECT_ALL_USER_IDS_STATEMENT)) // prepare statement
-        {
-            set = statement.executeQuery(); // execute query
-            // loop through result set
-            while (set.next()) {
-                usersObservableList.add(set.getInt("User_ID")); // add user to observable list
-            }
-            return usersObservableList; // return observable list
-        }
-        catch (SQLException e) {
-            throw e;
-        }
-        finally {
-            if (set != null) {
-                set.close();
-            }
-            if (statement != null) {
-                statement.close();
-            }
-            if (connection != null) {
-                connection.close();
-            }
-        }
-    }
-
     // a method that returns an observablelist of all the user names in the database
     public static ObservableList<String> getAllUserNames() throws SQLException {
         ObservableList<String> usersObservableList = FXCollections.observableArrayList(); // create observable list

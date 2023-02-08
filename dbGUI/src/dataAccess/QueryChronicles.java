@@ -213,7 +213,11 @@ public class QueryChronicles {
         }
     }
 
-    // a method that counts appointments by type and month using the COUNT_APPOINTMENTS_BY_TYPE_AND_MONTH_STATEMENT
+    /**
+     * counts the number of appointments by type and month
+     * @param type the type of appointment
+     * @param month the month of the appointment
+     * */
     public static int countByTypeAndMonth(String type, int month) throws Exception {
         try (Connection connection = JDBC.openConnection()) {
             JDBC.setPreparedStatement(connection, QueryChronicles.COUNT_APPOINTMENTS_BY_TYPE_AND_MONTH_STATEMENT); // set the prepared statement
@@ -230,7 +234,10 @@ public class QueryChronicles {
         }
     }
 
-    // count appointments by month using APPOINTMENTS_PER_MONTH_STATEMENT
+    /**
+     * counts the number of appointments by month
+     * @param month the month of the appointment
+     * */
     public static int countAppointmentsByMonth(int month) throws Exception {
         try (Connection connection = JDBC.openConnection()) {
             JDBC.setPreparedStatement(connection, QueryChronicles.APPOINTMENTS_PER_MONTH_STATEMENT); // set the prepared statement
@@ -474,33 +481,6 @@ public class QueryChronicles {
             return false;
         }
     }
-
-    /**
-     * countAppointmentsReport counts the number of appointments by type and month
-     * */
-    public static int countAppointmentsReport(Connection connection,
-                                              String type,
-                                              int month)
-    {
-        try {
-            JDBC.setPreparedStatement(connection, QueryChronicles.COUNT_APPOINTMENTS_BY_TYPE_AND_MONTH_STATEMENT); // set the prepared statement
-            PreparedStatement statement = JDBC.getPreparedStatement(); // get the prepared statement
-            statement.setString(1, type); // set the type
-            statement.setInt(2, month); // set the month
-            ResultSet resultSet = statement.executeQuery(); // execute the query
-            if (resultSet.next()) {
-                return resultSet.getInt(1); // return the count
-            }
-            else {
-                return 0; // return 0 if there are no appointments
-            }
-        }
-        catch (Exception e) {
-            e.printStackTrace(); // print the stack trace
-            return 0;
-        }
-    }
-
 
     /**
      * generateSchedule generates a schedule for a contact based on the contact ID
