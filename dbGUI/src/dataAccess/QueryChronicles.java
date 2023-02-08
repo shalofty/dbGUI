@@ -175,13 +175,60 @@ public class QueryChronicles {
 
     public static final String COUNT_APPOINTMENTS_BY_TYPE_AND_MONTH_STATEMENT = "SELECT COUNT(*) FROM appointments WHERE Type = ? AND MONTH(Start) = ?"; // count appointments by type and month
     public final static String GENERATE_SCHEDULE_STATEMENT = "SELECT Appointment_ID, Title, Description, Location, Type, Start, End, Customer_ID, Contact_ID, User_ID FROM appointments WHERE Contact_ID = ? "; // generate schedule
-    public final static String COUNT_APPOINTMENTS_BY_CONTACT_STATEMENT = "SELECT COUNT(*) FROM appointments WHERE Contact_ID = ?"; // count appointments by contact
-    public final static String COUNT_APPOINTMENTS_BY_MONTH_STATEMENT = "SELECT COUNT(*) FROM appointments WHERE MONTH(Start) = ?"; // count appointments by month
     public final static String APPOINTMENTS_PER_MONTH_STATEMENT =
             "SELECT COUNT(*) " +
             "FROM customers " +
             "JOIN appointments ON customers.Customer_ID = appointments.Customer_ID " +
             "WHERE MONTH(appointments.Start) = ? ";
+
+    public static final String SELECT_APPOINTMENT_TYPES_STATEMENT =
+            "SELECT DISTINCT type " +
+            "FROM appointments " +
+            "ORDER BY type;"; // select appointment types
+    public final static String COUNT_BY_MONTH_AND_TYPE =
+            "SELECT type, DATE_FORMAT(start_date, '%M %Y') " +
+            "AS month, COUNT(*) AS count\n" +
+            "FROM appointments\n" +
+            "GROUP BY type, month\n" +
+            "ORDER BY month, type;\n";
+
+    /**
+     * gets all appointment types from the database
+     * */
+    public static ObservableList<String> getAppointmentTypes() throws Exception {
+        try (Connection connection = JDBC.openConnection()) {
+            JDBC.setPreparedStatement(connection, QueryChronicles.SELECT_APPOINTMENT_TYPES_STATEMENT); // set the prepared statement
+            PreparedStatement statement = JDBC.getPreparedStatement(); // get the prepared statement
+            ResultSet resultSet = statement.executeQuery(); // execute the query
+            ObservableList<String> appointmentTypes = FXCollections.observableArrayList(); // create an observable list
+            while (resultSet.next()) { // while there are more rows
+                appointmentTypes.add(resultSet.getString("Type")); // add the type to the list
+            }
+            System.out.println(appointmentTypes);
+            return appointmentTypes; // return the list
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    // a method that counts appointments by type and month using the COUNT_APPOINTMENTS_BY_TYPE_AND_MONTH_STATEMENT
+    public static int countByTypeAndMonth(String type, int month) throws Exception {
+        try (Connection connection = JDBC.openConnection()) {
+            JDBC.setPreparedStatement(connection, QueryChronicles.COUNT_APPOINTMENTS_BY_TYPE_AND_MONTH_STATEMENT); // set the prepared statement
+            PreparedStatement statement = JDBC.getPreparedStatement(); // get the prepared statement
+            statement.setString(1, type); // set the first parameter
+            statement.setInt(2, month); // set the second parameter
+            ResultSet resultSet = statement.executeQuery(); // execute the query
+            resultSet.next(); // move to the first row
+            return resultSet.getInt(1); // return the count
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
 
     // count appointments by month using APPOINTMENTS_PER_MONTH_STATEMENT
     public static int countAppointmentsByMonth(int month) throws Exception {

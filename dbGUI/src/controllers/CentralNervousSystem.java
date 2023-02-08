@@ -41,6 +41,7 @@ import java.util.stream.Stream;
  * */
 public class CentralNervousSystem implements Initializable {
 
+
     @FXML public Connection connection = null;
     @FXML public PreparedStatement preparedStatement = null;
     @FXML public Tab appointmentsTab, customersTab, reportsTab, logTab;
@@ -49,37 +50,149 @@ public class CentralNervousSystem implements Initializable {
     @FXML public Label userCreds;
     @FXML public TextField appIDField, userIDField, locationField, typeField, titleField;
     @FXML public DatePicker datePicker;
-    @FXML public ComboBox<String> contactsMenu = new ComboBox<>(); // Contacts Menu
-    @FXML public ComboBox<String> reportContactMenu = new ComboBox<>(); // Contacts Menu for report
-    @FXML public ComboBox<String> customersMenu = new ComboBox<>(); // Customers Menu
-    @FXML public ComboBox<String> usersMenu = new ComboBox<>(); // Users Menu
-    @FXML public ComboBox<String> startHourBox = new ComboBox<>(); // Start Hour Menu
-    @FXML public ComboBox<String> endHourBox = new ComboBox<>(); // End Hour Menu
-    @FXML public ComboBox<String> startMinBox = new ComboBox<>(); // Start Minute Menu
-    @FXML public TextArea descriptionTextArea; // Description Text Area
-    @FXML public RadioButton radioWeek, radioMonth; // Radio Buttons
+    @FXML public ComboBox<String> contactsMenu = new ComboBox<>();
+    @FXML public ComboBox<String> reportContactMenu = new ComboBox<>();
+    @FXML public ComboBox<String> customersMenu = new ComboBox<>();
+    @FXML public ComboBox<String> usersMenu = new ComboBox<>();
+    @FXML public ComboBox<String> startHourBox = new ComboBox<>();
+    @FXML public ComboBox<String> endHourBox = new ComboBox<>();
+    @FXML public ComboBox<String> startMinBox = new ComboBox<>();
+    @FXML public ComboBox<String> monthsMenu = new ComboBox<>();
+    @FXML public TextArea descriptionTextArea;
+    @FXML public RadioButton radioWeek, radioMonth;
     @FXML public TableColumn<Appointments, String> appIDColumn, titleColumn, descriptionColumn, locationColumn, typeColumn, customerIDAppointmentsColumn, userIDColumn, startColumn, endColumn, contactColumn;
     @FXML public TableColumn<Appointments, String> reportIDColumn, reportTitleColumn, reportDescriptionColumn, reportLocationColumn, reportTypeColumn, reportCIDColumn, reportStartColumn, reportEndColumn;
     @FXML public Button addAppointmentButton, modifyAppointmentButton, deleteAppointmentButton, clearSelectionButton;
-    @FXML public TableView<Appointments> viewAppointments; // Appointments Table
-    @FXML public TableView<Appointments> viewContactReport; // Appointments Table for contact report
-    @FXML public ObservableList<Appointments> appointmentsList; // Observable List of Appointments
-    @FXML public ObservableList<Appointments> contactSchedule; // Observable List of Appointments
-    @FXML public Appointments selectedAppointment; // Selected Appointment
+    @FXML public TableView<Appointments> viewAppointments;
+    @FXML public TableView<Appointments> viewContactReport;
+    @FXML public ObservableList<Appointments> appointmentsList;
+    @FXML public ObservableList<Appointments> contactSchedule;
+    @FXML public Appointments selectedAppointment;
     @FXML public TextField customerRecordsIDField, customerNameField, addressField, postalField, phoneField;
-    @FXML public ComboBox<String> countryMenu; // Country Menu
-    @FXML public ComboBox<String> divisionMenu; // Division Menu
+    @FXML public ComboBox<String> countryMenu;
+    @FXML public ComboBox<String> divisionMenu;
     @FXML public ObservableList<String> countryList = FXCollections.observableArrayList();
-    @FXML public TableView<Customers> viewCustomers; // Customers Table
+    @FXML public TableView<Customers> viewCustomers;
     @FXML public TableColumn<?, ?> customerIDRecordsColumn, nameColumn, phoneColumn, addressColumn, postalColumn, divisionColumn;
-    @FXML public Button addCustomerButton;
-    @FXML public Button modifyCustomerButton;
-    @FXML public Button deleteCustomerButton;
-    @FXML public Button clearSelectedCustomerButton;
-    @FXML public Button generateContactScheduleButton, chartButton;
+    @FXML public Button addCustomerButton, modifyCustomerButton, deleteCustomerButton, clearSelectedCustomerButton;
+    @FXML public Button generateContactScheduleButton, chartButton, countByMonthTypeButton;
     @FXML public Customers selectedCustomer;
     @FXML public Tab customersReportTab;
     @FXML public BarChart<String, Integer> customersChart;
+    @FXML public ObservableList<String> typesList;
+    @FXML public ComboBox<String> typesMenu = new ComboBox<>();
+    @FXML public ObservableList<String> monthsList = FXCollections.observableArrayList("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December");
+    @FXML public TextField numberOfAppointments;
+
+    /**
+     * reportTypeMonth() is the method that runs when the user clicks the "Generate Report" button.
+     * It gets the selected type and month from the menus, and then gets the number of appointments for that type and month.
+     * */
+    public void reportTypeMonth() throws Exception {
+        try {
+            String type = typesMenu.getValue(); // get the selected type
+            String month = monthsMenu.getValue(); // get the selected month
+            int monthNum = getMonthNum(month); // get the corresponding number for the selected month
+            int appointments = QueryChronicles.countByTypeAndMonth(type, monthNum); // get the number of appointments
+            numberOfAppointments.setText(String.valueOf(appointments)); // set the text field to the number of appointment
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * getMonthNum() is a helper method for reportTypeMonth().
+     * */
+    public int getMonthNum(String month) {
+        int monthNum = 0;
+        switch (month) {
+            case "January":
+                monthNum = 1;
+                break;
+            case "February":
+                monthNum = 2;
+                break;
+            case "March":
+                monthNum = 3;
+                break;
+            case "April":
+                monthNum = 4;
+                break;
+            case "May":
+                monthNum = 5;
+                break;
+            case "June":
+                monthNum = 6;
+                break;
+            case "July":
+                monthNum = 7;
+                break;
+            case "August":
+                monthNum = 8;
+                break;
+            case "September":
+                monthNum = 9;
+                break;
+            case "October":
+                monthNum = 10;
+                break;
+            case "November":
+                monthNum = 11;
+                break;
+            case "December":
+                monthNum = 12;
+                break;
+        }
+        return monthNum;
+    }
+
+    /**
+     * generateSchedule generates a schedule for the selected contact
+     * repurposes code from the intialize method to generate a table view of appointments for the selected contact
+     * */
+    @FXML public void generateSchedule() throws SQLException {
+        try (Connection connection = JDBC.openConnection()) {
+            String contactName = reportContactMenu.getValue(); // get the selected contact name
+            int contactID = ContactAccess.findContactID(contactName); // get the contact ID
+            contactSchedule = QueryChronicles.generateSchedule(connection , contactID); // get the contact schedule
+
+            // lambda expression to set the cell value factory for the start time column
+            reportStartColumn.setCellValueFactory(cellData -> { // set the cell value factory for the start time column
+                Appointments appointment = cellData.getValue(); // get the value of the cell
+                LocalDateTime start = appointment.getStartTime(); // get the start time
+                // ZoneId localZone = ZoneId.of("Asia/Shanghai"); // get the local zone for Shanghai for testing
+                ZoneId localZone = ZoneId.systemDefault(); // get the local zone, comment this out for testing other zones
+                ZonedDateTime localStart = start.atZone(ZoneId.of("UTC")).withZoneSameInstant(localZone); // convert the start time to the local zone from UTC
+                return new SimpleStringProperty(localStart.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT))); // return the start time
+            });
+
+            // lambda expression to set the cell value factory for the end time column
+            reportEndColumn.setCellValueFactory(cellData -> { // set the cell value factory for the end time column
+                Appointments appointment = cellData.getValue(); // get the value of the cell
+                LocalDateTime end = appointment.getEndTime(); // get the end time
+                // ZoneId localZone = ZoneId.of("Asia/Shanghai"); // get the local zone for Shanghai
+                ZoneId localZone = ZoneId.systemDefault(); // get the local zone, comment this out for testing other zones
+                ZonedDateTime localStart = end.atZone(ZoneId.of("UTC")).withZoneSameInstant(localZone); // convert the end time to the local zone from UTC
+                return new SimpleStringProperty(localStart.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT))); // return the end time
+            });
+
+            // set the cell value factory for the other columns
+            reportIDColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentID")); // set the appointment ID column
+            reportTitleColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentTitle")); // set the title column
+            reportDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentDescription")); // set the description column
+            reportLocationColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentLocation")); // set the location column
+            reportTypeColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentType")); // set the type column
+            reportCIDColumn.setCellValueFactory(new PropertyValueFactory<>("customerID")); // set the customer ID column
+            viewContactReport.setItems(contactSchedule); // set the items in the tableview to the contact schedule
+        }
+        catch (Exception e) {
+            e.printStackTrace(); // print the stack trace
+            AgentFord.apprehendException(e, theCrimeScene); // if an exception is thrown, display the exception in the crime scene text area
+        }
+        finally {
+            AgentFord.gatherIntel(caseFile); // Gather Intel
+        }
+    }
 
     /**
      * populateAppointmentsTable populates the appointments tableview with all appointments
@@ -149,6 +262,7 @@ public class CentralNervousSystem implements Initializable {
                 customersMenu.setItems(CustomerAccess.getAllCustomerNameStrings()); // Sets the customer combo box
                 customersMenu.setValue(String.valueOf(selectedAppointment.getCustomerName(selectedAppointment.getCustomerID()))); // Sets the customer combo box
                 usersMenu.setValue(String.valueOf(selectedAppointment.getUserName(selectedAppointment.getUserID()))); // Sets the user combo box
+                userIDField.setText(String.valueOf(selectedAppointment.getUserID())); // Sets the user ID text field
                 locationField.setText(String.valueOf(selectedAppointment.getAppointmentLocation())); // Sets the appointment location text field
                 typeField.setText(String.valueOf(selectedAppointment.getAppointmentType())); // Sets the appointment type text field
                 descriptionTextArea.setText(String.valueOf(selectedAppointment.getAppointmentDescription())); // Sets the appointment description text field
@@ -452,7 +566,7 @@ public class CentralNervousSystem implements Initializable {
 
                 String[] strings = {address, phone, postalCode, country, customerName}; // create string array of address and phone
 
-                if (GateKeeper.customerInfoCheck(strings)) {
+                if (GateKeeper.correctCustomer(strings)) {
                     QueryChronicles.INSERT_INTO_CUSTOMERS_METHOD(connection,
                                                                 customerID,
                                                                 customerName,
@@ -499,7 +613,7 @@ public class CentralNervousSystem implements Initializable {
                 int divisionID = DivisionAccess.getDivisionID(division); // get division ID
 
                 String[] strings = {address, phone, postalCode, country, customerName}; // create string array of address and phone
-                if (GateKeeper.customerInfoCheck(strings)) {
+                if (GateKeeper.correctCustomer(strings)) {
                     QueryChronicles.UPDATE_CUSTOMER_METHOD(connection,
                                                             customerID,
                                                             customerName,
@@ -582,12 +696,13 @@ public class CentralNervousSystem implements Initializable {
 
     /**
      * updateCustomersMenu updates the customers divisions menu in the add appointment screen
-     * NOTE: I've noticed a sort of buginess with this feature, sometimes a double click is necessary. I'm not sure why this is happening.
+     * NOTE: I noticed a bugginess when it was set to on action in scenebuilder. I changed the listener to on click, and it seems much more responsive.
      * */
     @FXML public void updateDivisionsMenu() {
         countryMenu.valueProperty().addListener((observable, oldValue, newValue) -> {
+            String selectedCountry = countryMenu.getValue(); // get selected country
             try {
-                String selectedCountry = countryMenu.getValue(); // get selected country
+                // if the selected country is not null
                 if (selectedCountry != null) {
                     divisionMenu.setItems(null); // clear division menu
                     int countryID = CountryAccess.getCountryNamebyID(selectedCountry); // get country ID
@@ -702,51 +817,18 @@ public class CentralNervousSystem implements Initializable {
     }
 
     /**
-     * generateSchedule generates a schedule for the selected contact
-     * repurposes code from the intialize method to generate a table view of appointments for the selected contact
+     * reportButtonSpy disables the report button if any of the fields are empty
+     * Prevents null exceptions
      * */
-    @FXML public void generateSchedule() throws SQLException {
-        try (Connection connection = JDBC.openConnection()) {
-            String contactName = reportContactMenu.getValue(); // get the selected contact name
-            int contactID = ContactAccess.findContactID(contactName); // get the contact ID
-            contactSchedule = QueryChronicles.generateSchedule(connection , contactID); // get the contact schedule
-
-            // lambda expression to set the cell value factory for the start time column
-            reportStartColumn.setCellValueFactory(cellData -> { // set the cell value factory for the start time column
-                Appointments appointment = cellData.getValue(); // get the value of the cell
-                LocalDateTime start = appointment.getStartTime(); // get the start time
-                // ZoneId localZone = ZoneId.of("Asia/Shanghai"); // get the local zone for Shanghai for testing
-                ZoneId localZone = ZoneId.systemDefault(); // get the local zone, comment this out for testing other zones
-                ZonedDateTime localStart = start.atZone(ZoneId.of("UTC")).withZoneSameInstant(localZone); // convert the start time to the local zone from UTC
-                return new SimpleStringProperty(localStart.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT))); // return the start time
-            });
-
-            // lambda expression to set the cell value factory for the end time column
-            reportEndColumn.setCellValueFactory(cellData -> { // set the cell value factory for the end time column
-                Appointments appointment = cellData.getValue(); // get the value of the cell
-                LocalDateTime end = appointment.getEndTime(); // get the end time
-                // ZoneId localZone = ZoneId.of("Asia/Shanghai"); // get the local zone for Shanghai
-                ZoneId localZone = ZoneId.systemDefault(); // get the local zone, comment this out for testing other zones
-                ZonedDateTime localStart = end.atZone(ZoneId.of("UTC")).withZoneSameInstant(localZone); // convert the end time to the local zone from UTC
-                return new SimpleStringProperty(localStart.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT))); // return the end time
-            });
-
-            // set the cell value factory for the other columns
-            reportIDColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentID")); // set the appointment ID column
-            reportTitleColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentTitle")); // set the title column
-            reportDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentDescription")); // set the description column
-            reportLocationColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentLocation")); // set the location column
-            reportTypeColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentType")); // set the type column
-            reportCIDColumn.setCellValueFactory(new PropertyValueFactory<>("customerID")); // set the customer ID column
-            viewContactReport.setItems(contactSchedule); // set the items in the tableview to the contact schedule
-        }
-        catch (Exception e) {
-            e.printStackTrace(); // print the stack trace
-            AgentFord.apprehendException(e, theCrimeScene); // if an exception is thrown, display the exception in the crime scene text area
-        }
-        finally {
-            AgentFord.gatherIntel(caseFile); // Gather Intel
-        }
+    @FXML public void reportButtonSpy() {
+        countByMonthTypeButton.disableProperty().bind(Bindings.createBooleanBinding(
+                        () ->   !viewAppointments.getSelectionModel().isEmpty() ||
+                                monthsMenu.getValue() == null ||
+                                typesMenu.getValue() == null,
+                        monthsMenu.valueProperty(),
+                        typesMenu.valueProperty()
+                )
+        );
     }
 
     /**
@@ -811,6 +893,13 @@ public class CentralNervousSystem implements Initializable {
             }
             AgentFord.gatherIntel(caseFile); // Gather Intel
         }
+    }
+
+    /**
+     * exitApplication exits the application
+     * */
+    @FXML public void exitApplication() {
+        System.exit(0); // close the application
     }
 
     /**
@@ -923,6 +1012,15 @@ public class CentralNervousSystem implements Initializable {
                 countriesList.stream().map(Country::getCountryName).forEach(countryList::add); // add the country names to the observable list
                 countryMenu.setItems(countryList); // set the items in the country menu to the observable list
             }
+
+            typesList = QueryChronicles.getAppointmentTypes(); // get the appointment types
+            for(String type : typesList) {
+                typesMenu.getItems().add(type); // add the types to the types menu
+            }
+            typesMenu.setValue("Types"); // set the prompt text for the types menu
+
+            monthsMenu.setValue("Months"); // set the prompt text for the months menu
+            monthsMenu.setItems(monthsList); // set the items in the months menu to the observable list
 
             ObservableList<String> contactsList = FXCollections.observableArrayList(ContactAccess.getContactNames()); // get the list of contact names from the db
             contactsMenu.setItems(contactsList); // set the items in the contact menu to the observable list

@@ -26,7 +26,7 @@
         <tabs>
           <Tab fx:id="appointmentsTab" text="Appointments">
             <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" onMouseEntered="#appointmentFieldSpy" prefHeight="728.0" prefWidth="943.0">
+              <AnchorPane minHeight="0.0" minWidth="0.0" onMouseEntered="#appointmentFieldSpy" onMouseMoved="#reportButtonSpy" prefHeight="728.0" prefWidth="943.0">
                      <children>
                         <TableView fx:id="viewAppointments" layoutX="14.0" layoutY="18.0" onMouseClicked="#selectAppointment" prefHeight="326.0" prefWidth="1025.0">
                            <columns>
@@ -97,7 +97,7 @@
                               </GridPane>
                            </children>
                         </GridPane>
-                        <TextArea fx:id="descriptionTextArea" layoutX="175.0" layoutY="384.0" prefHeight="237.0" prefWidth="865.0" promptText="Appointment Description..." />
+                        <TextArea fx:id="descriptionTextArea" layoutX="175.0" layoutY="384.0" prefHeight="237.0" prefWidth="598.0" promptText="Appointment Description..." />
                         <Button fx:id="addAppointmentButton" layoutX="175.0" layoutY="632.0" mnemonicParsing="false" onAction="#addAppointment" prefHeight="25.0" prefWidth="85.0" text="Add" />
                         <Button fx:id="modifyAppointmentButton" disable="true" layoutX="272.0" layoutY="632.0" mnemonicParsing="false" onAction="#modifyAppointment" prefHeight="25.0" prefWidth="85.0" text="Modify" />
                         <Button fx:id="deleteAppointmentButton" disable="true" layoutX="369.0" layoutY="632.0" mnemonicParsing="false" onAction="#deleteAppointment" prefHeight="25.0" prefWidth="85.0" text="Delete" />
@@ -106,7 +106,14 @@
                         <Button fx:id="clearSelectionButton" layoutX="14.0" layoutY="352.0" mnemonicParsing="false" onAction="#clearSelectedAppointment" prefHeight="25.0" prefWidth="152.0" text="Clear Selection" />
                         <Label layoutX="179.0" layoutY="356.0" prefHeight="17.0" prefWidth="77.0" text="Logged in as:" />
                         <Label fx:id="userCreds" layoutX="256.0" layoutY="356.0" prefHeight="17.0" prefWidth="489.0" text="credentials" textFill="#9c2bf8" />
-                        <Button fx:id="logoutButton" layoutX="975.0" layoutY="632.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="64.0" text="Logout" />
+                        <Button fx:id="logoutButton" layoutX="709.0" layoutY="632.0" mnemonicParsing="false" onAction="#exitApplication" prefHeight="25.0" prefWidth="64.0" text="Logout" />
+                        <ComboBox fx:id="typesMenu" layoutX="843.0" layoutY="526.0" prefHeight="25.0" prefWidth="155.0" promptText="Appointment Types" />
+                        <ComboBox fx:id="monthsMenu" layoutX="843.0" layoutY="563.0" prefHeight="25.0" prefWidth="156.0" promptText="Month" />
+                        <Button fx:id="countByMonthTypeButton" layoutX="886.0" layoutY="632.0" mnemonicParsing="false" onAction="#reportTypeMonth" prefHeight="25.0" prefWidth="70.0" text="Generate" />
+                        <TextField fx:id="numberOfAppointments" editable="false" layoutX="843.0" layoutY="599.0" prefHeight="25.0" prefWidth="156.0" promptText="Number of Appointments" />
+                        <Separator layoutX="785.0" layoutY="383.0" prefHeight="3.0" prefWidth="272.0" />
+                        <Separator layoutX="785.0" layoutY="383.0" orientation="VERTICAL" prefHeight="348.0" prefWidth="2.0" />
+                        <Label alignment="CENTER" layoutX="847.0" layoutY="433.0" prefHeight="70.0" prefWidth="147.0" text="Generate the total number of customer appointments by type and month." textAlignment="CENTER" wrapText="true" />
                      </children>
                   </AnchorPane>
             </content>
@@ -134,7 +141,7 @@
                         <TextField fx:id="phoneField" layoutX="873.0" layoutY="131.0" prefHeight="25.0" prefWidth="150.0" promptText="Phone Number" />
                         <TextField fx:id="postalField" layoutX="872.0" layoutY="168.0" prefHeight="25.0" prefWidth="150.0" promptText="Postal Code" />
                         <Button fx:id="clearSelectedCustomerButton" layoutX="871.0" layoutY="18.0" mnemonicParsing="false" onAction="#clearSelectedCustomer" prefHeight="25.0" prefWidth="152.0" text="Clear Selection" />
-                        <ComboBox fx:id="countryMenu" layoutX="873.0" layoutY="246.0" onAction="#updateDivisionsMenu" prefWidth="150.0" promptText="Country" />
+                        <ComboBox fx:id="countryMenu" layoutX="873.0" layoutY="246.0" onMouseClicked="#updateDivisionsMenu" prefWidth="150.0" promptText="Country" />
                         <ComboBox fx:id="divisionMenu" disable="true" layoutX="873.0" layoutY="284.0" prefWidth="150.0" promptText="Division" />
                      </children>
                   </AnchorPane>
@@ -144,7 +151,7 @@
                <content>
                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <TableView fx:id="viewContactReport" layoutX="14.0" layoutY="31.0" prefHeight="638.0" prefWidth="1030.0">
+                        <TableView fx:id="viewContactReport" layoutX="14.0" layoutY="31.0" prefHeight="614.0" prefWidth="1030.0">
                           <columns>
                             <TableColumn fx:id="reportIDColumn" prefWidth="44.0" resizable="false" text="ID" />
                             <TableColumn fx:id="reportTitleColumn" prefWidth="63.0" text="Title" />
@@ -156,25 +163,27 @@
                               <TableColumn fx:id="reportCIDColumn" prefWidth="83.0" resizable="false" text="Customer ID" />
                           </columns>
                         </TableView>
-                        <Button fx:id="generateContactScheduleButton" layoutX="114.0" layoutY="682.0" mnemonicParsing="false" onAction="#generateSchedule" prefHeight="25.0" prefWidth="122.0" text="Generate Schedule" />
-                        <ComboBox fx:id="reportContactMenu" layoutX="14.0" layoutY="682.0" prefHeight="25.0" prefWidth="90.0" promptText="Contact" />
-                        <Button fx:id="exportToFileButton" layoutX="245.0" layoutY="682.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="87.0" text="Export to File" />
+                        <Button fx:id="generateContactScheduleButton" layoutX="111.0" layoutY="657.0" mnemonicParsing="false" onAction="#generateSchedule" prefHeight="25.0" prefWidth="122.0" text="Generate Schedule" />
+                        <ComboBox fx:id="reportContactMenu" layoutX="14.0" layoutY="657.0" prefHeight="25.0" prefWidth="90.0" promptText="Contact" />
+                        <Button fx:id="exportToFileButton" disable="true" layoutX="16.0" layoutY="689.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="87.0" text="Export to File" />
+                        <Label layoutX="16.0" layoutY="6.0" prefHeight="17.0" prefWidth="153.0" text="Generate contact schedules" />
                      </children></AnchorPane>
                </content>
             </Tab>
-            <Tab fx:id="customerReportTab" onSelectionChanged="#clearChart" text="Customers Report">
+            <Tab fx:id="customerReportTab" onSelectionChanged="#clearChart" text="Other Reports">
                <content>
                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <BarChart fx:id="customersChart" animated="false" barGap="2.0" layoutX="27.0" layoutY="24.0" prefHeight="638.0" prefWidth="1003.0" title="Customers per Month">
+                        <BarChart fx:id="customersChart" animated="false" barGap="2.0" layoutX="27.0" layoutY="46.0" prefHeight="618.0" prefWidth="1003.0" title="Customers per Month">
                           <xAxis>
-                            <CategoryAxis side="BOTTOM" />
+                            <CategoryAxis prefHeight="1.0" prefWidth="946.0" side="BOTTOM" />
                           </xAxis>
                           <yAxis>
                             <NumberAxis side="LEFT" />
                           </yAxis>
                         </BarChart>
-                        <Button fx:id="chartButton" layoutX="918.0" layoutY="662.0" mnemonicParsing="false" onAction="#populateCustomersChart" prefHeight="25.0" prefWidth="94.0" text="Generate" />
+                        <Button fx:id="chartButton" layoutX="876.0" layoutY="670.0" mnemonicParsing="false" onAction="#populateCustomersChart" prefHeight="25.0" prefWidth="143.0" text="Generate Visual Report" />
+                        <Label layoutX="427.0" layoutY="20.0" prefHeight="17.0" prefWidth="204.0" text="Periodic, Quantized Customer Review" />
                      </children>
                   </AnchorPane>
                </content>
