@@ -7,8 +7,6 @@ This project represents a comprehensive performance evaluation for the advanced 
 It showcases a robust Java application that empowers users to efficiently manage customer appointments and information within a database.
 
 Stephan Haloftis
-shaloftis@wgu.edu
-2/7/2023
 
 JDK: 11.0.10
 JRE: 11.0.10
